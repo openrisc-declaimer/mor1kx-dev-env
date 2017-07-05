@@ -35,8 +35,8 @@
 
 `define BOARD_CLOCK_PERIOD 20000 // 50MHz (pS accuracy)
 
-`define MOR1KX
-//`define OR1200
+// `define MOR1KX
+`define OR1200
 
 //
 // Debug interface
