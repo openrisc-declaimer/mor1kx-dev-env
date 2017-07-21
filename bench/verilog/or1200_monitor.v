@@ -132,11 +132,11 @@ module or1200_monitor;
  `endif	 
 	 for(i = 0; i < 32; i = i + 1) begin
 	    if (i % 4 == 0)
-	      $fdisplay(fexe);
+	      $fdisplay(fexe, "");
 	    get_gpr(i, r);
 	    $fwrite(fexe, "GPR%d: %h  ", i, r);
 	 end
-	 $fdisplay(fexe);
+	 $fdisplay(fexe, "");
 	 r = `OR1200_TOP.`CPU_cpu.`CPU_sprs.sr;
 	 $fwrite(fexe, "SR   : %h  ", r);
 	 r = `OR1200_TOP.`CPU_cpu.`CPU_sprs.epcr;
@@ -377,6 +377,8 @@ module or1200_monitor;
 	   get_gpr(3, r3);
 	   $fdisplay(fgeneral, "%t: l.nop exit (%h)", $time, r3);
 `ifdef OR1200_MONITOR_VERBOSE_NOPS
+	   // Note that the 'expect' scripts in or1ksim's test suite look for strings
+	   // like "exit(1)", therefore something like "exit(  1)" would fail.
 	   $display("exit(%h)",r3);
 `endif	   
 	   $finish;
@@ -390,7 +392,10 @@ module or1200_monitor;
 	   get_gpr(3, r3);
 	   $fdisplay(fgeneral, "%t: l.nop report (0x%h)", $time, r3);
 `ifdef OR1200_MONITOR_VERBOSE_NOPS
-	   $display("report (0x%h);", r3);
+	   // Note that the 'expect' scripts in or1ksim's test suite look for strings
+	   // like "report(0x7ffffffe);", therefore something like "report (0x7ffffffe);"
+	   // (note the extra space character) would fail.
+	   $display("report(0x%h);", r3);
 `endif
 	end
 	// simulation printfs (l.nop 3)
