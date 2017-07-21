@@ -1,0 +1,3 @@
+#define 
+
+make modelsim END_TIME=50000 VCD=1 TEST_NAME_STRING=orpsoc_testbench 
