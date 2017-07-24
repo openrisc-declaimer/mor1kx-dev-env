@@ -99,11 +99,11 @@ module orpsoc_testbench;
  `define CPU_dc_top or1200_dc_top
    wire ic_en = orpsoc_testbench.dut.or1200_top0.or1200_ic_top.ic_en;
    always @(posedge ic_en)
-     $display("Or1200 IC enabled at %t", $time);
+		$display("Or1200 IC enabled at %t", $time);
 
    wire dc_en = orpsoc_testbench.dut.or1200_top0.or1200_dc_top.dc_en;
    always @(posedge dc_en)
-     $display("Or1200 DC enabled at %t", $time);
+		$display("Or1200 DC enabled at %t", $time);
 `endif
 `endif // OR1200
 
@@ -133,23 +133,21 @@ module orpsoc_testbench;
 `endif //  `ifdef JTAG_DEBUG
    
 
-   initial 
-     begin
+	initial begin
 `ifndef SIM_QUIET
-	$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n",
-		 `TEST_NAME_STRING );
-`endif	
+		$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n", `TEST_NAME_STRING );
+`endif
       
 `ifdef VCD
  `ifdef VCD_DELAY
-	#(`VCD_DELAY);   
+		#(`VCD_DELAY);   
  `endif
 
 	// Delay by x insns
  `ifdef VCD_DELAY_INSNS
-	#10; // Delay until after the value becomes valid
-	while (monitor.insns < `VCD_DELAY_INSNS)
-	  @(posedge clk);
+		#10; // Delay until after the value becomes valid
+		while (monitor.insns < `VCD_DELAY_INSNS)
+			@(posedge clk);
  `endif	
 
  `ifdef SIMULATOR_MODELSIM
@@ -160,15 +158,15 @@ module orpsoc_testbench;
  `endif
 	
 `ifndef SIM_QUIET
-	$display("* VCD in %s\n", {"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
+		$display("* VCD in %s\n", {"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
 `endif	
-	$dumpfile({"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
+		$dumpfile({"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
  `ifndef VCD_DEPTH
   `define VCD_DEPTH 0
  `endif     
-	$dumpvars(`VCD_DEPTH);
+		$dumpvars(`VCD_DEPTH);
 `endif
-      
+
    end // initial begin
    
 `ifdef END_TIME
@@ -184,17 +182,16 @@ module orpsoc_testbench;
 `ifdef END_INSNS
    initial begin
       #10
-	while (monitor.insns < `END_INSNS)
-	  @(posedge clk);
+		while (monitor.insns < `END_INSNS)
+			@(posedge clk);
  `ifndef SIM_QUIET      
-      $display("* Finish simulation due to END_INSNS count (%d) reached at %t",
-	       `END_INSNS, $time);
+      $display("* Finish simulation due to END_INSNS count (%d) reached at %t", `END_INSNS, $time);
  `endif
       $finish;
    end
 `endif     
    
-`ifdef UART0   
+`ifdef UART0
    //	
    // UART0 decoder
    //   
