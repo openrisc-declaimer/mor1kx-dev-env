@@ -40,7 +40,9 @@
 //// from http://www.opencores.org/lgpl.shtml                     ////
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
+`ifdef SYNTHESIS
 `include "synthesis-defines.v"
+`endif // SYNTHESIS
 `include "orpsoc-defines.v" // To determine synthesis technology.
 module smii_if
   (
@@ -276,7 +278,7 @@ module smii_if
    /////////////////////////////////////////////////
    // Receive
 
-`ifndef SYNTHESIS   
+`ifndef SYNTHESIS
    reg [79:0] rx_statename;
    always @* begin
       case (1)

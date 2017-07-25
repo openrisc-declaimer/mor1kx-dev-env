@@ -154,15 +154,22 @@ MODELSIM=modelsim
 ICARUS_COMPILE=iverilog
 ICARUS_RUN=vvp
 ICARUS_SCRIPT=icarus.scr
-ICARUS_SIM_EXE=vlogsim.elf
+ICARUS_SIM_EXE=vlogsim.elf  
 ICARUS=icarus
+
+# VCS variables
+VCS_COMPILE=vcs
+VCS_RUN=
+VCS_SCRIPT=vcs.scr
+VCS_SIM_EXE=vcssim.elf # 宏定义，输出的文件替换simv
+VCS=vcs
 
 #Default simulator is Icarus Verilog
 # Set SIMULATOR=modelsim to use Modelsim
 # Set SIMULATOR=ncverilog to use Cadence's NC-Verilog - TODO
 # Set SIMULATOR=icarus to use Icarus Verilog (Default)
 
-SIMULATOR ?= $(MODELSIM)
+SIMULATOR ?= $(VCS)
 
 # VPI debugging interface variables
 VPI_SRC_C_DIR=$(BENCH_VERILOG_DIR)/vpi/c
@@ -265,6 +272,11 @@ RTL_VERILOG_SRC=$(shell for module in $(RTL_VERILOG_MODULES); do \
 
 # List of verilog includes
 RTL_VERILOG_INCLUDES=$(shell ls $(RTL_VERILOG_INCLUDE_DIR)/*.*)
+
+.PHONY: sim-restore-profileoutput
+sim-restore-profileoutput:
+	@echo;echo "\tRestoring profiling outputs"; echo
+	$(Q)mkdir -p ../out
 
 print-verilog-src:
 	@echo echo; echo "\t### Verilog source ###"; echo
@@ -414,7 +426,6 @@ rtl-tests:
 		echo; echo "\t### $$test test OK ###"; echo; \
 	done
 
-
 .PHONY: check-test-log
 check-test-log:
 	$(Q)echo "#!/bin/bash" > $@
@@ -426,6 +437,9 @@ check-test-log:
 
 # Include the test-defines.v generation rule
 include ../bin/definesgen.inc
+# VCS commands
+include ../bin/vcs-sim.inc
+# include ../bin/xxx-sim.inc
 
 #
 # Software make rules (called recursively)
