@@ -161,7 +161,7 @@ ICARUS=icarus
 VCS_COMPILE=vcs
 VCS_RUN=
 VCS_SCRIPT=vcs.scr
-VCS_SIM_EXE=vcssim.elf # 宏定义，输出的文件替换simv
+VCS_SIM=$(RTL_TESTBENCH_TOP)
 VCS=vcs
 
 #Default simulator is Icarus Verilog

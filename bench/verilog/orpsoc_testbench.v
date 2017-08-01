@@ -164,8 +164,18 @@ module orpsoc_testbench;
  `ifndef VCD_DEPTH
   `define VCD_DEPTH 0
  `endif     
-		$dumpvars(`VCD_DEPTH);
-`endif
+		$dumpvars(`VCD_DEPTH);		
+`endif // VCD
+
+`ifdef VPD
+	$vcdpluson(0, orpsoc_testbench);
+	// $vcdpluson(1, orpsoc_testbench);
+	// $vcdpluson(2, orpsoc_testbench);
+	// 进行竞争检查
+	$vcdplusdeltacycleon();
+	$vcdplusglitchon();
+	$vcdplusmemon();
+`endif // VPD
 
    end // initial begin
    

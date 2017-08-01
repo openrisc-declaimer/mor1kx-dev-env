@@ -40,16 +40,34 @@
 ####                                                              ####
 ######################################################################
 
-.PHONY: vcs-com vcs-cov vcs-cov_rep vcs-clean vcs-debug
+# 这几个文件不是变量，是目标的标号使用PHONY来声明
+.PHONY: vcs-com vcs-debug vcs-cov vcs-rpt vcs-clean 
 
-# 使能VCD+记录
-ALL_DEFINE = +define+DUMP_VPD
+# 宏定义，输出的文件替换simv
+OUTPUT = $(VCS_SIM).elf
 
+######################################################################
+# VCS compile macro define
+######################################################################
+# enable vpd dump at testbench module.
+VCS_DEFINE  = +define+VPD
+# setting simulate run time
+VCS_DEFINE += +define+END_TIME=5000000
 
+######################################################################
+# all include files search path
+######################################################################
 TB_INC  = +incdir+$(RTL_VERILOG_INCLUDE_DIR)
 TB_INC += +incdir+$(BOOTROM_SW_DIR)
 TB_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
-	
+
+######################################################################
+# all source files 
+######################################################################
+ALL_SRC  = $(RTL_VERILOG_SRC) 
+ALL_SRC += $(BENCH_VERILOG_SRC) 
+ALL_SRC += $(BENCH_TOP)
+
 # Code coverage command 
 # 代码覆盖率相关
 # line: Enables statement (line) coverage
@@ -60,16 +78,16 @@ TB_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
 # -cm_nocasedef: 忽略对default的检查
 # 
 CM = -cm line+cond+fsm+branch+tgl+path -cm_nocasedef
-CM_NAME = -cm_name $(VCS_SIM_EXE) 
-CM_DIR = -cm_dir ./$(VCS_SIM_EXE).vdb
-CM_LOG = -cm_log cm_$(VCS_SIM_EXE).log
+CM_NAME = -cm_name $(VCS_SIM) 
+CM_DIR = -cm_dir ./$(VCS_SIM).vdb
+CM_LOG = -cm_log cm_$(VCS_SIM).log
 
 # -cm_hier
 CM_RUN = -lca
 
 # vpd file name
 # 输出的VCD+文件名
-VPD_NAME = +vpdfile+$(VCS_SIM_EXE).vpd
+VPD_NAME = +vpdfile+$(VCS_SIM).vpd
 
 #########################################################################################
 # 后仿命令
@@ -86,9 +104,9 @@ VPD_NAME = +vpdfile+$(VCS_SIM_EXE).vpd
 # +pluse_int_r/number:
 #
 # 运行时：
-# +mindelays: 最小延时
+# +mindelays:  最小延时
 # +typedelays: 典型延时
-# +maxdelays: 最大延时
+# +maxdelays:  最大延时
 #
 #########################################################################################
 LIB_EXT = +libext+.v
@@ -96,45 +114,69 @@ LIB_EXT = +libext+.v
 DUT_CMP_OPTIONS   += -timescale=1ns/1ns
 DUT_CMP_OPTIONS   += -override_timescale=1ns/1ns
 # VCS commands
-# -timescale=1ns/1ns
-VCS_VSIM_ARGS = -sverilog +v2k             \
-                -full64                                      \
-					 -lca                                         \
-					 -debug_all   		                       		 \
-					 -Mupdate                                     \
-					 -race                                        \
-					 -simprofile                                  \
-					 +notimingcheck                               \
-					 +nospecify                                   \
-					 +vcs+flush+all
+# Compile command 
+# 编译指令
+# -race: 竞争检查
+# -raced
+# +alwaystrigger: 在0时刻加上这个参数，我们认为这个信号总是被传递的；默认是打开的
+# +rad: 编译时对代码的优化操作，这个应该打开，注意在做覆盖率的时候不能打开这个选项！
+# -simprofile: 性能分析
+# -cm_hier vcs_cov.cfg: 要测试这个
+# -sverilog 
+VCS_VSIM_ARGS = +v2k             		   \
+				-timescale=1ns/1ns         \
+                -full64                    \
+				-lca                       \
+				-debug_all   		       \
+				-Mupdate                   \
+				-race                      \
+				-simprofile                \
+				+notimingcheck             \
+				+nospecify                 \
+				+vcs+flush+all             \
+				$(CM)                      \
+				$(CM_NAME)                 \
+				$(CM_DIR)                  \
+				$(CM_LOG)                  \
+				$(LIB_DIR)                 \
+				$(LIB_EXT)                 \
+				$(LIB_FILE)                \
+				$(VCS_DEFINE)              \
+				$(DUT_CMP_OPTIONS)         \
+				$(VPD_NAME)                \
+				-o  $(OUTPUT)              \
+                -l  compile.log
 
 # simulation command
-SIM = ./$(VCS_SIM_EXE)                \
+SIM = ./$(VCS_SIM).elf           \
       $(CM) $(CM_NAME) $(CM_DIR) \
       $(VPD_NAME)                \
-      -l $(VCS_SIM_EXE).log  
+      -l $(VCS_SIM).log  
 		
 # start compile
-vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) 
-#	$(Q)touch synthesis-defines.v
-#	$(Q)echo '// Just a test' > synthesis-defines.v
-	$(Q)$(VCS) -full64 -top orpsoc_testbench $(DUT_CMP_OPTIONS) $(TB_INC) $(RTL_VERILOG_SRC) $(BENCH_VERILOG_SRC) $(BENCH_TOP)
+vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP)
+	$(Q)$(VCS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
 
 # Start simulation
 vcs-sim: 
-	$(SIM) 
+	$(Q)$(SIM) 
 
 # Show the coverage
-vcs-cov: 
-	dve $(CM_RUN) -covdir *.vdb &
+vcs-cov:
+	$(Q)dve $(CM_RUN) -cov *.vpd &
     
 # 生成覆盖率报告
-vcs-cov_rpt:    
-	urg $(CM_RUN) -dir *.vdb 
+vcs-rpt:
+	$(Q)urg $(CM_RUN) -dir *.vdb
 
 vcs-debug:
-	dve -vpd $(VCS_SIM_EXE).vpd &
+	$(Q)dve -vpd $(VCS_SIM).vpd &
 
 # Start clean
 vcs-clean: 
-	rm -rf  ./csrc  *.daidir  ./csrc   *.log   *.vpd   *.vdb  simv*  *.key  *race*.out* DVEfiles $(VCS_SIM_EXE) profileReport.* simprofile_dir.* profileReport simprofile_dir urgReport* vc_hdrs.h
+	$(Q)rm -rf ./csrc  *.daidir  ./csrc   *.log   *.vpd   *.vdb  simv*  *.key  
+	$(Q)rm -rf *race*.out* DVEfiles $(VCS_SIM) profileReport.* simprofile_dir.* 
+	$(Q)rm -rf profileReport simprofile_dir urgReport* vc_hdrs.h test-defines.v
+	$(Q)rm -rf urgReport simprofile_dir* profileReport*
+	$(Q)rm -rf orpsoc_testbench.vdb orpsoc_testbench.elf.daidir
+	$(Q)rm -rf $(OUTPUT) ../out/
