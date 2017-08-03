@@ -158,7 +158,7 @@ vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_
 	$(Q)$(VCS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
 
 # Start simulation
-vcs-sim: 
+vcs-sim: $(SIM_DIR_VMEM_IMAGE)
 	$(Q)$(SIM) 
 
 # Show the coverage

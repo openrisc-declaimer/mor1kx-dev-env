@@ -41,6 +41,7 @@ OPT_ALL ?= $(OPT_SLOW) $(OPT_FAST) $(OPT)
 SYSC_INC_DIR = ../include
 INCDIRS += $(SCRIPT_INCDIRS)
 INCDIRS += -I$(SYSTEMC)/include -I$(SYSC_INC_DIR) -I../../../or1ktrace/include
+INCDIRS += -I../../.././sim/vlt
 
 # Local objects
 OBJS = DebugUnitSC.o \
