@@ -1,0 +1,77 @@
+Magic 271485
+Revision Verdi3_L-2016.06-1
+
+; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
+viewPort 0 28 1572 413 100 65
+
+; File list:
+; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
+openDirFile -d / "" "/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb"
+
+; file time scale:
+; fileTimeScale ### s|ms|us|ns|ps
+
+; signal spacing:
+signalSpacing 5
+
+; windowTimeUnit is used for zoom, cursor & marker
+; waveform viewport range
+zoom 22036.807011 25157.899849
+cursor 0.000000
+marker 0.000000
+
+; user define markers
+; userMarker time_pos marker_name color linestyle
+; visible top row signal index
+top 0
+; marker line index
+markerPos 10
+
+; event list
+; addEvent event_name event_expression
+; curEvent event_name
+
+
+
+COMPLEX_EVENT_BEGIN
+
+
+COMPLEX_EVENT_END
+
+
+
+; toolbar current search type
+; curSTATUS search_type
+curSTATUS ByChange
+
+
+addGroup "G1"
+activeDirFile "" "/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb"
+addSignal -h 15 /orpsoc_testbench/clk
+addSignal -h 15 -holdScope dc_en
+addSignal -h 15 -holdScope ic_en
+addSignal -h 15 -holdScope rst_n
+addSignal -h 15 -holdScope tck_pad_i
+addSignal -h 15 -holdScope tdi_pad_i
+addSignal -h 15 -holdScope tdo_pad_o
+addSignal -h 15 -holdScope tms_pad_i
+addSignal -h 15 -holdScope uart0_srx_pad_i
+addSignal -h 15 -holdScope uart0_stx_pad_o
+addGroup "G2"
+
+; getSignalForm Scope Hierarchy Status
+; active file of getSignalForm
+activeDirFile "" "/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb"
+
+GETSIGNALFORM_SCOPE_HIERARCHY_BEGIN
+getSignalForm close
+
+"/orpsoc_testbench"
+
+SCOPE_LIST_BEGIN
+"/orpsoc_testbench"
+SCOPE_LIST_END
+
+GETSIGNALFORM_SCOPE_HIERARCHY_END
+
+

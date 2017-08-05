@@ -527,7 +527,8 @@ clean: clean-sim clean-sim-test-sw clean-bootrom clean-vlt clean-out clean-sw
 
 clean-sim:
 	$(Q) echo; echo "\t### Cleaning simulation run directory ###"; echo;
-	$(Q)rm -rf *.* lib_* work transcript check-test-log
+	# $(Q)rm -rf *.* lib_* work transcript check-test-log
+	$(Q)rm -rf lib_* work transcript check-test-log
 	$(Q) if [ -e $(VPI_SRC_C_DIR) ]; then \
 		$(MAKE) -C $(VPI_SRC_C_DIR) clean; \
 	fi
@@ -871,4 +872,6 @@ sim-tests:
 
 # VCS commands
 include ../bin/vcs-sim.inc
+# Verdi commands
+include ../bin/verdi-sim.inc
 # include ../bin/xxx-sim.inc

@@ -51,6 +51,8 @@ OUTPUT = $(VCS_SIM).elf
 ######################################################################
 # enable vpd dump at testbench module.
 VCS_DEFINE  = +define+VPD
+# enable verdi fsdb dump at testbench module.
+VCS_DEFINE  = +define+FSDB -line -debug_access+all
 # setting simulate run time
 VCS_DEFINE += +define+END_TIME=5000000
 
@@ -153,7 +155,7 @@ VCS_VSIM_ARGS = +v2k             		   \
 SIM = ./$(VCS_SIM).elf           \
       $(CM) $(CM_NAME) $(CM_DIR) \
       $(VPD_NAME)                \
-      -l $(VCS_SIM).log  
+      -l $(VCS_SIM).vcs.log  
 
 # debug run param
 DEBUG_RUN = -full64

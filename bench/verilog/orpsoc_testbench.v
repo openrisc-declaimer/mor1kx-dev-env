@@ -177,6 +177,11 @@ module orpsoc_testbench;
 	$vcdplusmemon();
 `endif // VPD
 
+`ifdef FSDB
+	$fsdbDumpfile("orpsoc_testbench.fsdb");
+	$fsdbDumpvars;
+`endif
+
    end // initial begin
    
 `ifdef END_TIME
