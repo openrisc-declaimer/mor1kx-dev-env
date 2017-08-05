@@ -316,10 +316,10 @@ module ram_wb_b3(/*AUTOARG*/
       input [aw-1:0] 		addr;
       input [dw-1:0] 		data;
       begin
-	 mem0[addr] = data[31:24];
-	 mem1[addr] = data[23:16];
-	 mem2[addr] = data[15:8];
-	 mem3[addr] = data[7:0];
+			mem0[addr] = data[31:24];
+			mem1[addr] = data[23:16];
+			mem2[addr] = data[15:8];
+			mem3[addr] = data[7:0];
       end
    endfunction // set_mem32   
    // synthesis translate_on

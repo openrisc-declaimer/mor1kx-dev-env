@@ -44,6 +44,8 @@
 CUR_DIR=$(shell pwd)
 
 # The root path of the whole project
+# Current env at ${PROJECT_ROOT}/sim/run
+# Current file at ${PROJECT_ROOT}/sim/bin
 PROJECT_ROOT ?=$(CUR_DIR)/../..
 
 DESIGN_NAME=orpsoc
@@ -53,6 +55,7 @@ DUT_TOP=$(RTL_VERILOG_DIR)/$(DESIGN_NAME)_top/$(DESIGN_NAME)_top.v
 BENCH_TOP=$(BENCH_VERILOG_DIR)/$(DESIGN_NAME)_testbench.v
 
 # Need this for individual test variables to not break
+# ?????? 不理解
 TEST ?= or1200-simple
 
 TESTS ?= or1200-simple \
@@ -84,6 +87,7 @@ RTL_VHDL_DIR = $(RTL_DIR)/vhdl
 
 PROJECT_VERILOG_DEFINES=$(RTL_VERILOG_INCLUDE_DIR)/$(DESIGN_NAME)-defines.v
 # Detect technology to use for the simulation
+# ??? 什么意思 ???
 DESIGN_DEFINES=$(shell cat $(PROJECT_VERILOG_DEFINES) | \
 	sed s://.*::g | sed s:\`:\#:g | sed 's:^[ ]*::' | \
 	awk '{print};/^\#define/{printf "_%s=%s\n",$$2,$$2}' | \
@@ -111,7 +115,6 @@ BENCH_VHDL_DIR=$(BENCH_DIR)/vhdl
 BENCH_SYSC_DIR=$(BENCH_DIR)/sysc
 BENCH_SYSC_SRC_DIR=$(BENCH_SYSC_DIR)/src
 BENCH_SYSC_INCLUDE_DIR=$(BENCH_SYSC_DIR)/include
-
 
 # System software dir
 SW_DIR=$(PROJECT_ROOT)/sw
@@ -151,15 +154,21 @@ MODELSIM=modelsim
 ICARUS_COMPILE=iverilog
 ICARUS_RUN=vvp
 ICARUS_SCRIPT=icarus.scr
-ICARUS_SIM_EXE=vlogsim.elf
+ICARUS_SIM_EXE=vlogsim.elf  
 ICARUS=icarus
+
+# VCS variables
+VCS_COMPILE=vcs
+VCS_RUN=
+VCS_SCRIPT=vcs.scr
+VCS_SIM=$(RTL_TESTBENCH_TOP)
+VCS=vcs
 
 #Default simulator is Icarus Verilog
 # Set SIMULATOR=modelsim to use Modelsim
 # Set SIMULATOR=ncverilog to use Cadence's NC-Verilog - TODO
 # Set SIMULATOR=icarus to use Icarus Verilog (Default)
-
-SIMULATOR ?= $(MODELSIM)
+SIMULATOR ?= $(VCS)
 
 # VPI debugging interface variables
 VPI_SRC_C_DIR=$(BENCH_VERILOG_DIR)/vpi/c
@@ -237,7 +246,7 @@ BENCH_VERILOG_SRC_SUBDIRS += $(VPI_SRC_VERILOG_DIR)
 # Verilog DUT source variables
 #
 # A list of paths under rtl/verilog we wish to exclude for module searching
-VERILOG_MODULES_EXCLUDE=  include components
+VERILOG_MODULES_EXCLUDE= include components
 VERILOG_MODULES_EXCLUDE_LIST_E=$(shell for exclude in \
 		                       $(VERILOG_MODULES_EXCLUDE); do echo "-e $$exclude"; done)
 RTL_VERILOG_MODULES=$(shell ls $(RTL_VERILOG_DIR) | grep -v \
@@ -245,13 +254,15 @@ RTL_VERILOG_MODULES=$(shell ls $(RTL_VERILOG_DIR) | grep -v \
 # Specific files to exclude, currently none.
 #VERILOG_EXCLUDE=
 #VERILOG_EXCLUDE_LIST_E=$(shell for exclude in $(VERILOG_EXCLUDE); \
-		            do echo "-e $$exclude"; done)
+#		            do echo "-e $$exclude"; done)
+
 # List of verilog source files, minus excluded files
 #RTL_VERILOG_SRC=$(shell for module in $(RTL_VERILOG_MODULES); do \
-	if [ -d $(RTL_VERILOG_DIR)/$$module ]; then \
-		ls $(RTL_VERILOG_DIR)/$$module/*.v | grep -v \
-			$(VERILOG_EXCLUDE_LIST_E); \
-	fi; done)
+#	if [ -d $(RTL_VERILOG_DIR)/$$module ]; then \
+#		ls $(RTL_VERILOG_DIR)/$$module/*.v | grep -v \
+#			$(VERILOG_EXCLUDE_LIST_E); \
+#	fi; done)
+
 # List of verilog source files, ignoring excludes
 RTL_VERILOG_SRC=$(shell for module in $(RTL_VERILOG_MODULES); do \
 	if [ -d $(RTL_VERILOG_DIR)/$$module ]; then \
@@ -260,6 +271,11 @@ RTL_VERILOG_SRC=$(shell for module in $(RTL_VERILOG_MODULES); do \
 
 # List of verilog includes
 RTL_VERILOG_INCLUDES=$(shell ls $(RTL_VERILOG_INCLUDE_DIR)/*.*)
+
+.PHONY: sim-restore-profileoutput
+sim-restore-profileoutput:
+	@echo;echo "\tRestoring profiling outputs"; echo
+	$(Q)mkdir -p ../out
 
 print-verilog-src:
 	@echo echo; echo "\t### Verilog source ###"; echo
@@ -284,9 +300,9 @@ rtl:
 #RTL_VHDL_MODULES=$(shell ls $(RTL_VHDL_DIR))
 # VHDL sources
 #RTL_VHDL_SRC=$(shell for module in $(RTL_VHDL_MODULES); do \
-	if [ -d $(RTL_VHDL_DIR)/$$module ]; then \
-		ls $(RTL_VHDL_DIR)/$$module/*.vhd; \
-	fi; done)
+#	if [ -d $(RTL_VHDL_DIR)/$$module ]; then \
+#		ls $(RTL_VHDL_DIR)/$$module/*.vhd; \
+#	fi; done)
 #print-vhdl-src:
 #	@echo echo; echo "\t### VHDL modules and source ###"; echo
 #	@echo "modules: "; echo $(RTL_VHDL_MODULES); echo
@@ -345,7 +361,7 @@ work: modelsim_dut.scr #$(RTL_VHDL_SRC)
 .PHONY : $(MODELSIM)
 $(MODELSIM): modelsim_bench.scr $(TEST_DEFINES_VLG) $(MGC_VPI_LIB) work
 	$(Q)echo; echo "\t### Compiling testbench ###"; echo
-	$(Q)vlog $(QUIET) -nologo -incr $(BENCH_TOP) -f $<
+	$(Q)vlog $(QUIET) -suppress 2902 -nologo -incr $(BENCH_TOP) -f $<
 	$(Q)$(MGC_VOPT_CMD)
 	$(Q)echo; echo "\t### Launching simulation ###"; echo
 	$(Q)vsim $(VOPT_ARGS) $(MGC_VSIM_ARGS) $(MGC_VSIM_TGT)
@@ -408,7 +424,6 @@ rtl-tests:
 		if [ $$? -ne 0 ]; then break; fi; \
 		echo; echo "\t### $$test test OK ###"; echo; \
 	done
-
 
 .PHONY: check-test-log
 check-test-log:
@@ -511,7 +526,8 @@ clean: clean-sim clean-sim-test-sw clean-bootrom clean-vlt clean-out clean-sw
 
 clean-sim:
 	$(Q) echo; echo "\t### Cleaning simulation run directory ###"; echo;
-	$(Q)rm -rf *.* lib_* work transcript check-test-log
+	# $(Q)rm -rf *.* lib_* work transcript check-test-log
+	$(Q)rm -rf lib_* work transcript check-test-log
 	$(Q) if [ -e $(VPI_SRC_C_DIR) ]; then \
 		$(MAKE) -C $(VPI_SRC_C_DIR) clean; \
 	fi
@@ -562,6 +578,8 @@ VLT_SCRIPT=verilator.scr
 $(SIM_VLT_DIR)/$(VLT_SCRIPT): $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) \
 				$(BOOTROM_VERILOG)
 	$(Q)echo "\tGenerating Verilator script"
+	$(Q)echo "# Verilator sources script" > $@
+	$(Q)echo "# Auto generated. Any alterations will be written over!" >> $@
 	$(Q)echo "+incdir+"$(RTL_VERILOG_INCLUDE_DIR) >> $@;
 	$(Q)echo "+incdir+"$(BOOTROM_SW_DIR) >> $@;        
 	$(Q)echo "+incdir+"$(SIM_RUN_DIR) >> $@;
@@ -850,3 +868,9 @@ sim-tests:
 		if [ $$? -ne 0 ]; then break; fi; \
 		echo; echo "\t### $$test test OK ###"; echo; \
 	done
+
+# VCS commands
+include ../bin/vcs-sim.inc
+# Verdi commands
+include ../bin/verdi-sim.inc
+# include ../bin/xxx-sim.inc

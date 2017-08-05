@@ -81,6 +81,14 @@ ifneq ($(OPENRISC_CPU_DRIVER), mor1kx)
 UNWANTED_CPU_DRIVERS +=mor1kx
 endif
 
+# Depending on which CPU was selected, mok1kx or or1200?
+ifeq ($(OPENRISC_CPU_DRIVER), mor1kx)
+OPENRISC_CPU_TYPE = -DOPENRISC_CPU_TYPE_MOK1KX
+endif
+ifeq ($(OPENRISC_CPU_DRIVER), or1200)
+OPENRISC_CPU_TYPE = -DOPENRISC_CPU_TYPE_OR1200
+endif
+
 COMMON_SW_DRIVERS_WITHOUT_UNWANTED_CPU_DRIVERS=$(filter-out $(UNWANTED_CPU_DRIVERS),$(COMMON_SW_DRIVERS))
 
 # Now get rid of the drivers we have in the board directory
@@ -147,6 +155,7 @@ OR32_CFLAGS ?=-g -nostdlib -O2 $(MARCH_FLAGS) \
 		$(INCLUDE_FLAGS) \
 		-I$(SW_ROOT)/lib/include \
 		-DOPENRISC_CPU_DRIVER=$(OPENRISC_CPU_DRIVER) \
+		$(OPENRISC_CPU_TYPE) \
 		$(BOARD_C_FLAGS)
 
 LINK_SCRIPT_NAME ?= link.ld
@@ -172,6 +181,7 @@ ELF_DEPENDS ?=
 
 # Set V=1 when calling make to enable verbose output
 # mainly for debugging purposes.
+V = 1
 ifeq ($(V), 1)
 Q=
 else
@@ -281,3 +291,4 @@ distclean: clean
 	$(Q)$(MAKE) -C $(SW_ROOT)/lib clean
 	$(Q)$(MAKE) -C $(SW_ROOT)/bootrom clean
 	$(Q)rm -f $(PROCESSED_DEFINES)
+	$(Q)rm -f $(UTILS_BIN2VMEM)

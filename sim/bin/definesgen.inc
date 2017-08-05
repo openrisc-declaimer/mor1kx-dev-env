@@ -37,6 +37,38 @@ $(TEST_DEFINES_VLG):
 		then echo "\`define SIM_QUIET" >> $@; \
 	fi
 	$(Q)for module in $(GATELEVEL_MODULES); do echo "\`define "$$module"_IS_GATELEVEL " >> $@; done
-
-
+	# for or1200_monitor setting ...
+	$(Q)if [ ! -z $$OR1200_MONITOR_SPRS ]; \
+		then echo "\`define OR1200_MONITOR_SPRS" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_MONITOR_LOOKUP ]; \
+		then echo "\`define OR1200_MONITOR_LOOKUP" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_MONITOR_EXEC_STATE ]; \
+		then echo "\`define OR1200_MONITOR_EXEC_STATE" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_MONITOR_EXEC_LOG_DISASSEMBLY ]; \
+		then echo "\`define OR1200_MONITOR_EXEC_LOG_DISASSEMBLY" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_RFRAM_GENERIC ]; \
+		then echo "\`define OR1200_RFRAM_GENERIC" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_DISPLAY_EXECUTED ]; \
+		then echo "\`define OR1200_DISPLAY_EXECUTED" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_SYSTEM_CHECKER ]; \
+		then echo "\`define OR1200_SYSTEM_CHECKER" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_SYSTEM_CHECKER ]; \
+		then echo "\`define OR1200_SYSTEM_CHECKER" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200_MONITOR_JUMPTRACK_DEBUG_OUTPUT ]; \
+		then echo "\`define OR1200_MONITOR_JUMPTRACK_DEBUG_OUTPUT" >> $@; \
+	fi
+	$(Q)if [ ! -z $$OR1200 ]; \
+		then echo "\`define OR1200" >> $@; \
+	fi
+	$(Q)if [ ! -z $$MOR1KX ]; \
+		then echo "\`define MOR1KX" >> $@; \
+	fi
 

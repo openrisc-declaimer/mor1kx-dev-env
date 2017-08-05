@@ -1,13 +1,12 @@
 #ifndef _CPU_UTILS_H_
 #define _CPU_UTILS_H_
 
-#if OPENRISC_CPU_TYPE==mor1kx
+#ifdef OPENRISC_CPU_TYPE_MOK1KX
 # include "mor1kx-utils.h"
 #else
-# if OPENRISC_CPU_TYPE==or1200
+# ifdef OPENRISC_CPU_TYPE_OR1200
 #  include "or1200-utils.h"
-# endif
-#endif
-
+# endif /* OPENRISC_CPU_TYPE_OR1200 */
+#endif /* OPENRISC_CPU_TYPE_MOK1KX */
 
 #endif

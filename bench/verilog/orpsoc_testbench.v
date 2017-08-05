@@ -74,17 +74,17 @@ module orpsoc_testbench;
    
    orpsoc_top dut
      (
-      .clk_pad_i                        (clk),
-`ifdef JTAG_DEBUG          
+      .clk_pad_i            (clk),
+`ifdef JTAG_DEBUG
       .tms_pad_i			(tms_pad_i),
       .tck_pad_i			(tck_pad_i),
       .tdi_pad_i			(tdi_pad_i),
       .tdo_pad_o			(tdo_pad_o),
-`endif      
-`ifdef UART0      
-      .uart0_stx_pad_o			(uart0_stx_pad_o),
-      .uart0_srx_pad_i			(uart0_srx_pad_i),
-`endif
+`endif // JTAG_DEBUG
+`ifdef UART0
+      .uart0_stx_pad_o		(uart0_stx_pad_o),
+      .uart0_srx_pad_i		(uart0_srx_pad_i),
+`endif // UART0
       .rst_n_pad_i			(rst_n)
       );
 
@@ -99,14 +99,14 @@ module orpsoc_testbench;
  `define CPU_dc_top or1200_dc_top
    wire ic_en = orpsoc_testbench.dut.or1200_top0.or1200_ic_top.ic_en;
    always @(posedge ic_en)
-     $display("Or1200 IC enabled at %t", $time);
+		$display("Or1200 IC enabled at %t", $time);
 
    wire dc_en = orpsoc_testbench.dut.or1200_top0.or1200_dc_top.dc_en;
    always @(posedge dc_en)
-     $display("Or1200 DC enabled at %t", $time);
-`endif
+		$display("Or1200 DC enabled at %t", $time);
+`endif // SIM_QUIET
+`endif // OR1200
 
-`endif
 `ifdef MOR1KX
    //
    // Instantiate mor1kx monitor
@@ -114,7 +114,7 @@ module orpsoc_testbench;
    mor1kx_monitor monitor();
 `endif
 
-`ifdef JTAG_DEBUG   
+`ifdef JTAG_DEBUG
  `ifdef VPI_DEBUG
    // Debugging interface
    vpi_debug_module vpi_dbg
@@ -133,23 +133,21 @@ module orpsoc_testbench;
 `endif //  `ifdef JTAG_DEBUG
    
 
-   initial 
-     begin
+	initial begin
 `ifndef SIM_QUIET
-	$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n",
-		 `TEST_NAME_STRING );
-`endif	
-      
+		$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n", `TEST_NAME_STRING );
+`endif
+
 `ifdef VCD
  `ifdef VCD_DELAY
-	#(`VCD_DELAY);   
+		#(`VCD_DELAY);   
  `endif
 
 	// Delay by x insns
  `ifdef VCD_DELAY_INSNS
-	#10; // Delay until after the value becomes valid
-	while (monitor.insns < `VCD_DELAY_INSNS)
-	  @(posedge clk);
+		#10; // Delay until after the value becomes valid
+		while (monitor.insns < `VCD_DELAY_INSNS)
+			@(posedge clk);
  `endif	
 
  `ifdef SIMULATOR_MODELSIM
@@ -160,15 +158,30 @@ module orpsoc_testbench;
  `endif
 	
 `ifndef SIM_QUIET
-	$display("* VCD in %s\n", {"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
+		$display("* VCD in %s\n", {"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
 `endif	
-	$dumpfile({"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
+		$dumpfile({"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
  `ifndef VCD_DEPTH
   `define VCD_DEPTH 0
  `endif     
-	$dumpvars(`VCD_DEPTH);
+		$dumpvars(`VCD_DEPTH);		
+`endif // VCD
+
+`ifdef VPD
+	$vcdpluson(0, orpsoc_testbench);
+	// $vcdpluson(1, orpsoc_testbench);
+	// $vcdpluson(2, orpsoc_testbench);
+	// 进行竞争检查
+	$vcdplusdeltacycleon();
+	$vcdplusglitchon();
+	$vcdplusmemon();
+`endif // VPD
+
+`ifdef FSDB
+	$fsdbDumpfile("orpsoc_testbench.fsdb");
+	$fsdbDumpvars;
 `endif
-      
+
    end // initial begin
    
 `ifdef END_TIME
@@ -184,20 +197,19 @@ module orpsoc_testbench;
 `ifdef END_INSNS
    initial begin
       #10
-	while (monitor.insns < `END_INSNS)
-	  @(posedge clk);
+		while (monitor.insns < `END_INSNS)
+			@(posedge clk);
  `ifndef SIM_QUIET      
-      $display("* Finish simulation due to END_INSNS count (%d) reached at %t",
-	       `END_INSNS, $time);
+      $display("* Finish simulation due to END_INSNS count (%d) reached at %t", `END_INSNS, $time);
  `endif
       $finish;
    end
 `endif     
    
-`ifdef UART0   
-   //	
+`ifdef UART0
+   //
    // UART0 decoder
-   //   
+   //
    uart_decoder
      #( 
 	.uart_baudrate_period_ns(8680) // 115200 baud = period 8.68uS
@@ -207,7 +219,7 @@ module orpsoc_testbench;
       .clk(clk),
       .uart_tx(uart0_stx_pad_o)
       );
-   
+
    // UART0 stimulus
    /*
    uart_stim
@@ -233,3 +245,4 @@ endmodule // orpsoc_testbench
 // verilog-library-extensions:(".v" ".h")
 // End:
 
+// <End of file>
