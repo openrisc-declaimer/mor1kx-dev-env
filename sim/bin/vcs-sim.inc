@@ -67,6 +67,7 @@ TB_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
 ALL_SRC  = $(RTL_VERILOG_SRC) 
 ALL_SRC += $(BENCH_VERILOG_SRC) 
 ALL_SRC += $(BENCH_TOP)
+# ALL_SRC += $(VPI_SRCS)
 
 # Code coverage command 
 # 代码覆盖率相关
@@ -83,7 +84,7 @@ CM_DIR = -cm_dir ./$(VCS_SIM).vdb
 CM_LOG = -cm_log cm_$(VCS_SIM).log
 
 # -cm_hier
-CM_RUN = -lca
+CM_RUN = -lca -full64
 
 # vpd file name
 # 输出的VCD+文件名
@@ -110,6 +111,7 @@ VPD_NAME = +vpdfile+$(VCS_SIM).vpd
 #
 #########################################################################################
 LIB_EXT = +libext+.v
+LIB_FILE = -v /home/klin/digital_lib/charter/fb_csm18ic_sc-x_2007q2v1/aci/sc-x/verilog/csm18ic.v
 
 DUT_CMP_OPTIONS   += -timescale=1ns/1ns
 DUT_CMP_OPTIONS   += -override_timescale=1ns/1ns
@@ -152,31 +154,36 @@ SIM = ./$(VCS_SIM).elf           \
       $(CM) $(CM_NAME) $(CM_DIR) \
       $(VPD_NAME)                \
       -l $(VCS_SIM).log  
-		
+
+# debug run param
+DEBUG_RUN = -full64
+
 # start compile
-vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP)
+vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
 	$(Q)$(VCS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
 
 # Start simulation
+# 
 vcs-sim: $(SIM_DIR_VMEM_IMAGE)
 	$(Q)$(SIM) 
 
 # Show the coverage
 vcs-cov:
-	$(Q)dve $(CM_RUN) -cov *.vpd &
+	$(Q)dve $(CM_RUN) -covdir *.vdb &
     
 # 生成覆盖率报告
 vcs-rpt:
 	$(Q)urg $(CM_RUN) -dir *.vdb
 
 vcs-debug:
-	$(Q)dve -vpd $(VCS_SIM).vpd &
+	$(Q)dve $(DEBUG_RUN) -vpd $(VCS_SIM).vpd &
 
 # Start clean
-vcs-clean: 
+vcs-clean: distclean 
 	$(Q)rm -rf ./csrc  *.daidir  ./csrc   *.log   *.vpd   *.vdb  simv*  *.key  
 	$(Q)rm -rf *race*.out* DVEfiles $(VCS_SIM) profileReport.* simprofile_dir.* 
 	$(Q)rm -rf profileReport simprofile_dir urgReport* vc_hdrs.h test-defines.v
 	$(Q)rm -rf urgReport simprofile_dir* profileReport*
 	$(Q)rm -rf orpsoc_testbench.vdb orpsoc_testbench.elf.daidir
 	$(Q)rm -rf $(OUTPUT) ../out/
+	$(Q)rm -rf $(OUTPUT) sram.vmem

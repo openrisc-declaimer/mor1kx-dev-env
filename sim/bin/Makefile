@@ -437,9 +437,6 @@ check-test-log:
 
 # Include the test-defines.v generation rule
 include ../bin/definesgen.inc
-# VCS commands
-include ../bin/vcs-sim.inc
-# include ../bin/xxx-sim.inc
 
 #
 # Software make rules (called recursively)
@@ -871,3 +868,7 @@ sim-tests:
 		if [ $$? -ne 0 ]; then break; fi; \
 		echo; echo "\t### $$test test OK ###"; echo; \
 	done
+
+# VCS commands
+include ../bin/vcs-sim.inc
+# include ../bin/xxx-sim.inc

@@ -90,7 +90,7 @@ module orpsoc_top
 `ifdef JTAG_DEBUG
       .tck_pad_i                 (tck_pad_i),
       .dbg_tck_o                 (dbg_tck),
-`endif      
+`endif
 
       // Asynchronous active low reset
       .rst_n_pad_i               (rst_n_pad_i)
@@ -151,13 +151,13 @@ module orpsoc_top
    wire [2:0] 		      wbm_d_dbg_cti_o;
    wire [1:0] 		      wbm_d_dbg_bte_o;
    
-   wire [wb_dw-1:0] 	      wbm_d_dbg_dat_i;   
+   wire [wb_dw-1:0]   wbm_d_dbg_dat_i;
    wire 		      wbm_d_dbg_ack_i;
    wire 		      wbm_d_dbg_err_i;
    wire 		      wbm_d_dbg_rty_i;
 
    // Byte bus bridge master signals
-   wire [wb_aw-1:0] 	      wbm_b_d_adr_o;
+   wire [wb_aw-1:0]   wbm_b_d_adr_o;
    wire [wb_dw-1:0] 	      wbm_b_d_dat_o;
    wire [3:0] 		      wbm_b_d_sel_o;
    wire 		      wbm_b_d_we_o;

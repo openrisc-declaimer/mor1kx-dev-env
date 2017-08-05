@@ -74,17 +74,17 @@ module orpsoc_testbench;
    
    orpsoc_top dut
      (
-      .clk_pad_i                        (clk),
-`ifdef JTAG_DEBUG          
+      .clk_pad_i            (clk),
+`ifdef JTAG_DEBUG
       .tms_pad_i			(tms_pad_i),
       .tck_pad_i			(tck_pad_i),
       .tdi_pad_i			(tdi_pad_i),
       .tdo_pad_o			(tdo_pad_o),
-`endif      
-`ifdef UART0      
-      .uart0_stx_pad_o			(uart0_stx_pad_o),
-      .uart0_srx_pad_i			(uart0_srx_pad_i),
-`endif
+`endif // JTAG_DEBUG
+`ifdef UART0
+      .uart0_stx_pad_o		(uart0_stx_pad_o),
+      .uart0_srx_pad_i		(uart0_srx_pad_i),
+`endif // UART0
       .rst_n_pad_i			(rst_n)
       );
 
@@ -104,7 +104,7 @@ module orpsoc_testbench;
    wire dc_en = orpsoc_testbench.dut.or1200_top0.or1200_dc_top.dc_en;
    always @(posedge dc_en)
 		$display("Or1200 DC enabled at %t", $time);
-`endif
+`endif // SIM_QUIET
 `endif // OR1200
 
 `ifdef MOR1KX
@@ -114,7 +114,7 @@ module orpsoc_testbench;
    mor1kx_monitor monitor();
 `endif
 
-`ifdef JTAG_DEBUG   
+`ifdef JTAG_DEBUG
  `ifdef VPI_DEBUG
    // Debugging interface
    vpi_debug_module vpi_dbg
@@ -137,7 +137,7 @@ module orpsoc_testbench;
 `ifndef SIM_QUIET
 		$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n", `TEST_NAME_STRING );
 `endif
-      
+
 `ifdef VCD
  `ifdef VCD_DELAY
 		#(`VCD_DELAY);   
@@ -202,9 +202,9 @@ module orpsoc_testbench;
 `endif     
    
 `ifdef UART0
-   //	
+   //
    // UART0 decoder
-   //   
+   //
    uart_decoder
      #( 
 	.uart_baudrate_period_ns(8680) // 115200 baud = period 8.68uS
@@ -214,7 +214,7 @@ module orpsoc_testbench;
       .clk(clk),
       .uart_tx(uart0_stx_pad_o)
       );
-   
+
    // UART0 stimulus
    /*
    uart_stim
@@ -240,3 +240,4 @@ endmodule // orpsoc_testbench
 // verilog-library-extensions:(".v" ".h")
 // End:
 
+// <End of file>
