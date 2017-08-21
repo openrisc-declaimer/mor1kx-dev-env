@@ -272,8 +272,8 @@ RTL_VERILOG_SRC=$(shell for module in $(RTL_VERILOG_MODULES); do \
 # List of verilog includes
 RTL_VERILOG_INCLUDES=$(shell ls $(RTL_VERILOG_INCLUDE_DIR)/*.*)
 
-.PHONY: sim-restore-profileoutput
-sim-restore-profileoutput:
+.PHONY: restore-profileoutput
+restore-profileoutput:
 	@echo;echo "\tRestoring profiling outputs"; echo
 	$(Q)mkdir -p ../out
 
@@ -873,4 +873,7 @@ sim-tests:
 include ../bin/vcs-sim.inc
 # Verdi commands
 include ../bin/verdi-sim.inc
+# LEDA code check commands
+include ../bin/leda-check.inc
+# nLint code check commands
 # include ../bin/xxx-sim.inc

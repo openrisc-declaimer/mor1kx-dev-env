@@ -161,7 +161,7 @@ SIM = ./$(VCS_SIM).elf           \
 DEBUG_RUN = -full64
 
 # start compile
-vcs-com: sim-restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
+vcs-com: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
 	$(Q)$(VCS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
 
 # Start simulation
