@@ -1,3 +1,5 @@
+`ifdef ETH_FIFO_XILINX
+
 module xilinx_dist_ram_16x32
 (
     data_out,
@@ -48,3 +50,5 @@ module xilinx_dist_ram_16x32
     RAM16X1D ram30 (.DPO(data_out[30]), .SPO(), .A0(waddr[0]), .A1(waddr[1]), .A2(waddr[2]), .A3(waddr[3]), .D(data_in[30]), .DPRA0(raddr[0]), .DPRA1(raddr[1]), .DPRA2(raddr[2]), .DPRA3(raddr[3]), .WCLK(wclk), .WE(we));
     RAM16X1D ram31 (.DPO(data_out[31]), .SPO(), .A0(waddr[0]), .A1(waddr[1]), .A2(waddr[2]), .A3(waddr[3]), .D(data_in[31]), .DPRA0(raddr[0]), .DPRA1(raddr[1]), .DPRA2(raddr[2]), .DPRA3(raddr[3]), .WCLK(wclk), .WE(we));
 endmodule
+
+`endif //  `ifdef ETH_FIFO_XILINX

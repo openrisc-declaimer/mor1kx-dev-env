@@ -50,7 +50,12 @@ NLINT_LOG_NAME  = $(VCS_SIM).nlint.log
 # NLINT debug macro define
 ######################################################################
 # setting fsdb and rc param.
-NLINT_DEFINE  = -l $(NLINT_LOG_NAME)
+NLINT_DEFINE  = -logdir ../out/ -logfile $(NLINT_LOG_NAME)
+LEDA_DEFINE  += -top $(VCS_SIM)
+NLINT_DEFINE += -verilog -2001
+NLINT_DEFINE += -beauty
+NLINT_DEFINE += -fullname
+NLINT_DEFINE += -detail
 # setting debug param
 NLINT_DEFINE += +notimingchecks
 NLINT_DEFINE += +ieee
@@ -83,15 +88,16 @@ NLINT_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
 
 # Start gui interface ...
 # 
-nlint-gui: 
+nlint-gui: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
 	$(Q)nLint -gui $(NLINT_DEFINE) $(NLINT_INC) $(NLINT_SRC)
 
 # Start source code check ...
-nlint-chk: 
+nlint-chk: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
 	$(Q)nLint $(NLINT_DEFINE) $(NLINT_INC) $(NLINT_SRC)
 
 # Start clean
 nlint-clean:
-	$(Q)rm -rf *.fsdb 
+	$(Q)rm -rf nLint.ds nLint.rc orpsoc_testbench.rc
+	$(Q)rm -rf nLintDB nLintLog 
 	$(Q)rm -rf verdiLog
 	

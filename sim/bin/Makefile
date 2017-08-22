@@ -876,4 +876,4 @@ include ../bin/verdi-sim.inc
 # LEDA code check commands
 include ../bin/leda-check.inc
 # nLint code check commands
-# include ../bin/xxx-sim.inc
+include ../bin/nlint-check.inc

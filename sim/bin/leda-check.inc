@@ -56,6 +56,7 @@ LEDA_DEFINE += -chip
 LEDA_DEFINE += -top $(VCS_SIM)
 # setting debug param
 LEDA_DEFINE += +libext+.udp+.v+.vmd
+LEDA_DEFINE += +tcl_rule+leda_rule.tcl
 
 ######################################################################
 # LEDA debug source and include define
@@ -69,11 +70,11 @@ LEDA_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
 
 # Start simulation
 # 
-leda-gui: restore-profileoutput
-	$(Q)leda +gui $(LEDA_INC) $(LEDA_SRC) 
+leda-gui: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
+	$(Q)leda +gui $(LEDA_DEFINE) $(LEDA_INC) $(LEDA_SRC) 
 
 # start compile
-leda-chk: restore-profileoutput
+leda-chk: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
 	$(Q)leda $(LEDA_DEFINE) $(LEDA_INC) $(LEDA_SRC) 
 	
 # -tcl_rule+rule.tcl 
@@ -82,6 +83,6 @@ leda-chk: restore-profileoutput
 leda-clean:
 	$(Q)rm -rf leda.cmd leda-libs leda-logs
 	$(Q)rm -rf leda.cmd leda-libs leda.pro
-	$(Q)rm -rf .leda_work
+	$(Q)rm -rf .leda_work .bbox_for_block_check
 	# $(Q)rm -rf ../out/
 	
