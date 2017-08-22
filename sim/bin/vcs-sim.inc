@@ -41,7 +41,7 @@
 ######################################################################
 
 # 这几个文件不是变量，是目标的标号使用PHONY来声明
-.PHONY: vcs-com vcs-debug vcs-cov vcs-rpt vcs-clean 
+.PHONY: vcs-com vcs-sim vcs-debug vcs-cov vcs-rpt vcs-clean 
 
 # 宏定义，输出的文件替换simv
 OUTPUT = $(VCS_SIM).elf
