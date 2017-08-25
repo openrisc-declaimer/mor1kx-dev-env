@@ -407,8 +407,6 @@ assign mtspr_done = mtspr_dc_done;
 //
 assign sig_range = sr[`OR1200_SR_OV];
    
-   
-   
 //
 // Instantiation of instruction fetch block
 //
@@ -717,9 +715,9 @@ or1200_sprs or1200_sprs(
 	.except_started(except_started),
 
 	.fpcsr(fpcsr),
-	.fpcsr_we(fpcsr_we),			
+	.fpcsr_we(fpcsr_we),
 	.spr_dat_fpu(spr_dat_fpu),
-			
+
 	.sr_we(sr_we),
 	.to_sr(to_sr),
 	.sr(sr),

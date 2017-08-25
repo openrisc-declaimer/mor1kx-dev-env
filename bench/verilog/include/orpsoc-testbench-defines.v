@@ -47,9 +47,19 @@
 `endif
 
 //
+// Define to enable monitor processor system, it is a main macro
+//
+`define OR1200_SYSTEM_CHECKER
+
+//
 // Define to enable monitor processor stage
 //
 `define OR1200_MONITOR_EXEC_STATE
+`define OR1200_MONITOR_EXEC_LOG_DISASSEMBLY
+`define OR1200_MONITOR_SPRS
+`define OR1200_MONITOR_LOOKUP
+`define OR1200_DISPLAY_EXECUTED
+`define OR1200_MONITOR_VERBOSE_NOPS
 
 //
 // Define to enable VCD wave dump

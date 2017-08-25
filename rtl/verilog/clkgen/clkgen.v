@@ -93,6 +93,7 @@ module clkgen
    //
    
    // An active-low synchronous reset signal (usually a PLL lock signal)
+	// 同步复位，需要打上几拍才可以？还是这个文件仅仅用于仿真使用？
    wire   sync_rst_n;
    assign sync_rst_n  = async_rst_n; // Pretend it's somehow synchronous now
 

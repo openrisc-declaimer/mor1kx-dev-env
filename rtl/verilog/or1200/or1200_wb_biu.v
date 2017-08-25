@@ -278,56 +278,56 @@ module or1200_wb_biu(
    // 
    always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
       if (wb_rst_i == `OR1200_RST_VALUE) begin
-	 wb_cyc_o	<=  1'b0;
-	 wb_stb_o	<=  1'b0;
-	 wb_cti_o	<=  3'b111;
-	 wb_bte_o	<=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
+			wb_cyc_o	<=  1'b0;
+			wb_stb_o	<=  1'b0;
+			wb_cti_o	<=  3'b111;
+			wb_bte_o	<=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
 `ifdef OR1200_WB_CAB
-	 wb_cab_o	<=  1'b0;
+			wb_cab_o	<=  1'b0;
 `endif
-	 wb_we_o		<=  1'b0;
-	 wb_sel_o	<=  4'hf;
-	 wb_adr_o	<=  {aw{1'b0}};
+			wb_we_o		<=  1'b0;
+			wb_sel_o	<=  4'hf;
+			wb_adr_o	<=  {aw{1'b0}};
 `ifdef OR1200_NO_DC	 
-	 wb_dat_o	<=  {dw{1'b0}};
+			wb_dat_o	<=  {dw{1'b0}};
 `endif	 
       end
       else begin
-	 wb_cyc_o	<=  wb_cyc_nxt;
+			wb_cyc_o	<=  wb_cyc_nxt;
 
          if (wb_ack & wb_cti_o == 3'b111) 
-           wb_stb_o        <=  1'b0;
+				wb_stb_o        <=  1'b0;
          else
-           wb_stb_o        <=  wb_stb_nxt;
+				wb_stb_o        <=  wb_stb_nxt;
 `ifndef OR1200_NO_BURSTS
-	 wb_cti_o	<=  wb_cti_nxt;
+			wb_cti_o	<=  wb_cti_nxt;
 `endif	 
-	 wb_bte_o	<=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
+			wb_bte_o	<=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
 `ifdef OR1200_WB_CAB
-	 wb_cab_o	<=  biu_cab_i;
+			wb_cab_o	<=  biu_cab_i;
 `endif
-	 // we and sel - set at beginning of access 
-	 if (wb_fsm_state_cur == wb_fsm_idle) begin
-	    wb_we_o		<=  biu_we_i;
-	    wb_sel_o	<=  biu_sel_i;
-	 end
-	 // adr - set at beginning of access and changed at every termination 
-	 if (wb_fsm_state_cur == wb_fsm_idle) begin
-	    wb_adr_o	<=  biu_adr_i;
-	 end 
-	 else if (wb_stb_o & wb_ack) begin
-	    if (bl==4) begin
-	       wb_adr_o[3:2]	<=  wb_adr_o[3:2] + 1;
-	    end
-	    if (bl==8) begin
-	       wb_adr_o[4:2]	<=  wb_adr_o[4:2] + 1;
-	    end
-	 end
+			// we and sel - set at beginning of access 
+			if (wb_fsm_state_cur == wb_fsm_idle) begin
+				wb_we_o		<=  biu_we_i;
+				wb_sel_o	<=  biu_sel_i;
+			end
+			// adr - set at beginning of access and changed at every termination 
+			if (wb_fsm_state_cur == wb_fsm_idle) begin
+				wb_adr_o	<=  biu_adr_i;
+			end 
+			else if (wb_stb_o & wb_ack) begin
+				if (bl==4) begin
+					wb_adr_o[3:2]	<=  wb_adr_o[3:2] + 1;
+				end
+				if (bl==8) begin
+					wb_adr_o[4:2]	<=  wb_adr_o[4:2] + 1;
+				end
+			end
 `ifdef OR1200_NO_DC	 
-	 // dat - write data changed after avery subsequent write access
-	 if (!wb_stb_o) begin
-	    wb_dat_o 	<=  biu_dat_i;
-	 end
+			// dat - write data changed after avery subsequent write access
+			if (!wb_stb_o) begin
+				wb_dat_o 	<=  biu_dat_i;
+			end
 `endif	 
       end
    end
@@ -337,9 +337,9 @@ module or1200_wb_biu(
    // 
    always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
       if (wb_rst_i == `OR1200_RST_VALUE) begin
-	 wb_ack_cnt	<=  1'b0;
-	 wb_err_cnt	<=  1'b0;
-	 wb_rty_cnt	<=  1'b0;
+			wb_ack_cnt	<=  1'b0;
+			wb_err_cnt	<=  1'b0;
+			wb_rty_cnt	<=  1'b0;
       end
       else begin
 	 // WB ack toggle counter

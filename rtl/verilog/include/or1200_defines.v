@@ -108,8 +108,7 @@
 // `define OR1200_DC_1W_4KB
 `define OR1200_DC_1W_8KB
 
-`else
-
+`else //`ifdef OR1200_ASIC
 
 /////////////////////////////////////////////////////////
 //
@@ -500,8 +499,8 @@
 `define OR1200_ALUOP_FFL1	5'b0_1111 // f
 
 /* Values sent to ALU from decode unit - not defined by ISA */
-`define OR1200_ALUOP_COMP       5'b1_0000 // Comparison
-`define OR1200_ALUOP_MOVHI      5'b1_0001 // Move-high
+`define OR1200_ALUOP_COMP  5'b1_0000 // Comparison
+`define OR1200_ALUOP_MOVHI 5'b1_0001 // Move-high
 `define OR1200_ALUOP_CUST5	5'b1_0010 // l.cust5
 
 // ALU instructions second opcode field
@@ -563,10 +562,10 @@
 //
 `define OR1200_BRANCHOP_WIDTH		3
 `define OR1200_BRANCHOP_NOP		3'd0
-`define OR1200_BRANCHOP_J		3'd1
-`define OR1200_BRANCHOP_JR		3'd2
+`define OR1200_BRANCHOP_J			3'd1
+`define OR1200_BRANCHOP_JR			3'd2
 `define OR1200_BRANCHOP_BAL		3'd3
-`define OR1200_BRANCHOP_BF		3'd4
+`define OR1200_BRANCHOP_BF			3'd4
 `define OR1200_BRANCHOP_BNF		3'd5
 `define OR1200_BRANCHOP_RFE		3'd6
 
@@ -631,12 +630,12 @@
 //
 // MSbit indicates FPU operation valid
 //
-`define OR1200_FPUOP_WIDTH	8
+`define OR1200_FPUOP_WIDTH			8
 // FPU unit from Usselman takes 5 cycles from decode, so 4 ex. cycles
-`define OR1200_FPUOP_CYCLES 3'd4
+`define OR1200_FPUOP_CYCLES 		3'd4
 // FP instruction is double precision if bit 4 is set. We're a 32-bit 
 // implementation thus do not support double precision FP 
-`define OR1200_FPUOP_DOUBLE_BIT 4
+`define OR1200_FPUOP_DOUBLE_BIT 	4
 `define OR1200_FPUOP_ADD  8'b0000_0000
 `define OR1200_FPUOP_SUB  8'b0000_0001
 `define OR1200_FPUOP_MUL  8'b0000_0010
@@ -710,7 +709,7 @@
 `define OR1200_OR32_XORI              6'b101011
 `define OR1200_OR32_MULI              6'b101100
 `define OR1200_OR32_MFSPR             6'b101101
-`define OR1200_OR32_SH_ROTI 	      6'b101110
+`define OR1200_OR32_SH_ROTI 	        6'b101110
 `define OR1200_OR32_SFXXI             6'b101111
 /* */
 `define OR1200_OR32_MTSPR             6'b110000
@@ -753,7 +752,7 @@
 //
 `define OR1200_EXCEPT_EPH0_P    20'h00000
 `define OR1200_EXCEPT_EPH1_P    20'hF0000
-`define OR1200_EXCEPT_V		    8'h00
+`define OR1200_EXCEPT_V		     8'h00
 
 //
 // N part width
@@ -767,21 +766,21 @@
 // simply comment out corresponding line
 //
 `define OR1200_EXCEPT_UNUSED		`OR1200_EXCEPT_WIDTH'hf
-`define OR1200_EXCEPT_TRAP		`OR1200_EXCEPT_WIDTH'he
+`define OR1200_EXCEPT_TRAP			`OR1200_EXCEPT_WIDTH'he
 `define OR1200_EXCEPT_FLOAT		`OR1200_EXCEPT_WIDTH'hd
 `define OR1200_EXCEPT_SYSCALL		`OR1200_EXCEPT_WIDTH'hc
 `define OR1200_EXCEPT_RANGE		`OR1200_EXCEPT_WIDTH'hb
-`define OR1200_EXCEPT_ITLBMISS		`OR1200_EXCEPT_WIDTH'ha
-`define OR1200_EXCEPT_DTLBMISS		`OR1200_EXCEPT_WIDTH'h9
-`define OR1200_EXCEPT_INT		`OR1200_EXCEPT_WIDTH'h8
+`define OR1200_EXCEPT_ITLBMISS	`OR1200_EXCEPT_WIDTH'ha
+`define OR1200_EXCEPT_DTLBMISS	`OR1200_EXCEPT_WIDTH'h9
+`define OR1200_EXCEPT_INT			`OR1200_EXCEPT_WIDTH'h8
 `define OR1200_EXCEPT_ILLEGAL		`OR1200_EXCEPT_WIDTH'h7
 `define OR1200_EXCEPT_ALIGN		`OR1200_EXCEPT_WIDTH'h6
-`define OR1200_EXCEPT_TICK		`OR1200_EXCEPT_WIDTH'h5
-`define OR1200_EXCEPT_IPF		`OR1200_EXCEPT_WIDTH'h4
-`define OR1200_EXCEPT_DPF		`OR1200_EXCEPT_WIDTH'h3
+`define OR1200_EXCEPT_TICK			`OR1200_EXCEPT_WIDTH'h5
+`define OR1200_EXCEPT_IPF			`OR1200_EXCEPT_WIDTH'h4
+`define OR1200_EXCEPT_DPF			`OR1200_EXCEPT_WIDTH'h3
 `define OR1200_EXCEPT_BUSERR		`OR1200_EXCEPT_WIDTH'h2
 `define OR1200_EXCEPT_RESET		`OR1200_EXCEPT_WIDTH'h1
-`define OR1200_EXCEPT_NONE		`OR1200_EXCEPT_WIDTH'h0
+`define OR1200_EXCEPT_NONE			`OR1200_EXCEPT_WIDTH'h0
 
 
 /////////////////////////////////////////////////////
@@ -796,7 +795,7 @@
 `define OR1200_SPR_GROUP_WIDTH 	5
 
 // Bits that define offset inside the group
-`define OR1200_SPR_OFS_BITS 10:0
+`define OR1200_SPR_OFS_BITS 	10:0
 
 // List of groups
 `define OR1200_SPR_GROUP_SYS	5'd00
@@ -809,7 +808,7 @@
 `define OR1200_SPR_GROUP_PM	5'd08
 `define OR1200_SPR_GROUP_PIC	5'd09
 `define OR1200_SPR_GROUP_TT	5'd10
-`define OR1200_SPR_GROUP_FPU    5'd11
+`define OR1200_SPR_GROUP_FPU  5'd11
 
 /////////////////////////////////////////////////////
 //
@@ -824,7 +823,7 @@
 `define OR1200_SPR_NPC		11'd16
 `define OR1200_SPR_SR		11'd17
 `define OR1200_SPR_PPC		11'd18
-`define OR1200_SPR_FPCSR        11'd20
+`define OR1200_SPR_FPCSR   11'd20
 `define OR1200_SPR_EPCR		11'd32
 `define OR1200_SPR_EEAR		11'd48
 `define OR1200_SPR_ESR		11'd64
@@ -1087,7 +1086,6 @@
 // Define if unused PIC register bits should be zero
 `define OR1200_PIC_UNUSED_ZERO
 
-
 /////////////////////////////////////////////////////
 //
 // Tick Timer (TT)
@@ -1116,7 +1114,6 @@
 // Define if reading TT registers is allowed
 `define OR1200_TT_READREGS
 
-
 //////////////////////////////////////////////
 //
 // MAC
@@ -1135,7 +1132,6 @@
 // were normally
 // dest_GPR = {MACHI,MACLO}[59:28]
 `define OR1200_MAC_SHIFTBY	0	// 0 = According to arch manual, 28 = obsolete backward compatibility
-
 
 //////////////////////////////////////////////
 //
@@ -1176,11 +1172,11 @@
 //
 `define	OR1200_DMMU_PS		13					// 13 for 8KB page size
 `define	OR1200_DTLB_INDXW	6					// 6 for 64 entry DTLB	7 for 128 entries
-`define OR1200_DTLB_INDXL	`OR1200_DMMU_PS				// 13			13
-`define OR1200_DTLB_INDXH	`OR1200_DMMU_PS+`OR1200_DTLB_INDXW-1	// 18			19
+`define 	OR1200_DTLB_INDXL	`OR1200_DMMU_PS				// 13			13
+`define 	OR1200_DTLB_INDXH	`OR1200_DMMU_PS+`OR1200_DTLB_INDXW-1	// 18			19
 `define	OR1200_DTLB_INDX	`OR1200_DTLB_INDXH:`OR1200_DTLB_INDXL	// 18:13		19:13
-`define OR1200_DTLB_TAGW	32-`OR1200_DTLB_INDXW-`OR1200_DMMU_PS	// 13			12
-`define OR1200_DTLB_TAGL	`OR1200_DTLB_INDXH+1			// 19			20
+`define 	OR1200_DTLB_TAGW	32-`OR1200_DTLB_INDXW-`OR1200_DMMU_PS	// 13			12
+`define 	OR1200_DTLB_TAGL	`OR1200_DTLB_INDXH+1			// 19			20
 `define	OR1200_DTLB_TAG		31:`OR1200_DTLB_TAGL			// 31:19		31:20
 `define	OR1200_DTLBMRW		`OR1200_DTLB_TAGW+1			// +1 because of V bit
 `define	OR1200_DTLBTRW		32-`OR1200_DMMU_PS+5			// +5 because of protection bits and CI
@@ -1196,7 +1192,6 @@
 // cached 0GB-4GB			1'b0
 //
 `define OR1200_DMMU_CI			dcpu_adr_i[31]
-
 
 //////////////////////////////////////////////
 //
@@ -1257,7 +1252,6 @@
 //
 `define OR1200_IMMU_CI			1'b0
 
-
 /////////////////////////////////////////////////
 //
 // Insn cache (IC)
@@ -1274,12 +1268,12 @@
 // IC configurations
 //
 `ifdef OR1200_IC_1W_512B
-`define OR1200_ICSIZE                   9                       // 512
-`define OR1200_ICINDX                   `OR1200_ICSIZE-2        // 7
-`define OR1200_ICINDXH                  `OR1200_ICSIZE-1        // 8
-`define OR1200_ICTAGL                   `OR1200_ICINDXH+1       // 9
-`define OR1200_ICTAG                    `OR1200_ICSIZE-`OR1200_ICLS // 5
-`define OR1200_ICTAG_W                  24
+`define OR1200_ICSIZE         9                       // 512
+`define OR1200_ICINDX         `OR1200_ICSIZE-2        // 7
+`define OR1200_ICINDXH        `OR1200_ICSIZE-1        // 8
+`define OR1200_ICTAGL         `OR1200_ICINDXH+1       // 9
+`define OR1200_ICTAG          `OR1200_ICSIZE-`OR1200_ICLS // 5
+`define OR1200_ICTAG_W        24
 `endif
 `ifdef OR1200_IC_1W_4KB
 `define OR1200_ICSIZE			12			// 4096
@@ -1313,7 +1307,6 @@
 `define	OR1200_ICTAG			`OR1200_ICSIZE-`OR1200_ICLS	// 10
 `define	OR1200_ICTAG_W			18
 `endif
-
 
 /////////////////////////////////////////////////
 //
@@ -1381,7 +1374,6 @@
 `define	OR1200_DCTAG			`OR1200_DCSIZE-`OR1200_DCLS	// 10
 `define	OR1200_DCTAG_W			18
 `endif
-
 
 /////////////////////////////////////////////////
 //
@@ -1537,7 +1529,7 @@
 // TODO - REVIR register value setting mechanism (an include?)
 //`include "or1200_revision.v"
 // Incrementing values for now
-`define OR1200_REVIR_REV_BITS               31:0
+`define OR1200_REVIR_REV_BITS            31:0
 `ifndef OR1200_REVIR0_REV
  `define OR1200_REVIR0_REV               32'h0
  `define OR1200_REVIR1_REV               32'h1
@@ -1547,12 +1539,12 @@
 `endif
 
 // UPR fields
-`define OR1200_UPR_UP_BITS		0
+`define OR1200_UPR_UP_BITS			0
 `define OR1200_UPR_DCP_BITS		1
 `define OR1200_UPR_ICP_BITS		2
 `define OR1200_UPR_DMP_BITS		3
 `define OR1200_UPR_IMP_BITS		4
-`define OR1200_UPR_MP_BITS		5
+`define OR1200_UPR_MP_BITS			5
 `define OR1200_UPR_DUP_BITS		6
 `define OR1200_UPR_PCUP_BITS		7
 `define OR1200_UPR_PMP_BITS		8
@@ -1619,14 +1611,14 @@
 `define OR1200_UPR_CUP			8'h00
 
 // CPUCFGR fields
-`define OR1200_CPUCFGR_NSGF_BITS	3:0
+`define OR1200_CPUCFGR_NSGF_BITS		3:0
 `define OR1200_CPUCFGR_HGF_BITS     4
 `define OR1200_CPUCFGR_OB32S_BITS	5
 `define OR1200_CPUCFGR_OB64S_BITS	6
 `define OR1200_CPUCFGR_OF32S_BITS	7
 `define OR1200_CPUCFGR_OF64S_BITS	8
 `define OR1200_CPUCFGR_OV64S_BITS	9
-`define OR1200_CPUCFGR_RES1_BITS	31:10
+`define OR1200_CPUCFGR_RES1_BITS		31:10
 
 // CPUCFGR values
 `define OR1200_CPUCFGR_NSGF		    4'h0
@@ -1700,7 +1692,7 @@
 `define OR1200_IMMUCFGR_RES1		20'h00000
 `else
 `define OR1200_IMMUCFGR_NTW		2'h0	// 1 TLB way
-`define OR1200_IMMUCFGR_NTS 3'h`OR1200_ITLB_INDXW	// Num TLB sets
+`define OR1200_IMMUCFGR_NTS 		3'h`OR1200_ITLB_INDXW	// Num TLB sets
 `define OR1200_IMMUCFGR_NAE		3'h0	// No ATB entry
 `define OR1200_IMMUCFGR_CRI		1'b0	// No control reg
 `define OR1200_IMMUCFGR_PRI		1'b0	// No protection reg
@@ -1715,26 +1707,26 @@
 `define OR1200_DCCFGR_CBS_BITS		7
 `define OR1200_DCCFGR_CWS_BITS		8
 `define OR1200_DCCFGR_CCRI_BITS		9
-`define OR1200_DCCFGR_CBIRI_BITS	10
-`define OR1200_DCCFGR_CBPRI_BITS	11
-`define OR1200_DCCFGR_CBLRI_BITS	12
-`define OR1200_DCCFGR_CBFRI_BITS	13
+`define OR1200_DCCFGR_CBIRI_BITS		10
+`define OR1200_DCCFGR_CBPRI_BITS		11
+`define OR1200_DCCFGR_CBLRI_BITS		12
+`define OR1200_DCCFGR_CBFRI_BITS		13
 `define OR1200_DCCFGR_CBWBRI_BITS	14
-`define OR1200_DCCFGR_RES1_BITS	31:15
+`define OR1200_DCCFGR_RES1_BITS		31:15
 
 // DCCFGR values
 `ifdef OR1200_NO_DC
-`define OR1200_DCCFGR_NCW		3'h0	// Irrelevant
-`define OR1200_DCCFGR_NCS		4'h0	// Irrelevant
-`define OR1200_DCCFGR_CBS		1'b0	// Irrelevant
-`define OR1200_DCCFGR_CWS		1'b0	// Irrelevant
-`define OR1200_DCCFGR_CCRI		1'b0	// Irrelevant
+`define OR1200_DCCFGR_NCW			3'h0	// Irrelevant
+`define OR1200_DCCFGR_NCS			4'h0	// Irrelevant
+`define OR1200_DCCFGR_CBS			1'b0	// Irrelevant
+`define OR1200_DCCFGR_CWS			1'b0	// Irrelevant
+`define OR1200_DCCFGR_CCRI			1'b0	// Irrelevant
 `define OR1200_DCCFGR_CBIRI		1'b0	// Irrelevant
 `define OR1200_DCCFGR_CBPRI		1'b0	// Irrelevant
 `define OR1200_DCCFGR_CBLRI		1'b0	// Irrelevant
 `define OR1200_DCCFGR_CBFRI		1'b0	// Irrelevant
 `define OR1200_DCCFGR_CBWBRI		1'b0	// Irrelevant
-`define OR1200_DCCFGR_RES1		17'h00000
+`define OR1200_DCCFGR_RES1			17'h00000
 `else
 `define OR1200_DCCFGR_NCW		3'h0	// 1 cache way
 `define OR1200_DCCFGR_NCS (`OR1200_DCTAG)	// Num cache sets
@@ -1763,26 +1755,26 @@
 `define OR1200_ICCFGR_CBS_BITS		7
 `define OR1200_ICCFGR_CWS_BITS		8
 `define OR1200_ICCFGR_CCRI_BITS		9
-`define OR1200_ICCFGR_CBIRI_BITS	10
-`define OR1200_ICCFGR_CBPRI_BITS	11
-`define OR1200_ICCFGR_CBLRI_BITS	12
-`define OR1200_ICCFGR_CBFRI_BITS	13
+`define OR1200_ICCFGR_CBIRI_BITS		10
+`define OR1200_ICCFGR_CBPRI_BITS		11
+`define OR1200_ICCFGR_CBLRI_BITS		12
+`define OR1200_ICCFGR_CBFRI_BITS		13
 `define OR1200_ICCFGR_CBWBRI_BITS	14
-`define OR1200_ICCFGR_RES1_BITS	31:15
+`define OR1200_ICCFGR_RES1_BITS		31:15
 
 // ICCFGR values
 `ifdef OR1200_NO_IC
-`define OR1200_ICCFGR_NCW		3'h0	// Irrelevant
-`define OR1200_ICCFGR_NCS 		4'h0	// Irrelevant
-`define OR1200_ICCFGR_CBS 		1'b0	// Irrelevant
-`define OR1200_ICCFGR_CWS		1'b0	// Irrelevant
-`define OR1200_ICCFGR_CCRI		1'b0	// Irrelevant
+`define OR1200_ICCFGR_NCW			3'h0	// Irrelevant
+`define OR1200_ICCFGR_NCS 			4'h0	// Irrelevant
+`define OR1200_ICCFGR_CBS 			1'b0	// Irrelevant
+`define OR1200_ICCFGR_CWS			1'b0	// Irrelevant
+`define OR1200_ICCFGR_CCRI			1'b0	// Irrelevant
 `define OR1200_ICCFGR_CBIRI		1'b0	// Irrelevant
 `define OR1200_ICCFGR_CBPRI		1'b0	// Irrelevant
 `define OR1200_ICCFGR_CBLRI		1'b0	// Irrelevant
 `define OR1200_ICCFGR_CBFRI		1'b0	// Irrelevant
 `define OR1200_ICCFGR_CBWBRI		1'b0	// Irrelevant
-`define OR1200_ICCFGR_RES1		17'h00000
+`define OR1200_ICCFGR_RES1			17'h00000
 `else
 `define OR1200_ICCFGR_NCW		3'h0	// 1 cache way
 `define OR1200_ICCFGR_NCS (`OR1200_ICTAG)	// Num cache sets
@@ -1798,7 +1790,7 @@
 `endif
 
 // DCFGR fields
-`define OR1200_DCFGR_NDP_BITS		3:0
+`define OR1200_DCFGR_NDP_BITS			3:0
 `define OR1200_DCFGR_WPCI_BITS		4
 `define OR1200_DCFGR_RES1_BITS		31:5
 
@@ -1834,4 +1826,4 @@
 //`define OR1200_BOOT_ADR 32'hf0000100
 // Boot from 0x100
  `define OR1200_BOOT_PCREG_DEFAULT 30'h0000003f
- `define OR1200_BOOT_ADR 32'h00000100
+ `define OR1200_BOOT_ADR 	32'h00000100

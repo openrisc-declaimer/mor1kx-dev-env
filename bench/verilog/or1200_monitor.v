@@ -35,11 +35,10 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 
-`include "timescale.v"
+`include "test-defines.v"
 `include "or1200_defines.v"
 `include "or1200_monitor_defines.v"
-`include "test-defines.v"
-
+`include "timescale.v"
 
 module or1200_monitor;
 
@@ -57,7 +56,6 @@ module or1200_monitor;
    integer    r3;
    integer    insns;
    integer    cycles = 0;
-   
 
    //
    // Initialization
@@ -79,7 +77,6 @@ module or1200_monitor;
       flookup = $fopen({"../out/",`TEST_NAME_STRING,"-lookup.log"});
 `endif      
       insns = 0;
-
    end
 
    //
@@ -89,21 +86,17 @@ module or1200_monitor;
       input	[4:0]	gpr_no;
       output [31:0] 	gpr;
       integer 		j;
-      begin
+   begin
 
 `ifdef OR1200_RFRAM_GENERIC
 	 for(j = 0; j < 32; j = j + 1) begin
 	    gpr[j] = `OR1200_TOP.`CPU_cpu.`CPU_rf.rf_a.mem[gpr_no*32+j];
 	 end
-	 
 `else
 	 //gpr = `OR1200_TOP.`CPU_cpu.`CPU_rf.rf_a.mem[gpr_no];
 	 gpr = `OR1200_TOP.`CPU_cpu.`CPU_rf.rf_a.get_gpr(gpr_no);
-	 
 `endif
-
-
-      end
+   end
    endtask
 
    //
@@ -211,7 +204,6 @@ module or1200_monitor;
 	 
       end
    endtask // monitor_for_crash
-   
 
    //
    // Write state of the OR1200 registers into a file; version for exception
@@ -254,7 +246,6 @@ module or1200_monitor;
 		 `OR1200_TOP.`CPU_cpu.`CPU_ctrl.ex_insn);
 	 insns = insns + 1;
 `endif
-	 
       end
    endtask
 
@@ -350,8 +341,7 @@ module or1200_monitor;
 
    always @(posedge `CPU_CORE_CLK)
      cycles = cycles + 1;
-   
-   
+
    //
    // Hooks for:
    // - displaying registers
@@ -372,64 +362,66 @@ module or1200_monitor;
 	else
 	  if (`OR1200_TOP.`CPU_cpu.`CPU_except.except_flushpipe)
 	    display_arch_state_except;
-	// small hack to stop simulation (l.nop 1):
-	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0001) begin
-	   get_gpr(3, r3);
-	   $fdisplay(fgeneral, "%t: l.nop exit (%h)", $time, r3);
+		// small hack to stop simulation (l.nop 1):
+		if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0001) begin
+			get_gpr(3, r3);
+			$fdisplay(fgeneral, "%t: l.nop exit (%h)", $time, r3);
 `ifdef OR1200_MONITOR_VERBOSE_NOPS
-	   // Note that the 'expect' scripts in or1ksim's test suite look for strings
-	   // like "exit(1)", therefore something like "exit(  1)" would fail.
-	   $display("exit(%h)",r3);
+			// Note that the 'expect' scripts in or1ksim's test suite look for strings
+			// like "exit(1)", therefore something like "exit(  1)" would fail.
+			$display("exit(%h)",r3);
 `endif	   
-	   $finish;
-	end
+			$finish;
+		end
+	
 	// debug if test (l.nop 10)
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_000a) begin
-	   $fdisplay(fgeneral, "%t: l.nop dbg_if_test", $time);
+	  $fdisplay(fgeneral, "%t: l.nop dbg_if_test", $time);
 	end
 	// simulation reports (l.nop 2)
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0002) begin 
-	   get_gpr(3, r3);
-	   $fdisplay(fgeneral, "%t: l.nop report (0x%h)", $time, r3);
+	  get_gpr(3, r3);
+	  $fdisplay(fgeneral, "%t: l.nop report (0x%h)", $time, r3);
 `ifdef OR1200_MONITOR_VERBOSE_NOPS
 	   // Note that the 'expect' scripts in or1ksim's test suite look for strings
 	   // like "report(0x7ffffffe);", therefore something like "report (0x7ffffffe);"
 	   // (note the extra space character) would fail.
-	   $display("report(0x%h);", r3);
+	  $display("report(0x%h);", r3);
 `endif
 	end
+	
 	// simulation printfs (l.nop 3)
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0003) begin 
-	   get_gpr(3, r3);
-	   $fdisplay(fgeneral, "%t: l.nop printf (%h)", $time, r3);
+	  get_gpr(3, r3);
+	  $fdisplay(fgeneral, "%t: l.nop printf (%h)", $time, r3);
 	end
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0004) begin 
-	   // simulation putc (l.nop 4)
-	   get_gpr(3, r3);
-	   $write("%c", r3);
-	   $fdisplay(fgeneral, "%t: l.nop putc (%c)", $time, r3);
+	  // simulation putc (l.nop 4)
+	  get_gpr(3, r3);
+	  $write("%c", r3);
+	  $fdisplay(fgeneral, "%t: l.nop putc (%c)", $time, r3);
 	end
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0005) begin
-	   $display("%t: l.nop reset cycle counter", $time);
-	   $fdisplay(fgeneral, "%t: l.nop reset cycle counter", $time);
-	   cycles = 0;
+	  $display("%t: l.nop reset cycle counter", $time);
+	  $fdisplay(fgeneral, "%t: l.nop reset cycle counter", $time);
+	  cycles = 0;
 	end
 	if (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn == 32'h1500_0006) begin
-	   $display("%t: l.nop report cycle counter %d", $time, cycles);
-	   $fdisplay(fgeneral, "%t: l.nop report cycle counter %d", $time, cycles);
+	  $display("%t: l.nop report cycle counter %d", $time, cycles);
+	  $fdisplay(fgeneral, "%t: l.nop report cycle counter %d", $time, cycles);
 	end		
 `ifdef OR1200_MONITOR_SPRS	
 	if (`OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_we)
 	  $fdisplay(fspr, "%t: Write to SPR : [%h] <- %h", $time,
-		    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_addr,
-		    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_dat_o);
+                    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_addr,
+                    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_dat_o);
 	if ((|`OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_cs) & 
-	    !`OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_we)
+	     !`OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_we)
 	  $fdisplay(fspr, "%t: Read from SPR: [%h] -> %h", $time,
-		    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_addr, 
-		    `OR1200_TOP.`CPU_cpu.`CPU_sprs.to_wbmux);
-`endif	
-     end
+                    `OR1200_TOP.`CPU_cpu.`CPU_sprs.spr_addr, 
+                    `OR1200_TOP.`CPU_cpu.`CPU_sprs.to_wbmux);
+`endif
+	end
 
 
 `ifdef RAM_WB
@@ -690,8 +682,7 @@ module or1200_monitor;
    reg [31:0] last_addr = 0;
    reg [31:0] last_mem_word;
    reg [31:0] physical_pc;
-   reg 	      tlb_miss;   
-   
+   reg 	      tlb_miss;
 
 `ifdef MEM_COHERENCE_CHECK
  `define MEM_COHERENCE_TRIGGER (`OR1200_TOP.`CPU_cpu.`CPU_ctrl.id_void === 1'b0)
@@ -719,11 +710,11 @@ module or1200_monitor;
 		  if (mem_word !== `INSN_TO_CHECK)
 		    begin
 		       $fdisplay(fgeneral, "%t: Instruction mismatch for PC 0x%h (phys. 0x%h) - memory had 0x%h, CPU had 0x%h", 
-				 $time, `PC_TO_CHECK, physical_pc, mem_word, 
-				 `INSN_TO_CHECK);
+				                   $time, `PC_TO_CHECK, physical_pc, mem_word, 
+				                   `INSN_TO_CHECK);
 		       $display("%t: Instruction mismatch for PC 0x%h (phys. 0x%h) - memory had 0x%h, CPU had 0x%h", 
-				$time, `PC_TO_CHECK, physical_pc, mem_word, 
-				`INSN_TO_CHECK);
+				                   $time, `PC_TO_CHECK, physical_pc, mem_word, 
+				                   `INSN_TO_CHECK);
 		       #200;
 		       $finish;		  
 		    end
@@ -733,7 +724,6 @@ module or1200_monitor;
 	       end // if (((physical_pc !== last_addr) || (last_mem_word != `INSN_TO_CHECK))...	     
 	  end // if (`MEM_COHERENCE_TRIGGER)	
      end // always @ (posedge `CPU_CORE_CLK)
-   
 `endif //  `ifdef MEM_COHERENCE_CHECK
    
    // Trigger on each instruction that gets into writeback stage properly
@@ -741,7 +731,6 @@ module or1200_monitor;
    reg will_jump, jumping, jump_dslot, jumped;
    reg rfe, except_during_rfe;
    reg dslot_expt;
-   
 
    // Maintain a copy of GPRS for previous instruction
    reg [31:0] current_gprs [0:31];
@@ -760,7 +749,7 @@ module or1200_monitor;
 	      get_gpr(j,current_gprs[j]);
 	   end
 	 current_sr = `OR1200_TOP.`CPU_cpu.`CPU_sprs.sr ;
-    	 current_esr = `OR1200_TOP.`CPU_cpu.`CPU_sprs.epcr ;
+     current_esr = `OR1200_TOP.`CPU_cpu.`CPU_sprs.epcr ;
 	 current_epcr = `OR1200_TOP.`CPU_cpu.`CPU_sprs.epcr ;
 	 current_eear = `OR1200_TOP.`CPU_cpu.`CPU_sprs.eear ;
       end
@@ -1163,8 +1152,6 @@ module or1200_monitor;
    /////////////////////////////////////////////////////////////////////////
    // Execution tracking task
    /////////////////////////////////////////////////////////////////////////
-
-   
 `ifdef OR1200_SYSTEM_CHECKER
    always @(posedge `CPU_CORE_CLK)
      begin
@@ -1205,31 +1192,26 @@ module or1200_monitor;
 		// have duplicate return entries in the expected address list
 		if (exception_here & (jumped | jump_dslot))
 		  begin
-		     $display("%t: marked as jump address with exception (dup)"
-			      ,$time);
+		     $display("%t: marked as jump address with exception (dup)" ,$time);
 		     mark_duplicate_expected_address;
 		  end
 		
 		or1200_check_execution(`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn,
-				       `OR1200_TOP.`CPU_cpu.`CPU_except.wb_pc, 
-				       exception_here);		
-		//$write("%t: pc:0x%h\t",$time,
-		//       `OR1200_TOP.`CPU_cpu.`CPU_except.wb_pc);
-		// Decode the instruction, print it out
-		//or1200_print_op(`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn); 
-		//$write("\t exc:%0h dsl:%0h\n",exception_here,jump_dslot);
+				               `OR1200_TOP.`CPU_cpu.`CPU_except.wb_pc, 
+				                exception_here );		
+		// $write("%t: pc:0x%h\t",$time, `OR1200_TOP.`CPU_cpu.`CPU_except.wb_pc);
+		// // Decode the instruction, print it out
+		// or1200_print_op(`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_insn); 
+		// $write("\t exc:%0h dsl:%0h\n",exception_here,jump_dslot);
 
-		
-		
 	     end
 	end // if (!`OR1200_TOP.`CPU_cpu.`CPU_ctrl.wb_freeze)
      end // always @ (posedge `CPU_CORE_CLK)
-`endif   
-  
+`endif
 
    task or1200_check_execution;
-      input [31:0] insn;
-      input [31:0] pc;
+      input [31:0] insn; // current instruction at writeback stage?
+      input [31:0] pc;   // current PC address at exc
       input 	   exception;
       
       reg [5:0]    opcode;
@@ -1255,8 +1237,7 @@ module or1200_monitor;
       reg 	   flag;
 
       reg [31:0]   br_j_ea; // Branch/jump effective address
-      
-      
+
       begin
 	 
 	 // Instruction opcode
@@ -1293,7 +1274,7 @@ module or1200_monitor;
 
 	 // Check MSbit of the immediate, sign extend if set
 	 br_j_ea = j_imm[25] ? pc + {4'hf,j_imm,2'b00} : 
-		   pc + {4'h0,j_imm,2'b00};
+		                   pc + {4'h0,j_imm,2'b00};
 
 	 if (exception)
 	   begin
@@ -1304,7 +1285,6 @@ module or1200_monitor;
 	      // interrupt out of, we don't want to execute them again?
 	      //add_expected_address(current_epcr);
 	   end
-	 
 
 	 check_expected_address(pc, (jumped & !exception));
 
@@ -1323,7 +1303,6 @@ module or1200_monitor;
 		// a delay of one instruction.
 		
 		add_expected_address(br_j_ea);
-
 		jumping = 1;
 	     end
 	   `OR1200_OR32_JAL:
@@ -1454,7 +1433,6 @@ end
    /////////////////////////////////////////////////////////////////////////
    // Instruction decode task
    /////////////////////////////////////////////////////////////////////////
-
    task or1200_print_op;
       input [31:0] insn;
 
@@ -1819,6 +1797,4 @@ end
       end
    endtask // or1200_print_op
 
-
-   
 endmodule

@@ -64,7 +64,7 @@ parameter rom0_wb_adr = 4'hf;
 ////////////////////////
 //                    //
 // Arbiter parameters //
-//                    // 
+//                    //
 ////////////////////////
 
 parameter wb_dw = 32; // Default Wishbone full word width
@@ -120,7 +120,3 @@ parameter bbus_arb_slave16_adr  = 0 /* UNASSIGNED */;
 parameter bbus_arb_slave17_adr  = 0 /* UNASSIGNED */;
 parameter bbus_arb_slave18_adr  = 0 /* UNASSIGNED */;
 parameter bbus_arb_slave19_adr  = 0 /* UNASSIGNED */;
-
-
-
-

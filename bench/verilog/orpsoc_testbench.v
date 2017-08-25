@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-///                                                               //// 
+///                                                               ////
 /// ORPSoC testbench                                              ////
 ///                                                               ////
 /// Instantiate ORPSoC, monitors, provide stimulus                ////
@@ -40,9 +40,9 @@
 
 module orpsoc_testbench;
 
-  reg clk = 0;
+	reg clk = 0;
   reg rst_n = 1; // Active LOW
-   
+
   always
     #((`BOARD_CLOCK_PERIOD)/2) clk <= ~clk;
 
@@ -71,21 +71,21 @@ module orpsoc_testbench;
   wire 		     uart0_stx_pad_o;
   wire 		     uart0_srx_pad_i;
 `endif
-   
+
   orpsoc_top dut
      (
-      .clk_pad_i            (clk),
+      .clk_pad_i            	(clk),
 `ifdef JTAG_DEBUG
-      .tms_pad_i			(tms_pad_i),
-      .tck_pad_i			(tck_pad_i),
-      .tdi_pad_i			(tdi_pad_i),
-      .tdo_pad_o			(tdo_pad_o),
+      .tms_pad_i		(tms_pad_i),
+      .tck_pad_i		(tck_pad_i),
+      .tdi_pad_i		(tdi_pad_i),
+      .tdo_pad_o		(tdo_pad_o),
 `endif // JTAG_DEBUG
 `ifdef UART0
       .uart0_stx_pad_o		(uart0_stx_pad_o),
       .uart0_srx_pad_i		(uart0_srx_pad_i),
 `endif // UART0
-      .rst_n_pad_i			(rst_n)
+      .rst_n_pad_i		(rst_n)
       );
 
 `ifdef OR1200
@@ -121,12 +121,12 @@ module orpsoc_testbench;
    //
    vpi_debug_module vpi_dbg
      (
-      .tms(tms_pad_i), 
-      .tck(tck_pad_i), 
-      .tdi(tdi_pad_i), 
+      .tms(tms_pad_i),
+      .tck(tck_pad_i),
+      .tdi(tdi_pad_i),
       .tdo(tdo_pad_o)
       );
- `else   
+ `else
    // If no VPI debugging, tie off JTAG inputs
    assign tdi_pad_i = 1;
    assign tck_pad_i = 0;
@@ -141,7 +141,7 @@ module orpsoc_testbench;
 
 `ifdef VCD
  `ifdef VCD_DELAY
-	#(`VCD_DELAY);   
+	#(`VCD_DELAY);
  `endif
 
 	// Delay by x insns
@@ -164,13 +164,13 @@ module orpsoc_testbench;
 	$dumpfile({"../out/",`TEST_NAME_STRING,`VCD_SUFFIX});
  `ifndef VCD_DEPTH
   `define VCD_DEPTH 0
- `endif     
+ `endif
 		$dumpvars(`VCD_DEPTH);		
 `endif // VCD
 
 `ifdef VPD
 	//
-	// VCS wave file VPD 
+	// VCS wave file VPD
 	//
 	$vcdpluson(0, orpsoc_testbench);
 	// $vcdpluson(1, orpsoc_testbench);
@@ -187,13 +187,13 @@ module orpsoc_testbench;
 	$fsdbDumpvars;
 `endif
   end // initial begin
-   
+
 `ifdef END_TIME
   initial begin
      #(`END_TIME);
-`ifndef SIM_QUIET      
+`ifndef SIM_QUIET
      $display("* Finish simulation due to END_TIME being set at %t", $time);
-`endif      
+`endif
      $finish;
   end
 `endif // `ifdef END_TIME
@@ -201,21 +201,21 @@ module orpsoc_testbench;
 `ifdef END_INSNS
   initial begin
     #10
-	while (monitor.insns < `END_INSNS)
-		@(posedge clk);
- `ifndef SIM_QUIET      
+    while (monitor.insns < `END_INSNS)
+	@(posedge clk);
+ `ifndef SIM_QUIET
     $display("* Finish simulation due to END_INSNS count (%d) reached at %t", `END_INSNS, $time);
  `endif
     $finish;
   end
 `endif // `ifdef END_INSNS
-   
+
 `ifdef UART0
    //
    // UART0 decoder
    //
    uart_decoder
-   #( 
+   #(
 	.uart_baudrate_period_ns(8680) // 115200 baud = period 8.68uS
 	)
    uart0_decoder
@@ -227,7 +227,7 @@ module orpsoc_testbench;
    // UART0 stimulus
    /*
    uart_stim
-     #( 
+     #(
 	.uart_baudrate_period_ns(8680) // 115200 baud = period 8.68uS
 	)
    uart0_stim
