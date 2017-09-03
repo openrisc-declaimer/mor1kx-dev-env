@@ -80,7 +80,7 @@ leda-chk: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VER
 # -tcl_rule+rule.tcl 
 
 # Start clean
-leda-clean:
+leda-clean: vcs-clean
 	$(Q)rm -rf leda.cmd leda-libs leda-logs
 	$(Q)rm -rf leda.cmd leda-libs leda.pro
 	$(Q)rm -rf .leda_work .bbox_for_block_check
