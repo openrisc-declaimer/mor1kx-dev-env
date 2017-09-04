@@ -2,6 +2,12 @@ SW_ROOT=../../..
 
 include $(SW_ROOT)/Makefile.inc
 
+all: bootrom.v
+
+/* or1k-basic.bin  */
+%.v: %.bin $(SW_ROOT)/utils/bin2vlogarray
+	$(Q)$(SW_ROOT)/utils/bin2vlogarray < $< > $@
+
 %.dis: %.elf
 	$(Q)$(OR32_OBJDUMP) -d $< > $@
 

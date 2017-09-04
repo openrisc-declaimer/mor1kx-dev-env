@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-///                                                               //// 
+///                                                               ////
 /// bootrom                                                       ////
 ///                                                               ////
 /// Assembly programs to be embedded inside system to aid boot    ////
@@ -41,7 +41,6 @@
 #include "board.h"
 
 #ifdef BOOTROM_SPI_FLASH
-	
 	/* Assembly program to go into the boot ROM */
 	/* For use with simple_spi SPI master core and standard SPI flash
 	   interface-compatible parts (ST M25P16 for example.)*/
@@ -49,20 +48,20 @@
 	/* Assuming address at RAM_LOAD_BASE gets clobbered, we need
 	   a byte writable address somewhere!*/
 
-#define SPI_BASE SPI0_BASE
-/* simple_spi driver */	
-#define SPI_SPCR 0x0
-#define SPI_SPSR 0x1
-#define SPI_SPDR 0x2
-#define SPI_SPER 0x3
-#define SPI_SPSS 0x4
+	#define SPI_BASE SPI0_BASE
+	/* simple_spi driver */	
+	#define SPI_SPCR 0x0
+	#define SPI_SPSR 0x1
+	#define SPI_SPDR 0x2
+	#define SPI_SPER 0x3
+	#define SPI_SPSS 0x4
 
-#define SPI_SPCR_XFER_GO 0x51
-#define SPI_SPSS_INIT 0x1
-#define SPI_SPSR_RX_CHECK 0x01 /* Check bit 0 is cleared, fifo !empty*/
-	
-#define RAM_LOAD_BASE SDRAM_BASE
-#define RESET_ADDR (SDRAM_BASE+0x100)
+	#define SPI_SPCR_XFER_GO 0x51
+	#define SPI_SPSS_INIT 0x1
+	#define SPI_SPSR_RX_CHECK 0x01 /* Check bit 0 is cleared, fifo !empty*/
+		
+	#define RAM_LOAD_BASE SDRAM_BASE
+	#define RESET_ADDR (SDRAM_BASE+0x100)
 
 boot_init:	
 	l.movhi r0, 0
@@ -142,13 +141,12 @@ goto_reset:
 	OR1K_INST(l.sb  	SPI_SPSS(r4), r0), /* Clear SPI slave selects */
 	OR1K_INST(l.jr 	r1)
 	)
-	
-	
+
 store_sizeword:
 #ifdef SPI_RETRY_IF_INSANE_SIZEWORD
-	l.lwz 	r7, 0(r1)        /* Size word is in first word of SDRAM */
-	l.srli	r10, r7, 16	 /* Chop the sizeword we read in half */
-	l.sfgtui r10, 0x0200	 /* It's unlikely we'll ever load > 32MB */
+	l.lwz 	r7, 0(r1)       /* Size word is in first word of SDRAM */
+	l.srli	r10, r7, 16	 	/* Chop the sizeword we read in half */
+	l.sfgtui r10, 0x0200	/* It's unlikely we'll ever load > 32MB */
 	OR1K_DELAYED_NOP(
 	OR1K_INST(l.bf	boot_init))
 	OR1K_DELAYED_NOP(
@@ -160,7 +158,7 @@ store_sizeword:
 #endif
 	
 spi_xfer:
-	l.sb 	SPI_SPDR(r4), r3  /* Dummy write what's in r3 */
+	l.sb 	SPI_SPDR(r4), r3  	/* Dummy write what's in r3 */
 	l.ori 	r3, r0, SPI_SPSR_RX_CHECK /* r3 = , ensure loop just once */
 spi_xfer_poll:	
 	l.andi 	r3, r3, SPI_SPSR_RX_CHECK /* AND read fifo bit empty */
@@ -168,12 +166,11 @@ spi_xfer_poll:
 	OR1K_DELAYED(
 	OR1K_INST(l.lbz 	r3, SPI_SPSR(r4)), /* Read SPSR */
 	/* ... if so, rxfifo empty, keep polling */
-	OR1K_INST(l.bf 	spi_xfer_poll))     
+	OR1K_INST(l.bf 	spi_xfer_poll))
 	OR1K_DELAYED(
 	OR1K_INST(l.lbz 	r3, SPI_SPDR(r4)), /* Get data byte */
 	OR1K_INST(l.jr 	r9))
-
-#endif
+#endif /* BOOTROM_SPI_FLASH */
 
 #ifdef BOOTROM_GOTO_RESET
 	/* Jump to reset vector in the SDRAM */
@@ -182,14 +179,11 @@ spi_xfer_poll:
 	l.ori 	r4, r4, 0x100
 	l.jr 	r4
 	l.nop
-	
 #endif	
 
 #ifdef BOOTROM_LOOP_AT_ZERO
-
 	/* Don't load app via SPI, instead just put an infinite loop into bottom
-	of memory and jump there.
-	*/
+	   of memory and jump there. */
 	l.movhi r0, 0
 	l.movhi r4, SDRAM_BASE
 	l.sw 	0x0(r4), r0
@@ -200,26 +194,19 @@ spi_xfer_poll:
 	l.sw 	0xc(r4), r5
 	l.jr 	r4
 	l.nop
-
-	
-
 #endif
 
 #ifdef BOOTROM_LOOP_IN_ROM
-
 	/* Don't load app via SPI, instead just put an infinite loop into bottom
-	of memory and jump there.
-	*/
+	   of memory and jump there. */
 	l.movhi r0, 0
 	l.nop 	0x1
 	l.j 	0
 	l.nop
-	l.nop 
+	l.nop
 #endif
 
-
 #ifdef BOOTROM_WAIT_150US
-
 	l.movhi r0,0
 	l.movhi r1,hi(BOOTROM_WAIT_LOOPS)
 	l.ori	r1,r1,lo(BOOTROM_WAIT_LOOPS)
@@ -232,5 +219,5 @@ waitloop:
 	l.ori	r1,r0,0x100 /*reset vector*/
 	l.jr	r1
 	l.nop
-
 #endif
+

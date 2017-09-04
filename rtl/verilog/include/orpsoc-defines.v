@@ -38,6 +38,7 @@
 `define BOARD_CLOCK_PERIOD 20
 
 // Included modules: define to include
+`define BOOTROM
 `define JTAG_DEBUG
 `define UART0
 `define RAM_WB

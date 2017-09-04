@@ -120,7 +120,7 @@ BENCH_SYSC_INCLUDE_DIR=$(BENCH_SYSC_DIR)/include
 SW_DIR=$(PROJECT_ROOT)/sw
 # BootROM code, which generates a verilog array select values
 BOOTROM_FILE=bootrom.v
-BOOTROM_SW_DIR=$(SW_DIR)/bootrom
+BOOTROM_SW_DIR=$(SW_DIR)/bootsim
 BOOTROM_SRC=$(shell ls $(BOOTROM_SW_DIR)/* | grep -v $(BOOTROM_FILE))
 BOOTROM_VERILOG=$(BOOTROM_SW_DIR)/$(BOOTROM_FILE)
 $(BOOTROM_VERILOG): $(BOOTROM_SRC)

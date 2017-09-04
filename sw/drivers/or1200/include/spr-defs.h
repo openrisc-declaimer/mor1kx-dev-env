@@ -77,32 +77,32 @@
 #define SPRGROUP_FP	(11<< MAX_SPRS_PER_GRP_BITS)
 
 /* System control and status group */
-#define SPR_VR		(SPRGROUP_SYS + 0)
-#define SPR_UPR		(SPRGROUP_SYS + 1)
-#define SPR_CPUCFGR	(SPRGROUP_SYS + 2)
-#define SPR_DMMUCFGR	(SPRGROUP_SYS + 3)
-#define SPR_IMMUCFGR	(SPRGROUP_SYS + 4)
-#define SPR_DCCFGR	(SPRGROUP_SYS + 5)
-#define SPR_ICCFGR	(SPRGROUP_SYS + 6)
-#define SPR_DCFGR	(SPRGROUP_SYS + 7)
-#define SPR_PCCFGR	(SPRGROUP_SYS + 8)
-#define SPR_REVIR_BASE	(SPRGROUP_SYS + 11)
-#define SPR_REVIR_LAST	(SPRGROUP_SYS + 15)
-#define SPR_NPC         (SPRGROUP_SYS + 16)  /* CZ 21/06/01 */
-#define SPR_SR		(SPRGROUP_SYS + 17)  /* CZ 21/06/01 */
-#define SPR_PPC         (SPRGROUP_SYS + 18)  /* CZ 21/06/01 */
-#define SPR_FPCSR       (SPRGROUP_SYS + 20)  /* CZ 21/06/01 */
-#define SPR_EPCR_BASE	(SPRGROUP_SYS + 32)  /* CZ 21/06/01 */
-#define SPR_EPCR_LAST	(SPRGROUP_SYS + 47)  /* CZ 21/06/01 */
-#define SPR_EEAR_BASE	(SPRGROUP_SYS + 48)
-#define SPR_EEAR_LAST	(SPRGROUP_SYS + 63)
-#define SPR_ESR_BASE	(SPRGROUP_SYS + 64)
-#define SPR_ESR_LAST	(SPRGROUP_SYS + 79)
-#define SPR_GPR_BASE	(SPRGROUP_SYS + 1024)
+#define SPR_VR					(SPRGROUP_SYS + 0)
+#define SPR_UPR					(SPRGROUP_SYS + 1)
+#define SPR_CPUCFGR				(SPRGROUP_SYS + 2)
+#define SPR_DMMUCFGR			(SPRGROUP_SYS + 3)
+#define SPR_IMMUCFGR			(SPRGROUP_SYS + 4)
+#define SPR_DCCFGR				(SPRGROUP_SYS + 5)
+#define SPR_ICCFGR				(SPRGROUP_SYS + 6)
+#define SPR_DCFGR				(SPRGROUP_SYS + 7)
+#define SPR_PCCFGR				(SPRGROUP_SYS + 8)
+#define SPR_REVIR_BASE			(SPRGROUP_SYS + 11)
+#define SPR_REVIR_LAST			(SPRGROUP_SYS + 15)
+#define SPR_NPC         		(SPRGROUP_SYS + 16)  /* CZ 21/06/01 */
+#define SPR_SR					(SPRGROUP_SYS + 17)  /* CZ 21/06/01 */
+#define SPR_PPC         		(SPRGROUP_SYS + 18)  /* CZ 21/06/01 */
+#define SPR_FPCSR       		(SPRGROUP_SYS + 20)  /* CZ 21/06/01 */
+#define SPR_EPCR_BASE			(SPRGROUP_SYS + 32)  /* CZ 21/06/01 */
+#define SPR_EPCR_LAST			(SPRGROUP_SYS + 47)  /* CZ 21/06/01 */
+#define SPR_EEAR_BASE			(SPRGROUP_SYS + 48)
+#define SPR_EEAR_LAST			(SPRGROUP_SYS + 63)
+#define SPR_ESR_BASE			(SPRGROUP_SYS + 64)
+#define SPR_ESR_LAST			(SPRGROUP_SYS + 79)
+#define SPR_GPR_BASE			(SPRGROUP_SYS + 1024)
 
 /* Data MMU group */
-#define SPR_DMMUCR	(SPRGROUP_DMMU + 0)
-#define SPR_DTLBEIR     (SPRGROUP_DMMU + 2)
+#define SPR_DMMUCR				(SPRGROUP_DMMU + 0)
+#define SPR_DTLBEIR     		(SPRGROUP_DMMU + 2)
 #define SPR_DTLBMR_BASE(WAY)	(SPRGROUP_DMMU + 0x200 + (WAY) * 0x100)
 #define SPR_DTLBMR_LAST(WAY)	(SPRGROUP_DMMU + 0x27f + (WAY) * 0x100)
 #define SPR_DTLBTR_BASE(WAY)	(SPRGROUP_DMMU + 0x280 + (WAY) * 0x100)

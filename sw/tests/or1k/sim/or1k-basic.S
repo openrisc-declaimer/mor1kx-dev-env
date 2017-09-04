@@ -42,7 +42,7 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 	
-#include <or1k-asm.h>	
+#include <or1k-asm.h>
 #include "spr-defs.h"
 #include "board.h"
 
@@ -52,7 +52,7 @@
 
 
 /* ---[ 0x100: RESET exception ]----------------------------------------- */
-        .org 0x100 	
+        .org 0x100
 	l.movhi r0, 0
 	/* Clear status register */
 	l.ori r1, r0, SPR_SR_SM

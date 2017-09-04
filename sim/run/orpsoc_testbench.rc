@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi3_L-2016.06-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 28 1572 413 100 65
+viewPort 1920 23 1807 1057 275 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,8 +16,8 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 22036.807011 25157.899849
-cursor 0.000000
+zoom 3444.102998 4837.311412
+cursor 1690.000000
 marker 0.000000
 
 ; user define markers
@@ -25,7 +25,7 @@ marker 0.000000
 ; visible top row signal index
 top 0
 ; marker line index
-markerPos 10
+markerPos 24
 
 ; event list
 ; addEvent event_name event_expression
@@ -58,6 +58,20 @@ addSignal -h 15 -holdScope tms_pad_i
 addSignal -h 15 -holdScope uart0_srx_pad_i
 addSignal -h 15 -holdScope uart0_stx_pad_o
 addGroup "G2"
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/icpu_dat_i[31:0]
+addGroup "G3"
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/icpu_adr_o[31:0]
+addSignal -h 15 -holdScope icpu_cycstb_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_sel_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_dat_i[31:0]
+addSignal -h 15 -holdScope icpu_ack_i
+addSignal -h 15 -holdScope icpu_rty_i
+addSignal -h 15 -holdScope icpu_err_i
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_i[3:0]
+addSignal -h 15 -holdScope immu_en
+addGroup "G4"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

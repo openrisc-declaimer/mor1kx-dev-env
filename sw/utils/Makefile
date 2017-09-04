@@ -70,4 +70,5 @@ or32-idecode:
 
 clean:
 	/bin/rm -f $(PROGRAMS) *~ *.bak
+	/bin/rm -f bin2vlogarray
 	$(MAKE) -C ./or32-idecode clean

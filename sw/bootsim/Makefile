@@ -8,10 +8,13 @@ ifeq ($(PRELOAD_RAM),1)
 OR32_CFLAGS += -DPRELOAD_RAM
 endif
 
-all: bootrom.v
+all: bootrom.v bootrom.asm
 
-%.v: %.bin $(SW_ROOT)/utils/bin2vlogarray
+%.v: %.bin $(SW_ROOT)/utils/bin2vlogarray bootrom.asm
 	$(Q)$(SW_ROOT)/utils/bin2vlogarray < $< > $@
+	
+%.asm: %.o
+	$(Q)$(OR32_OBJDUMP) -D $< > $@
 
 %.dis: %.o
 	$(Q)$(OR32_OBJDUMP) -d $< > $@
@@ -23,5 +26,5 @@ $(SW_ROOT)/utils/bin2vlogarray:
 	$(Q)$(MAKE) -C $(SW_ROOT)/utils bin2vlogarray
 
 clean:
-	$(Q)rm -f *.o *.bin *.hex *.in *.dis *.v
+	$(Q)rm -f *.o *.bin *.hex *.in *.dis *.v *.asm
 
