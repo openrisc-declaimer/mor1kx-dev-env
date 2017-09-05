@@ -95,19 +95,13 @@ module or1200_cpu
   parameter dw = `OR1200_OPERAND_WIDTH;
   parameter aw = `OR1200_REGFILE_ADDR_WIDTH;
 
-  //
   // I/O ports
-  //
 
-  //
   // Clk & Rst
-  //
   input 				      clk;
   input 				      rst;
 
-  //
   // Insn (IC) interface
-  //
   output				      ic_en;
   output	[31:0]			icpu_adr_o;
   output				      icpu_cycstb_o;
@@ -120,14 +114,10 @@ module or1200_cpu
   input	  [31:0]			icpu_adr_i;
   input	   [3:0]			icpu_tag_i;
 
-  //
   // Insn (IMMU) interface
-  //
   output				      immu_en;
 
-  //
   // Debug interface
-  //
   output              id_void;
   output	[31:0]			id_insn;
   output              ex_void;
@@ -157,9 +147,7 @@ module or1200_cpu
   output	[dw-1:0]		du_lsu_store_dat;
   output	[dw-1:0]		du_lsu_load_dat;
 
-  //
   // Data (DC) interface
-  //
   output	[31:0]			dcpu_adr_o;
   output				      dcpu_cycstb_o;
   output				      dcpu_we_o;
@@ -174,22 +162,16 @@ module or1200_cpu
   output				      dc_en;
   output  			      dc_no_writethrough;
 
-  //
   // Data (DMMU) interface
-  //
   output				      sb_en;
   output				      dmmu_en;
   output				      abort_ex;
   output				      abort_mvspr;
 
-  //
   // SR Interface
-  //
   input				        boot_adr_sel_i;
 
-  //
   // SPR interface
-  //
   output				      supv;
   input	  [dw-1:0]		spr_dat_pic;
   input	  [dw-1:0]		spr_dat_tt;
@@ -204,15 +186,11 @@ module or1200_cpu
   output				      spr_we;
   input   			      mtspr_dc_done;
 
-  //
   // Interrupt exceptions
-  //
   input				        sig_int;
   input				        sig_tick;
 
-  //
   // Internal wires
-  //
   wire	  [31:0]			if_insn;
   wire				        saving_if_insn;
   wire	  [31:0]			if_pc;
@@ -337,83 +315,62 @@ module or1200_cpu
   wire				      abort_ex;
   wire				      abort_mvspr;
 
-  //
   // Send exceptions to Debug Unit
-  //
   assign du_except_trig   = except_trig;
   assign du_except_stop   = except_stop;
   assign du_lsu_store_dat = operand_b;
   assign du_lsu_load_dat  = lsu_dataout;
 
-  //
   // Data cache enable
-  //
 `ifdef OR1200_NO_DC
   assign dc_en = 1'b0;
 `else
   assign dc_en = sr[`OR1200_SR_DCE];
 `endif
 
-  //
   // Instruction cache enable
-  //
 `ifdef OR1200_NO_IC
   assign ic_en = 1'b0;
 `else
   assign ic_en = sr[`OR1200_SR_ICE];
 `endif
 
-  //
   // SB enable
-  //
 `ifdef OR1200_SB_IMPLEMENTED
   //assign sb_en = sr[`OR1200_SR_SBE]; // SBE not defined  -- jb
+  assign sb_en = sr[`OR1200_SR_SBE];
 `else
   assign sb_en = 1'b0;
 `endif
 
-  //
   // DMMU enable
-  //
 `ifdef OR1200_NO_DMMU
   assign dmmu_en = 1'b0;
 `else
   assign dmmu_en = sr[`OR1200_SR_DME];
 `endif
 
-  //
   // IMMU enable
-  //
 `ifdef OR1200_NO_IMMU
   assign immu_en = 1'b0;
 `else
   assign immu_en = sr[`OR1200_SR_IME] & ~except_started;
 `endif
 
-  //
   // SUPV bit
-  //
   assign supv = sr[`OR1200_SR_SM];
 
-  //
   // FLAG write enable
-  //
   assign flagforw = (flag_we_alu & flagforw_alu) | (flagforw_fpu & flag_we_fpu);
   assign flag_we  = (flag_we_alu | flag_we_fpu) & ~abort_mvspr;
 
-  //
   // Flag for any MTSPR instructions, that must block execution, to indicate done
-  //
   assign mtspr_done = mtspr_dc_done;
 
-  //
   // Range exception
-  //
   assign sig_range  = sr[`OR1200_SR_OV];
 
-  //
   // Instantiation of instruction fetch block
-  //
   or1200_genpc or1200_genpc(
     .clk              (clk),
     .rst              (rst),
@@ -444,9 +401,7 @@ module or1200_cpu
     .no_more_dslot    (no_more_dslot)
   );
 
-  //
   // Instantiation of instruction fetch block
-  //
   or1200_if or1200_if(
     .clk              (clk),
     .rst              (rst),
@@ -470,9 +425,7 @@ module or1200_cpu
     .except_ibuserr   (except_ibuserr)
   );
 
-  //
   // Instantiation of instruction decode/control logic
-  //
   or1200_ctrl or1200_ctrl(
     .clk              (clk),
     .rst              (rst),
@@ -536,9 +489,7 @@ module or1200_cpu
     .dc_no_writethrough(dc_no_writethrough)
   );
 
-  //
   // Instantiation of register file
-  //
   or1200_rf or1200_rf(
     .clk              (clk),
     .rst              (rst),
@@ -565,9 +516,7 @@ module or1200_cpu
     .du_read(du_read)
   );
 
-  //
   // Instantiation of operand muxes
-  //
   or1200_operandmuxes or1200_operandmuxes(
     .clk(clk),
     .rst(rst),
@@ -586,9 +535,7 @@ module or1200_cpu
     .muxed_b(muxed_b)
   );
 
-  //
   // Instantiation of CPU's ALU
-  //
   or1200_alu or1200_alu(
     .a(operand_a),
     .b(operand_b),
@@ -615,9 +562,7 @@ module or1200_cpu
   //
   assign fpu_except_started = except_started && (except_type == `OR1200_EXCEPT_FLOAT);
 
-  //
   // Instantiation of FPU
-  //
   or1200_fpu or1200_fpu(
     .clk(clk),
     .rst(rst),
@@ -641,9 +586,7 @@ module or1200_cpu
   );
 
 
-  //
   // Instantiation of CPU's multiply unit
-  //
   or1200_mult_mac or1200_mult_mac(
     .clk(clk),
     .rst(rst),
@@ -665,9 +608,7 @@ module or1200_cpu
     .spr_dat_o(spr_dat_mac)
   );
 
-  //
   // Instantiation of CPU's SPRS block
-  //
   or1200_sprs or1200_sprs(
     .clk(clk),
     .rst(rst),
@@ -727,9 +668,7 @@ module or1200_cpu
     .branch_op(branch_op)
   );
 
-  //
   // Instantiation of load/store unit
-  //
   or1200_lsu or1200_lsu(
     .clk(clk),
     .rst(rst),
@@ -764,9 +703,7 @@ module or1200_cpu
     .dcpu_tag_i(dcpu_tag_i)
   );
 
-  //
   // Instantiation of write-back muxes
-  //
   or1200_wbmux or1200_wbmux(
     .clk(clk),
     .rst(rst),
@@ -782,9 +719,7 @@ module or1200_cpu
     .muxreg_valid(wbforw_valid)
   );
 
-  //
   // Instantiation of freeze logic
-  //
   or1200_freeze or1200_freeze(
     .clk(clk),
     .rst(rst),
@@ -811,9 +746,7 @@ module or1200_cpu
     .icpu_err_i(icpu_err_i)
   );
 
-  //
   // Instantiation of exception block
-  //
   or1200_except or1200_except(
     .clk(clk),
     .rst(rst),
@@ -881,11 +814,9 @@ module or1200_cpu
     .abort_ex(abort_ex)
   );
 
-  //
   // Instantiation of configuration registers
-  //
-  or1200_cfgr or1200_cfgr(
-    .spr_addr(spr_addr),
+  or1200_cfgr or1200_cfgr (
+    .spr_addr (spr_addr),
     .spr_dat_o(spr_dat_cfgr)
   );
 
