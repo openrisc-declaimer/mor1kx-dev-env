@@ -57,63 +57,67 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_mult_mac(
-		       // Clock and reset
-		       clk, rst,
-
-		       // Multiplier/MAC interface
-		       ex_freeze, id_macrc_op, macrc_op, a, b, mac_op, alu_op, 
-		       result, mult_mac_stall,
-
-		       // Overflow
-		       ovforw, ov_we,
-		       
-		       // SPR interface
-		       spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o
-		       );
-
-   parameter width = `OR1200_OPERAND_WIDTH;
-
-   //
-   // I/O
-   //
-
-   //
+module or1200_mult_mac
+  (
    // Clock and reset
-   //
-   input				clk;
-   input				rst;
+   clk, rst,
 
-   //
    // Multiplier/MAC interface
-   //
-   input				ex_freeze;
-   input				id_macrc_op;
-   input				macrc_op;
-   input [width-1:0] 			a;
-   input [width-1:0] 			b;
-   input [`OR1200_MACOP_WIDTH-1:0] 	mac_op;
-   input [`OR1200_ALUOP_WIDTH-1:0] 	alu_op;
-   output [width-1:0] 			result;
-   output				mult_mac_stall;
-   output 				ovforw, ov_we;
-   
-   //
-   // SPR interface
-   //
-   input				spr_cs;
-   input				spr_write;
-   input [31:0] 			spr_addr;
-   input [31:0] 			spr_dat_i;
-   output [31:0] 			spr_dat_o;
+   ex_freeze, id_macrc_op, macrc_op, a, b, mac_op, alu_op, 
+   result, mult_mac_stall,
 
-   //
-   // Internal wires and regs
-   //
-   reg [width-1:0] 			result;
-   reg 					ex_freeze_r;
-   wire 				alu_op_mul;
-   wire 				alu_op_smul;      
+   // Overflow
+   ovforw, ov_we,
+
+   // SPR interface
+   spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o
+  );
+
+  // ---------------------------------------------------------------------------
+  // Parameters
+  // ---------------------------------------------------------------------------
+  parameter width = `OR1200_OPERAND_WIDTH;
+
+  //
+  // I/O
+  //
+
+  //
+  // Clock and reset
+  //
+  input				clk;
+  input				rst;
+
+  //
+  // Multiplier/MAC interface
+  //
+  input				ex_freeze;
+  input				id_macrc_op;
+  input				macrc_op;
+  input [width-1:0] 			a;
+  input [width-1:0] 			b;
+  input [`OR1200_MACOP_WIDTH-1:0] 	mac_op;
+  input [`OR1200_ALUOP_WIDTH-1:0] 	alu_op;
+  output [width-1:0] 			result;
+  output				mult_mac_stall;
+  output 				ovforw, ov_we;
+  
+  //
+  // SPR interface
+  //
+  input				spr_cs;
+  input				spr_write;
+  input [31:0] 			spr_addr;
+  input [31:0] 			spr_dat_i;
+  output [31:0] 			spr_dat_o;
+
+  //
+  // Internal wires and regs
+  //
+  reg [width-1:0] 			result;
+  reg 					ex_freeze_r;
+  wire 				alu_op_mul;
+  wire 				alu_op_smul;      
 `ifdef OR1200_MULT_IMPLEMENTED
    reg [2*width-1:0] 			mul_prod_r;
    wire 				alu_op_umul;   

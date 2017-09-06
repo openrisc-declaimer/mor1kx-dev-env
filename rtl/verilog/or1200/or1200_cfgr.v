@@ -44,7 +44,7 @@
 //
 // $Log: or1200_cfgr.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// No update 
+// No update
 
 // synopsys translate_off
 `include "timescale.v"
@@ -60,13 +60,13 @@ module or1200_cfgr
   //
   // RISC Internal Interface
   //
-  input	[31:0]	spr_addr;	// SPR Address
+  input	 [31:0]	  spr_addr;	// SPR Address
   output [31:0] 	spr_dat_o;	// SPR Read Data
 
   //
   // Internal wires & registers
   //
-  reg [31:0] 		spr_dat_o;	// SPR Read Data
+  reg   [31:0] 		spr_dat_o;	// SPR Read Data
 
 `ifdef OR1200_CFGR_IMPLEMENTED
 
@@ -99,14 +99,14 @@ module or1200_cfgr
         spr_dat_o[`OR1200_UPR_CUP_BITS]  = `OR1200_UPR_CUP;
       end
       `OR1200_SPRGRP_SYS_CPUCFGR: begin
-        spr_dat_o[`OR1200_CPUCFGR_NSGF_BITS] = `OR1200_CPUCFGR_NSGF;
-        spr_dat_o[`OR1200_CPUCFGR_HGF_BITS] = `OR1200_CPUCFGR_HGF;
+        spr_dat_o[`OR1200_CPUCFGR_NSGF_BITS]  = `OR1200_CPUCFGR_NSGF;
+        spr_dat_o[`OR1200_CPUCFGR_HGF_BITS]   = `OR1200_CPUCFGR_HGF;
         spr_dat_o[`OR1200_CPUCFGR_OB32S_BITS] = `OR1200_CPUCFGR_OB32S;
         spr_dat_o[`OR1200_CPUCFGR_OB64S_BITS] = `OR1200_CPUCFGR_OB64S;
         spr_dat_o[`OR1200_CPUCFGR_OF32S_BITS] = `OR1200_CPUCFGR_OF32S;
         spr_dat_o[`OR1200_CPUCFGR_OF64S_BITS] = `OR1200_CPUCFGR_OF64S;
         spr_dat_o[`OR1200_CPUCFGR_OV64S_BITS] = `OR1200_CPUCFGR_OV64S;
-        spr_dat_o[`OR1200_CPUCFGR_RES1_BITS] = `OR1200_CPUCFGR_RES1;
+        spr_dat_o[`OR1200_CPUCFGR_RES1_BITS]  = `OR1200_CPUCFGR_RES1;
       end
       `OR1200_SPRGRP_SYS_DMMUCFGR: begin
         spr_dat_o[`OR1200_DMMUCFGR_NTW_BITS] = `OR1200_DMMUCFGR_NTW;
@@ -193,25 +193,25 @@ module or1200_cfgr
 `endif
       case(spr_addr[3:0])
       `OR1200_SPRGRP_SYS_VR: begin
-        spr_dat_o[`OR1200_VR_REV_BITS] = `OR1200_VR_REV;
-        spr_dat_o[`OR1200_VR_RES1_BITS] = `OR1200_VR_RES1;
-        spr_dat_o[`OR1200_VR_CFG_BITS] = `OR1200_VR_CFG;
-        spr_dat_o[`OR1200_VR_VER_BITS] = `OR1200_VR_VER;
+        spr_dat_o[`OR1200_VR_REV_BITS]    = `OR1200_VR_REV;
+        spr_dat_o[`OR1200_VR_RES1_BITS]   = `OR1200_VR_RES1;
+        spr_dat_o[`OR1200_VR_CFG_BITS]    = `OR1200_VR_CFG;
+        spr_dat_o[`OR1200_VR_VER_BITS]    = `OR1200_VR_VER;
       end
       `OR1200_SPRGRP_SYS_UPR: begin
-        spr_dat_o[`OR1200_UPR_UP_BITS] = `OR1200_UPR_UP;
-        spr_dat_o[`OR1200_UPR_DCP_BITS] = `OR1200_UPR_DCP;
-        spr_dat_o[`OR1200_UPR_ICP_BITS] = `OR1200_UPR_ICP;
-        spr_dat_o[`OR1200_UPR_DMP_BITS] = `OR1200_UPR_DMP;
-        spr_dat_o[`OR1200_UPR_IMP_BITS] = `OR1200_UPR_IMP;
-        spr_dat_o[`OR1200_UPR_MP_BITS] = `OR1200_UPR_MP;
-        spr_dat_o[`OR1200_UPR_DUP_BITS] = `OR1200_UPR_DUP;
-        spr_dat_o[`OR1200_UPR_PCUP_BITS] = `OR1200_UPR_PCUP;
-        spr_dat_o[`OR1200_UPR_PMP_BITS] = `OR1200_UPR_PMP;
-        spr_dat_o[`OR1200_UPR_PICP_BITS] = `OR1200_UPR_PICP;
-        spr_dat_o[`OR1200_UPR_TTP_BITS] = `OR1200_UPR_TTP;
-        spr_dat_o[`OR1200_UPR_RES1_BITS] = `OR1200_UPR_RES1;
-        spr_dat_o[`OR1200_UPR_CUP_BITS] = `OR1200_UPR_CUP;
+        spr_dat_o[`OR1200_UPR_UP_BITS]    = `OR1200_UPR_UP;
+        spr_dat_o[`OR1200_UPR_DCP_BITS]   = `OR1200_UPR_DCP;
+        spr_dat_o[`OR1200_UPR_ICP_BITS]   = `OR1200_UPR_ICP;
+        spr_dat_o[`OR1200_UPR_DMP_BITS]   = `OR1200_UPR_DMP;
+        spr_dat_o[`OR1200_UPR_IMP_BITS]   = `OR1200_UPR_IMP;
+        spr_dat_o[`OR1200_UPR_MP_BITS]    = `OR1200_UPR_MP;
+        spr_dat_o[`OR1200_UPR_DUP_BITS]   = `OR1200_UPR_DUP;
+        spr_dat_o[`OR1200_UPR_PCUP_BITS]  = `OR1200_UPR_PCUP;
+        spr_dat_o[`OR1200_UPR_PMP_BITS]   = `OR1200_UPR_PMP;
+        spr_dat_o[`OR1200_UPR_PICP_BITS]  = `OR1200_UPR_PICP;
+        spr_dat_o[`OR1200_UPR_TTP_BITS]   = `OR1200_UPR_TTP;
+        spr_dat_o[`OR1200_UPR_RES1_BITS]  = `OR1200_UPR_RES1;
+        spr_dat_o[`OR1200_UPR_CUP_BITS]   = `OR1200_UPR_CUP;
       end
       default: spr_dat_o = 32'h0000_0000;
       endcase

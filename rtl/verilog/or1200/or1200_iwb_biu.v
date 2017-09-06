@@ -48,7 +48,7 @@
 //
 // $Log: or1200_iwb_biu.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Major update: 
+// Major update:
 // This module is obsolete.
 //
 
@@ -59,7 +59,7 @@
 
 module or1200_iwb_biu();
 
-	// THIS MODULE IS OBSOLETE !!! 
+	// THIS MODULE IS OBSOLETE !!!
 	// COMPLETELY REWRITTEN or1200_wb_biu.v IS USED INSTEAD !!!
 
 

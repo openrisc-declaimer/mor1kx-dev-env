@@ -337,7 +337,6 @@ module or1200_cpu
 
   // SB enable
 `ifdef OR1200_SB_IMPLEMENTED
-  //assign sb_en = sr[`OR1200_SR_SBE]; // SBE not defined  -- jb
   assign sb_en = sr[`OR1200_SR_SBE];
 `else
   assign sb_en = 1'b0;

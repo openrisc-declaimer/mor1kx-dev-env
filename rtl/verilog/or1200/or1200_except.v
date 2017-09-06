@@ -230,7 +230,7 @@ module or1200_except
 
   //
   // Order defines exception detection priority
-  //
+  // 整体的收集工作
   assign except_trig = {
             ex_exceptflags[1]	& ~du_dsr[`OR1200_DU_DSR_IME],
             ex_exceptflags[0]	& ~du_dsr[`OR1200_DU_DSR_IPFE],

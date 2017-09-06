@@ -45,7 +45,7 @@
 //
 // $Log: or1200_ic_ram.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Minor update: 
+// Minor update:
 // Coding style changed.
 //
 
@@ -56,7 +56,7 @@
 
 module or1200_ic_ram(
 	// Clock and reset
-	clk, rst, 
+	clk, rst,
 
 `ifdef OR1200_BIST
 	// RAM BIST
@@ -125,7 +125,7 @@ assign mbist_so_o = mbist_si_i;
       .addr(addr),
       .di(datain),
       .doq(dataout)
-      );   
+      );
 `endif
 
 endmodule

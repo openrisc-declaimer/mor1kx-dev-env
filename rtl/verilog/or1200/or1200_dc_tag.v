@@ -52,82 +52,86 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_dc_tag(
-	// Clock and reset
-	clk, rst,
+module or1200_dc_tag
+  (
+	 // Clock and reset
+	 clk, rst,
 
 `ifdef OR1200_BIST
-	// RAM BIST
-	mbist_si_i, mbist_so_o, mbist_ctrl_i,
+	 // RAM BIST
+	 mbist_si_i, mbist_so_o, mbist_ctrl_i,
 `endif
 
-	// Internal i/f
-	addr, en, we, datain, tag_v, tag, dirty
-);
+	 // Internal i/f
+	 addr, en, we, datain, tag_v, tag, dirty
+  );
 
-parameter dw = `OR1200_DCTAG_W+1;
-parameter aw = `OR1200_DCTAG;
+  // ---------------------------------------------------------------------------
+  // Parameters
+  // ---------------------------------------------------------------------------   
+  parameter dw = `OR1200_DCTAG_W+1;
+  parameter aw = `OR1200_DCTAG;
 
-//
-// I/O
-//
-input				clk;
-input				rst;
-input	[aw-1:0]		addr;
-input				en;
-input				we;
-input	[dw-1:0]		datain;
-output				tag_v;
-output	[dw-3:0]		tag;
-output  			dirty;
-   
+  //
+  // I/O
+  //
+  input				clk;
+  input				rst;
+  input	[aw-1:0]		addr;
+  input				en;
+  input				we;
+  input	[dw-1:0]		datain;
+  output				tag_v;
+  output	[dw-3:0]		tag;
+  output  			dirty;
+     
 
 `ifdef OR1200_BIST
-//
-// RAM BIST
-//
-input mbist_si_i;
-input [`OR1200_MBIST_CTRL_WIDTH - 1:0] mbist_ctrl_i;
-output mbist_so_o;
+  //
+  // RAM BIST
+  //
+  input mbist_si_i;
+  input [`OR1200_MBIST_CTRL_WIDTH - 1:0] mbist_ctrl_i;
+  output mbist_so_o;
 `endif
 
 `ifdef OR1200_NO_DC
 
-//
-// Data cache not implemented
-//
-assign tag = {dw-1{1'b0}};
-assign tag_v = 1'b0;
+  //
+  // Data cache not implemented
+  //
+  assign tag = {dw-1{1'b0}};
+  assign tag_v = 1'b0;
 `ifdef OR1200_BIST
-assign mbist_so_o = mbist_si_i;
+  assign mbist_so_o = mbist_si_i;
 `endif
 
 `else
 
-//
-// Instantiation of TAG RAM block
-//
-// Data widths are tag width plus one for valid
-   or1200_spram #
-     (
-      .aw(`OR1200_DCTAG),
-      .dw(`OR1200_DCTAG_W + 1)
-      )
-   dc_tag0
-     (
+  //
+  // Instantiation of TAG RAM block
+  //
+  // Data widths are tag width plus one for valid
+  or1200_spram #
+   (
+    .aw(`OR1200_DCTAG),
+    .dw(`OR1200_DCTAG_W + 1)
+    )
+  dc_tag0
+  (
 `ifdef OR1200_BIST
-      // RAM BIST
-      .mbist_si_i(mbist_si_i),
-      .mbist_so_o(mbist_so_o),
-      .mbist_ctrl_i(mbist_ctrl_i),
+    // RAM BIST
+    .mbist_si_i(mbist_si_i),
+    .mbist_so_o(mbist_so_o),
+    .mbist_ctrl_i(mbist_ctrl_i),
 `endif
-      .clk(clk),
-      .ce(en),
-      .we(we),
-      .addr(addr),
-      .di(datain),
-      .doq({tag, tag_v, dirty})
-      );
+    .clk(clk),
+    .ce(en),
+    .we(we),
+    .addr(addr),
+    .di(datain),
+    .doq({tag, tag_v, dirty})
+    );
 `endif
 
 endmodule // or1200_dc_tag

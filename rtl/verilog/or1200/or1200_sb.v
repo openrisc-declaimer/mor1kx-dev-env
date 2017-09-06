@@ -52,7 +52,8 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_sb(
+module or1200_sb
+  (
 	// RISC clock, reset
 	clk, rst,
 

@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi3_L-2016.06-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 1920 23 1807 1057 275 65
+viewPort 0 28 1567 391 275 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -23,9 +23,9 @@ marker 0.000000
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 0
+top 23
 ; marker line index
-markerPos 24
+markerPos 36
 
 ; event list
 ; addEvent event_name event_expression
@@ -72,6 +72,18 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_i[3:0]
 addSignal -h 15 -holdScope immu_en
 addGroup "G4"
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_qmem_top/iaddr_qmem_hit
+addSignal -h 15 -holdScope daddr_qmem_hit
+addSignal -h 15 -UNSIGNED -HEX -holdScope state[2:0]
+addSignal -h 15 -holdScope qmem_dack
+addSignal -h 15 -holdScope qmem_iack
+addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_di[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_do[31:0]
+addSignal -h 15 -holdScope qmem_en
+addSignal -h 15 -holdScope qmem_we
+addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_addr[31:0]
+addSignal -h 15 -holdScope qmem_ack
+addGroup "G5"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

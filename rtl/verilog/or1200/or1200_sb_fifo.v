@@ -63,7 +63,8 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_sb_fifo(
+module or1200_sb_fifo
+(
 	clk_i, rst_i, dat_i, wr_i, rd_i, dat_o, full_o, empty_o
 );
 

@@ -43,8 +43,8 @@
 //
 // $Log: or1200_ic_fsm.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Minor update: 
-// Bugs fixed. 
+// Minor update:
+// Bugs fixed.
 //
 
 // synopsys translate_off
@@ -67,11 +67,11 @@ module or1200_ic_fsm(
 
 	// Internal i/f to top level IC
 	ic_en, icqmem_cycstb_i, icqmem_ci_i,
-	tagcomp_miss, 
-	biudata_valid, biudata_error, 
+	tagcomp_miss,
+	biudata_valid, biudata_error,
         start_addr, saved_addr,
 	icram_we, tag_we,
-        biu_read, 
+        biu_read,
         first_hit_ack, first_miss_ack, first_miss_err,
 	burst
 );
@@ -107,7 +107,7 @@ reg				hitmiss_eval;
 reg				load;
 reg				cache_inhibit;
 reg 				last_eval_miss; // JPB
-   
+
    //
    // Generate of ICRAM write enables
    //
@@ -127,7 +127,7 @@ reg 				last_eval_miss; // JPB
    // Assert for cache miss first word stored/loaded OK
    // Assert for cache miss first word stored/loaded with an error
    //
-   assign first_hit_ack = (state == `OR1200_ICFSM_CFETCH) & hitmiss_eval & 
+   assign first_hit_ack = (state == `OR1200_ICFSM_CFETCH) & hitmiss_eval &
 			  !tagcomp_miss & !cache_inhibit;
    assign first_miss_ack = (state == `OR1200_ICFSM_CFETCH) & biudata_valid;
    assign first_miss_err = (state == `OR1200_ICFSM_CFETCH) & biudata_error;
@@ -135,7 +135,7 @@ reg 				last_eval_miss; // JPB
    //
    // Assert burst when doing reload of complete cache line
    //
-   assign burst = (state == `OR1200_ICFSM_CFETCH) & tagcomp_miss & 
+   assign burst = (state == `OR1200_ICFSM_CFETCH) & tagcomp_miss &
 		  !cache_inhibit | (state == `OR1200_ICFSM_LREFILL3);
 
    //
@@ -150,7 +150,7 @@ reg 				last_eval_miss; // JPB
 	 cnt <=  `OR1200_ICLS'd0;
 	 cache_inhibit <=  1'b0;
 	 last_eval_miss <= 0; // JPB
-	 
+
       end
       else
 	case (state)	// synopsys parallel_case
@@ -167,29 +167,29 @@ reg 				last_eval_miss; // JPB
 	       hitmiss_eval <=  1'b0;
 	       load <=  1'b0;
 	       cache_inhibit <=  1'b0;
-	    end	  
+	    end
 	  `OR1200_ICFSM_CFETCH: begin	// fetch
-	     
+
 	     if (icqmem_cycstb_i & icqmem_ci_i)
 	       cache_inhibit <=  1'b1;
-	     
+
 	     if (hitmiss_eval)
 	       saved_addr_r[31:`OR1200_ICTAGL] <= start_addr[31:`OR1200_ICTAGL];
 	     if ((!ic_en) ||
 		 // fetch aborted (usually caused by IMMU)
-		 (hitmiss_eval & !icqmem_cycstb_i) ||	
+		 (hitmiss_eval & !icqmem_cycstb_i) ||
 		 (biudata_error) ||  // fetch terminated with an error
 		 // fetch from cache-inhibited page
-		 (cache_inhibit & biudata_valid)) begin	
+		 (cache_inhibit & biudata_valid)) begin
 		state <=  `OR1200_ICFSM_IDLE;
 		hitmiss_eval <=  1'b0;
 		load <=  1'b0;
 		cache_inhibit <=  1'b0;
-	     end // if ((!ic_en) ||...	     
+	     end // if ((!ic_en) ||...
 	     // fetch missed, wait for first fetch and continue filling line
-	     else if (tagcomp_miss & biudata_valid) begin	
+	     else if (tagcomp_miss & biudata_valid) begin
 		state <=  `OR1200_ICFSM_LREFILL3;
-		saved_addr_r[`OR1200_ICLS-1:2] 
+		saved_addr_r[`OR1200_ICLS-1:2]
 		  <= saved_addr_r[`OR1200_ICLS-1:2] + 1;
 		hitmiss_eval <=  1'b0;
 		cnt <= ((1 << `OR1200_ICLS) - (2 * 4));
@@ -198,7 +198,7 @@ reg 				last_eval_miss; // JPB
 	     // fetch aborted (usually caused by exception)
 	     else if (!icqmem_cycstb_i
 		      & !last_eval_miss // JPB
-		      ) begin	
+		      ) begin
 		state <=  `OR1200_ICFSM_IDLE;
 		hitmiss_eval <=  1'b0;
 		load <=  1'b0;
@@ -214,21 +214,21 @@ reg 				last_eval_miss; // JPB
 
 	     if (hitmiss_eval & !tagcomp_miss) // JPB
 	       last_eval_miss <= 1; // JPB
-	     
+
 	  end
 	  `OR1200_ICFSM_LREFILL3 : begin
 	     // abort because IC has just been turned off
              if (!ic_en) begin
 		// invalidate before IC can be turned on
-		state <=  `OR1200_ICFSM_IDLE;	
+		state <=  `OR1200_ICFSM_IDLE;
                 saved_addr_r <=  start_addr;
                 hitmiss_eval <=  1'b0;
                 load <=  1'b0;
              end
 	     // refill ack, more fetchs to come
-	     else if (biudata_valid && (|cnt)) begin	
+	     else if (biudata_valid && (|cnt)) begin
 		cnt <=  cnt - `OR1200_ICLS'd4;
-		saved_addr_r[`OR1200_ICLS-1:2] 
+		saved_addr_r[`OR1200_ICLS-1:2]
 		  <= saved_addr_r[`OR1200_ICLS-1:2] + 1;
 	     end
 	     // last fetch of line refill

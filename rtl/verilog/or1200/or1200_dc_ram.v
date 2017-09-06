@@ -53,7 +53,8 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_dc_ram(
+module or1200_dc_ram
+(
 	// Reset and clock
 	clk, rst,
 

@@ -224,14 +224,11 @@ module or1200_dc_fsm
   assign tag_we = tagram_we_end_of_loadstore_loop |		
                   tagram_dirty_bit_set | (state == `OR1200_DCFSM_INV6);
 
-
   // Valid bit
   // Set valid when end of line load, or marking dirty (is still valid)
   assign tag_valid = ( tagram_we_end_of_loadstore_loop &
     (load | (store & cache_spr_block_writeback)) ) |
         tagram_dirty_bit_set;
-
-
 
   //
   // BIU read and write

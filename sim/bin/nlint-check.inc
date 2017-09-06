@@ -96,8 +96,8 @@ nlint-chk: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VE
 	$(Q)nLint $(NLINT_DEFINE) $(NLINT_INC) $(NLINT_SRC)
 
 # Start clean
-nlint-clean: vcs-clean
-	$(Q)rm -rf nLint.ds nLint.rc orpsoc_testbench.rc
+nlint-clean:
+	$(Q)rm -rf nLint.ds nLint.rc
 	$(Q)rm -rf nLintDB nLintLog 
 	$(Q)rm -rf verdiLog
 	

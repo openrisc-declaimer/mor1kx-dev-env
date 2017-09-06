@@ -105,15 +105,15 @@ module or1200_ctrl
   output [`OR1200_RFWBOP_WIDTH-1:0]		      rfwb_op;
   output  [`OR1200_FPUOP_WIDTH-1:0] 		    fpu_op;
   input					                            pc_we;
-  output	[31:0]			wb_insn;
-  output	[31:2]			id_branch_addrtarget;
-  output	[31:2]			ex_branch_addrtarget;
-  output	[`OR1200_SEL_WIDTH-1:0]		sel_a;
-  output	[`OR1200_SEL_WIDTH-1:0]		sel_b;
-  output	[`OR1200_LSUOP_WIDTH-1:0]		id_lsu_op;
-  output	[`OR1200_COMPOP_WIDTH-1:0]		comp_op;
+  output	[31:0]			                      wb_insn;
+  output	[31:2]			                      id_branch_addrtarget;
+  output	[31:2]			                      ex_branch_addrtarget;
+  output	[`OR1200_SEL_WIDTH-1:0]		        sel_a;
+  output	[`OR1200_SEL_WIDTH-1:0]		        sel_b;
+  output	[`OR1200_LSUOP_WIDTH-1:0]		      id_lsu_op;
+  output	[`OR1200_COMPOP_WIDTH-1:0]		    comp_op;
   output	[`OR1200_MULTICYCLE_WIDTH-1:0]		multicycle;
-  output  [`OR1200_WAIT_ON_WIDTH-1:0] 		wait_on;
+  output  [`OR1200_WAIT_ON_WIDTH-1:0] 		  wait_on;
   output	[4:0]				cust5_op;
   output	[5:0]				cust5_limm;
   input   [31:0]      id_pc;
@@ -159,14 +159,14 @@ module or1200_ctrl
   reg	[31:0]				wb_insn /* verilator public */;
   reg	[`OR1200_REGFILE_ADDR_WIDTH-1:0]	rf_addrw;
   reg	[`OR1200_REGFILE_ADDR_WIDTH-1:0]	wb_rfaddrw;
-  reg	[`OR1200_RFWBOP_WIDTH-1:0]		rfwb_op;
-  reg	[`OR1200_SEL_WIDTH-1:0]		sel_a;
-  reg	[`OR1200_SEL_WIDTH-1:0]		sel_b;
-  reg					sel_imm;
-  reg	[`OR1200_LSUOP_WIDTH-1:0]		id_lsu_op;
-  reg	[`OR1200_COMPOP_WIDTH-1:0]		comp_op;
+  reg	[`OR1200_RFWBOP_WIDTH-1:0]		    rfwb_op;
+  reg	[`OR1200_SEL_WIDTH-1:0]		        sel_a;
+  reg	[`OR1200_SEL_WIDTH-1:0]		        sel_b;
+  reg					                          sel_imm;
+  reg	[`OR1200_LSUOP_WIDTH-1:0]		      id_lsu_op;
+  reg	[`OR1200_COMPOP_WIDTH-1:0]		    comp_op;
   reg	[`OR1200_MULTICYCLE_WIDTH-1:0]		multicycle;
-  reg     [`OR1200_WAIT_ON_WIDTH-1:0] 		wait_on;
+  reg [`OR1200_WAIT_ON_WIDTH-1:0] 	    wait_on;
   reg 	[31:0]				id_simm;
   reg 	[31:0]				ex_simm;
   reg					        sig_syscall;
@@ -189,23 +189,24 @@ module or1200_ctrl
   //
   assign rf_addra = if_insn[20:16];
   assign rf_addrb = if_insn[15:11];
-  assign rf_rda = if_insn[31] || if_maci_op;
-  assign rf_rdb = if_insn[30];
+  assign rf_rda   = if_insn[31] || if_maci_op;
+  assign rf_rdb   = if_insn[30];
 
   //
   // Force fetch of delay slot instruction when jump/branch is preceeded by
   // load/store instructions
-  //
+  // 延迟槽控制信号
   assign force_dslot_fetch = 1'b0;
-  assign no_more_dslot = (|ex_branch_op & !id_void & ex_branch_taken) |
-             (ex_branch_op == `OR1200_BRANCHOP_RFE);
+  assign no_more_dslot = (|ex_branch_op & !id_void & ex_branch_taken) | (ex_branch_op == `OR1200_BRANCHOP_RFE);
 
+  // 对NOP指令的解析
   assign id_void = (id_insn[31:26] == `OR1200_OR32_NOP) & id_insn[16];
   assign ex_void = (ex_insn[31:26] == `OR1200_OR32_NOP) & ex_insn[16];
   assign wb_void = (wb_insn[31:26] == `OR1200_OR32_NOP) & wb_insn[16];
 
+  // 产生对sprs的读写信号
   assign ex_spr_write = spr_write && !abort_mvspr;
-  assign ex_spr_read = spr_read && !abort_mvspr;
+  assign ex_spr_read  = spr_read && !abort_mvspr;
 
   //
   // ex_delayslot_dsi: delay slot insn is in EX stage
@@ -343,7 +344,7 @@ module or1200_ctrl
 
   //
   // l.macrc in ID stage
-  //
+  // mac运算的操作码解析
 `ifdef OR1200_MAC_IMPLEMENTED
   assign id_macrc_op = (id_insn[31:26] == `OR1200_OR32_MACRC) & id_insn[16];
 `else
@@ -372,9 +373,7 @@ module or1200_ctrl
   assign cust5_op = ex_insn[4:0];
   assign cust5_limm = ex_insn[10:5];
 
-  //
-  //
-  //
+  // 异常返回指示信号
   assign rfe = (id_branch_op == `OR1200_BRANCHOP_RFE) |
                (ex_branch_op == `OR1200_BRANCHOP_RFE);
 
@@ -404,7 +403,6 @@ module or1200_ctrl
         get_ex_insn = ex_insn;
      endfunction // get_ex_insn
 `endif
-
 
   //
   // Generation of sel_a
@@ -450,48 +448,50 @@ module or1200_ctrl
 
   //
   // Encode wait_on signal
-  //
-  always @(id_insn) begin
-     case (id_insn[31:26])		// synopsys parallel_case
-       `OR1200_OR32_ALU:
-         wait_on =  ( 1'b0
+  // 流水线等待的周期数
+  always @(id_insn) 
+  begin
+    case (id_insn[31:26])		// synopsys parallel_case
+    `OR1200_OR32_ALU:
+      wait_on =  ( 1'b0
 `ifdef OR1200_DIV_IMPLEMENTED
-                       | (id_insn[4:0] == `OR1200_ALUOP_DIV)
-                       | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
+                  | (id_insn[4:0] == `OR1200_ALUOP_DIV)
+                  | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
 `endif
 `ifdef OR1200_MULT_IMPLEMENTED
-                       | (id_insn[4:0] == `OR1200_ALUOP_MUL)
-                       | (id_insn[4:0] == `OR1200_ALUOP_MULU)
+                  | (id_insn[4:0] == `OR1200_ALUOP_MUL)
+                  | (id_insn[4:0] == `OR1200_ALUOP_MULU)
 `endif
-                    ) ? `OR1200_WAIT_ON_MULTMAC : `OR1200_WAIT_ON_NOTHING;
+                  ) ? `OR1200_WAIT_ON_MULTMAC : `OR1200_WAIT_ON_NOTHING;
 `ifdef OR1200_MULT_IMPLEMENTED
 `ifdef OR1200_MAC_IMPLEMENTED
-       `OR1200_OR32_MACMSB,
-       `OR1200_OR32_MACI,
+    `OR1200_OR32_MACMSB,
+    `OR1200_OR32_MACI,
 `endif
-       `OR1200_OR32_MULI:
-     wait_on = `OR1200_WAIT_ON_MULTMAC;
+    `OR1200_OR32_MULI:
+      wait_on = `OR1200_WAIT_ON_MULTMAC;
 `endif
 `ifdef OR1200_MAC_IMPLEMENTED
-       `OR1200_OR32_MACRC:
-           wait_on = id_insn[16] ? `OR1200_WAIT_ON_MULTMAC :
-                       `OR1200_WAIT_ON_NOTHING;
+    `OR1200_OR32_MACRC:
+      wait_on = id_insn[16] ? `OR1200_WAIT_ON_MULTMAC : `OR1200_WAIT_ON_NOTHING;
 `endif		
 `ifdef OR1200_FPU_IMPLEMENTED
-         `OR1200_OR32_FLOAT: begin
-     wait_on = id_insn[`OR1200_FPUOP_DOUBLE_BIT] ? 0 : `OR1200_WAIT_ON_FPU;
-         end
+    `OR1200_OR32_FLOAT: 
+    begin
+      wait_on = id_insn[`OR1200_FPUOP_DOUBLE_BIT] ? 0 : `OR1200_WAIT_ON_FPU;
+    end
 `endif
-  `ifndef OR1200_DC_WRITEHROUGH
-       // l.mtspr
-       `OR1200_OR32_MTSPR: begin
-    wait_on = `OR1200_WAIT_ON_MTSPR;
-       end
+`ifndef OR1200_DC_WRITEHROUGH
+    // l.mtspr
+    `OR1200_OR32_MTSPR: 
+    begin
+        wait_on = `OR1200_WAIT_ON_MTSPR;
+    end
 `endif
-       default: begin
-    wait_on = `OR1200_WAIT_ON_NOTHING;
-       end
-     endcase // case (id_insn[31:26])
+    default: begin
+      wait_on = `OR1200_WAIT_ON_NOTHING;
+    end
+    endcase // case (id_insn[31:26])
   end // always @ (id_insn)
 
   //
@@ -504,10 +504,10 @@ module or1200_ctrl
       rf_addrw <=  5'd00;
     else if (!ex_freeze)
       case (id_insn[31:26])	// synopsys parallel_case
-        `OR1200_OR32_JAL, `OR1200_OR32_JALR:
-          rf_addrw <=  5'd09;	// link register r9
-        default:
-          rf_addrw <=  id_insn[25:21];
+      `OR1200_OR32_JAL, `OR1200_OR32_JALR:
+        rf_addrw <=  5'd09;	// link register r9
+      default:
+        rf_addrw <=  id_insn[25:21];
       endcase
   end
 
@@ -523,7 +523,7 @@ module or1200_ctrl
 
   //
   // Instruction latch in id_insn
-  //
+  // 流水线正在解码的指令暂时保存
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       id_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
@@ -580,74 +580,74 @@ module or1200_ctrl
     else if (!id_freeze) begin
       case (if_insn[31:26])		// synopsys parallel_case
 
-        // j.jalr
-        `OR1200_OR32_JALR:
-          sel_imm <=  1'b0;
+      // j.jalr
+      `OR1200_OR32_JALR:
+        sel_imm <=  1'b0;
 
-        // l.jr
-        `OR1200_OR32_JR:
-          sel_imm <=  1'b0;
+      // l.jr
+      `OR1200_OR32_JR:
+        sel_imm <=  1'b0;
 
-        // l.rfe
-        `OR1200_OR32_RFE:
-          sel_imm <=  1'b0;
+      // l.rfe
+      `OR1200_OR32_RFE:
+        sel_imm <=  1'b0;
 
-        // l.mfspr
-        `OR1200_OR32_MFSPR:
-          sel_imm <=  1'b0;
+      // l.mfspr
+      `OR1200_OR32_MFSPR:
+        sel_imm <=  1'b0;
 
-        // l.mtspr
-        `OR1200_OR32_MTSPR:
-          sel_imm <=  1'b0;
+      // l.mtspr
+      `OR1200_OR32_MTSPR:
+        sel_imm <=  1'b0;
 
-        // l.sys, l.brk and all three sync insns
-        `OR1200_OR32_XSYNC:
-          sel_imm <=  1'b0;
+      // l.sys, l.brk and all three sync insns
+      `OR1200_OR32_XSYNC:
+        sel_imm <=  1'b0;
 
-        // l.mac/l.msb
+      // l.mac/l.msb
 `ifdef OR1200_MAC_IMPLEMENTED
-        `OR1200_OR32_MACMSB:
-          sel_imm <=  1'b0;
+      `OR1200_OR32_MACMSB:
+        sel_imm <=  1'b0;
 `endif
 
-        // l.sw
-        `OR1200_OR32_SW:
-          sel_imm <=  1'b0;
+      // l.sw
+      `OR1200_OR32_SW:
+        sel_imm <=  1'b0;
 
-        // l.sb
-        `OR1200_OR32_SB:
-          sel_imm <=  1'b0;
+      // l.sb
+      `OR1200_OR32_SB:
+        sel_imm <=  1'b0;
 
-        // l.sh
-        `OR1200_OR32_SH:
-          sel_imm <=  1'b0;
+      // l.sh
+      `OR1200_OR32_SH:
+        sel_imm <=  1'b0;
 
-        // ALU instructions except the one with immediate
-        `OR1200_OR32_ALU:
-          sel_imm <=  1'b0;
+      // ALU instructions except the one with immediate
+      `OR1200_OR32_ALU:
+        sel_imm <=  1'b0;
 
-        // SFXX instructions
-        `OR1200_OR32_SFXX:
-          sel_imm <=  1'b0;
+      // SFXX instructions
+      `OR1200_OR32_SFXX:
+        sel_imm <=  1'b0;
 
 `ifdef OR1200_IMPL_ALU_CUST5
-        // l.cust5 instructions
-        `OR1200_OR32_CUST5:
-          sel_imm <=  1'b0;
+      // l.cust5 instructions
+      `OR1200_OR32_CUST5:
+        sel_imm <=  1'b0;
 `endif
 `ifdef OR1200_FPU_IMPLEMENTED
-        // FPU instructions
-        `OR1200_OR32_FLOAT:
-          sel_imm <=  1'b0;
+      // FPU instructions
+      `OR1200_OR32_FLOAT:
+        sel_imm <=  1'b0;
 `endif
-        // l.nop
-        `OR1200_OR32_NOP:
-          sel_imm <=  1'b0;
+      // l.nop
+      `OR1200_OR32_NOP:
+        sel_imm <=  1'b0;
 
-        // All instructions with immediates
-        default: begin
-          sel_imm <=  1'b1;
-        end
+      // All instructions with immediates
+      default: begin
+        sel_imm <=  1'b1;
+      end
 
       endcase
 
@@ -656,7 +656,7 @@ module or1200_ctrl
 
   //
   // Decode of except_illegal
-  //
+  // 非法指令异常信号
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       except_illegal <=  1'b0;
@@ -1137,15 +1137,11 @@ module or1200_ctrl
   end
 
 `ifdef OR1200_FPU_IMPLEMENTED
-  //
   // Decode of FPU ops
-  //
-     assign fpu_op = {(id_insn[31:26] == `OR1200_OR32_FLOAT),
-          id_insn[`OR1200_FPUOP_WIDTH-2:0]};
+  assign fpu_op = {(id_insn[31:26] == `OR1200_OR32_FLOAT), id_insn[`OR1200_FPUOP_WIDTH-2:0]};
 `else
-     assign fpu_op = {`OR1200_FPUOP_WIDTH{1'b0}};
+  assign fpu_op = {`OR1200_FPUOP_WIDTH{1'b0}};
 `endif
-
 
   //
   // Decode of l.sys
@@ -1157,10 +1153,10 @@ module or1200_ctrl
       sig_syscall <=  1'b0;
     else if (!ex_freeze) begin
 `ifdef OR1200_VERBOSE
-  // synopsys translate_off
+      // synopsys translate_off
       if (id_insn[31:23] == {`OR1200_OR32_XSYNC, 3'b000})
         $display("Generating sig_syscall");
-  // synopsys translate_on
+      // synopsys translate_on
 `endif
       sig_syscall <=  (id_insn[31:23] == {`OR1200_OR32_XSYNC, 3'b000});
     end
@@ -1168,7 +1164,7 @@ module or1200_ctrl
 
   //
   // Decode of l.trap
-  //
+  // 陷入指令的解析
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       sig_trap <=  1'b0;
@@ -1188,6 +1184,7 @@ module or1200_ctrl
 
   // Decode destination register address for data cache to check if store ops
   // are being done from the stack register (r1) or frame pointer register (r2)
+  // 读写data cache的寄存器地址
 `ifdef OR1200_DC_NOSTACKWRITETHROUGH
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
      if (rst == `OR1200_RST_VALUE)

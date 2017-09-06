@@ -96,7 +96,7 @@ verdi-com:
 	make vcs-sim
 
 # Start clean
-verdi-clean: vcs-clean
-	$(Q)rm -rf *.fsdb 
+verdi-clean:
+	$(Q)rm -rf *.fsdb novas.rc novas.conf
 	$(Q)rm -rf verdiLog
 	

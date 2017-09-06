@@ -51,112 +51,116 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_wbmux(
-	// Clock and reset
-	clk, rst,
+module or1200_wbmux
+  (
+	 // Clock and reset
+	 clk, rst,
 
-	// Internal i/f
-	wb_freeze, rfwb_op,
-	muxin_a, muxin_b, muxin_c, muxin_d, muxin_e,
-	muxout, muxreg, muxreg_valid
-);
+	 // Internal i/f
+	 wb_freeze, rfwb_op,
+	 muxin_a, muxin_b, muxin_c, muxin_d, muxin_e,
+	 muxout, muxreg, muxreg_valid
+  );
 
-parameter width = `OR1200_OPERAND_WIDTH;
+  // ---------------------------------------------------------------------------
+  // Parameters
+  // ---------------------------------------------------------------------------  
+  parameter width = `OR1200_OPERAND_WIDTH;
 
-//
-// I/O
-//
+  //
+  // I/O
+  //
 
-//
-// Clock and reset
-//
-input				clk;
-input				rst;
+  //
+  // Clock and reset
+  //
+  input				clk;
+  input				rst;
 
-//
-// Internal i/f
-//
-input				wb_freeze;
-input	[`OR1200_RFWBOP_WIDTH-1:0]	rfwb_op;
-input	[width-1:0]		muxin_a;
-input	[width-1:0]		muxin_b;
-input	[width-1:0]		muxin_c;
-input	[width-1:0]		muxin_d;
-input	[width-1:0]		muxin_e;   
-output	[width-1:0]		muxout;
-output	[width-1:0]		muxreg;
-output				muxreg_valid;
+  //
+  // Internal i/f
+  //
+  input				              wb_freeze;
+  input	[`OR1200_RFWBOP_WIDTH-1:0]	rfwb_op;
+  input	[width-1:0]		      muxin_a;
+  input	[width-1:0]		      muxin_b;
+  input	[width-1:0]		      muxin_c;
+  input	[width-1:0]		      muxin_d;
+  input	[width-1:0]		      muxin_e;   
+  output	[width-1:0]		    muxout;
+  output	[width-1:0]		    muxreg;
+  output				            muxreg_valid;
 
-//
-// Internal wires and regs
-//
-reg	[width-1:0]		muxout;
-reg	[width-1:0]		muxreg;
-reg				muxreg_valid;
+  //
+  // Internal wires and regs
+  //
+  reg	[width-1:0]		        muxout;
+  reg	[width-1:0]		        muxreg;
+  reg				                muxreg_valid;
 
-//
-// Registered output from the write-back multiplexer
-//
-always @(posedge clk or `OR1200_RST_EVENT rst) begin
-	if (rst == `OR1200_RST_VALUE) begin
-		muxreg <=  32'd0;
-		muxreg_valid <=  1'b0;
-	end
-	else if (!wb_freeze) begin
-		muxreg <=  muxout;
-		muxreg_valid <=  rfwb_op[0];
-	end
-end
+  //
+  // Registered output from the write-back multiplexer
+  //
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
+    if (rst == `OR1200_RST_VALUE) begin
+      muxreg <=  32'd0;
+      muxreg_valid <=  1'b0;
+    end
+    else if (!wb_freeze) begin
+      muxreg <=  muxout;
+      muxreg_valid <=  rfwb_op[0];
+    end
+  end
 
-//
-// Write-back multiplexer
-//
-always @(muxin_a or muxin_b or muxin_c or muxin_d or muxin_e or rfwb_op) begin
+  //
+  // Write-back multiplexer
+  //
+  always @(muxin_a or muxin_b or muxin_c or muxin_d or muxin_e or rfwb_op) begin
 `ifdef OR1200_ADDITIONAL_SYNOPSYS_DIRECTIVES
-	casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case infer_mux
+    casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case infer_mux
 `else
-	casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case
+    casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case
 `endif
-		`OR1200_RFWBOP_ALU: muxout = muxin_a;
-		`OR1200_RFWBOP_LSU: begin
-			muxout = muxin_b;
+    `OR1200_RFWBOP_ALU: muxout = muxin_a;
+    `OR1200_RFWBOP_LSU: begin
+      muxout = muxin_b;
 `ifdef OR1200_VERBOSE
-// synopsys translate_off
-			$display("  WBMUX: muxin_b %h", muxin_b);
-// synopsys translate_on
+      // synopsys translate_off
+      $display("  WBMUX: muxin_b %h", muxin_b);
+      // synopsys translate_on
 `endif
-		end
-		`OR1200_RFWBOP_SPRS: begin
-			muxout = muxin_c;
+    end
+    `OR1200_RFWBOP_SPRS: begin
+      muxout = muxin_c;
 `ifdef OR1200_VERBOSE
-// synopsys translate_off
-			$display("  WBMUX: muxin_c %h", muxin_c);
-// synopsys translate_on
+      // synopsys translate_off
+      $display("  WBMUX: muxin_c %h", muxin_c);
+      // synopsys translate_on
 `endif
-		end
-		`OR1200_RFWBOP_LR: begin
-			muxout = muxin_d + 32'h8;
+    end
+    `OR1200_RFWBOP_LR: begin
+      muxout = muxin_d + 32'h8;
 `ifdef OR1200_VERBOSE
-// synopsys translate_off
-			$display("  WBMUX: muxin_d %h", muxin_d + 4'h8);
-// synopsys translate_on
+      // synopsys translate_off
+      $display("  WBMUX: muxin_d %h", muxin_d + 4'h8);
+      // synopsys translate_on
 `endif
-		end
+    end
 `ifdef OR1200_FPU_IMPLEMENTED
-	        `OR1200_RFWBOP_FPU : begin
-	     muxout = muxin_e;	     
- `ifdef OR1200_VERBOSE
-// synopsys translate_off
-			$display("  WBMUX: muxin_e %h", muxin_e);
-// synopsys translate_on
+    `OR1200_RFWBOP_FPU : begin
+      muxout = muxin_e;	     
+`ifdef OR1200_VERBOSE
+      // synopsys translate_off
+      $display("  WBMUX: muxin_e %h", muxin_e);
+      // synopsys translate_on
 `endif
-	       end		      
+    end		      
 `endif
-	  default : begin
-	     muxout = 0;
-	  end
-	  
-	endcase
-end
+    default : 
+    begin
+      muxout = 0;
+    end  
+    endcase
+  end
 
 endmodule

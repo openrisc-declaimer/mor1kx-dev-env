@@ -522,7 +522,8 @@ $(TEST_SW_DIR)/$(TEST).dis:
 #
 # Cleaning rules
 #
-clean: clean-sim clean-sim-test-sw clean-bootrom clean-vlt clean-out clean-sw
+clean: clean-sim clean-sim-test-sw clean-bootrom clean-vlt clean-out clean-sw \
+       nlint-clean leda-clean verdi-clean vcs-clean 
 
 clean-sim:
 	$(Q) echo; echo "\t### Cleaning simulation run directory ###"; echo;
