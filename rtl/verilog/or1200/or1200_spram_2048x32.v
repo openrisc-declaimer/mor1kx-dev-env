@@ -144,28 +144,28 @@ output mbist_so_o;
 //
 // Generic synchronous single-port RAM interface
 //
-input			clk;	// Clock
-input			rst;	// Reset
-input			ce;	// Chip enable input
-input			we;	// Write enable input
-input			oe;	// Output enable input
-input 	[aw-1:0]	addr;	// address bus inputs
-input	[dw-1:0]	di;	// input data bus
-output	[dw-1:0]	doq;	// output data bus
+input			          clk;	// Clock
+input			          rst;	// Reset
+input			          ce;	  // Chip enable input
+input			          we;	  // Write enable input
+input			          oe;	  // Output enable input
+input 	[aw-1:0]	  addr;	// address bus inputs
+input	  [dw-1:0]	  di;	  // input data bus
+output	[dw-1:0]	  doq;	// output data bus
 
 //
 // Internal wires and registers
 //
 
 `ifdef OR1200_ARTISAN_SSP
-`else
+`else // ! OR1200_ARTISAN_SSP
 `ifdef OR1200_VIRTUALSILICON_SSP
-`else
+`else // OR1200_VIRTUALSILICON_SSP
 `ifdef OR1200_BIST
 assign mbist_so_o = mbist_si_i;
-`endif
-`endif
-`endif
+`endif // OR1200_BIST
+`endif // OR1200_VIRTUALSILICON_SSP
+`endif // OR1200_ARTISAN_SSP
 
 `ifdef OR1200_ARTISAN_SSP
 
@@ -175,70 +175,71 @@ assign mbist_so_o = mbist_si_i;
 // Artisan Synchronous Single-Port RAM (ra1sh)
 //
 `ifdef UNUSED
-art_hdsp_2048x32 #(dw, 1<<aw, aw) artisan_ssp(
-`else
+  art_hdsp_2048x32 #(dw, 1<<aw, aw) artisan_ssp(
+`else // ! UNUSED
 `ifdef OR1200_BIST
-art_hssp_2048x32_bist artisan_ssp(
-`else
-art_hssp_2048x32 artisan_ssp(
+  art_hssp_2048x32_bist artisan_ssp(
+`else // ! OR1200_BIST
+  art_hssp_2048x32 artisan_ssp(
 `endif
-`endif
-`ifdef OR1200_BIST
-	// RAM BIST
-	.mbist_si_i(mbist_si_i),
-	.mbist_so_o(mbist_so_o),
-	.mbist_ctrl_i(mbist_ctrl_i),
-`endif
-	.CLK(clk),
-	.CEN(~ce),
-	.WEN(~we),
-	.A(addr),
-	.D(di),
-	.OEN(~oe),
-	.Q(doq)
-);
+`endif // UNUSED
 
-`else
+`ifdef OR1200_BIST
+    // RAM BIST
+    .mbist_si_i(mbist_si_i),
+    .mbist_so_o(mbist_so_o),
+    .mbist_ctrl_i(mbist_ctrl_i),
+`endif
+    .CLK(clk),
+    .CEN(~ce),
+    .WEN(~we),
+    .A(addr),
+    .D(di),
+    .OEN(~oe),
+    .Q(doq)
+  );
+
+`else // ! OR1200_ARTISAN_SSP
 
 `ifdef OR1200_AVANT_ATP
 
-//
-// Instantiation of ASIC memory:
-//
-// Avant! Asynchronous Two-Port RAM
-//
-avant_atp avant_atp(
-	.web(~we),
-	.reb(),
-	.oeb(~oe),
-	.rcsb(),
-	.wcsb(),
-	.ra(addr),
-	.wa(addr),
-	.di(di),
-	.doq(doq)
-);
+  //
+  // Instantiation of ASIC memory:
+  //
+  // Avant! Asynchronous Two-Port RAM
+  //
+  avant_atp avant_atp(
+    .web(~we),
+    .reb(),
+    .oeb(~oe),
+    .rcsb(),
+    .wcsb(),
+    .ra(addr),
+    .wa(addr),
+    .di(di),
+    .doq(doq)
+  );
 
-`else
+`else // !OR1200_AVANT_ATP
 
 `ifdef OR1200_VIRAGE_SSP
 
-//
-// Instantiation of ASIC memory:
-//
-// Virage Synchronous 1-port R/W RAM
-//
-virage_ssp virage_ssp(
-	.clk(clk),
-	.adr(addr),
-	.d(di),
-	.we(we),
-	.oe(oe),
-	.me(ce),
-	.q(doq)
-);
+  //
+  // Instantiation of ASIC memory:
+  //
+  // Virage Synchronous 1-port R/W RAM
+  //
+  virage_ssp virage_ssp(
+    .clk(clk),
+    .adr(addr),
+    .d(di),
+    .we(we),
+    .oe(oe),
+    .me(ce),
+    .q(doq)
+  );
 
-`else
+`else // ! OR1200_VIRAGE_SSP
 
 `ifdef OR1200_VIRTUALSILICON_SSP
 
@@ -248,28 +249,29 @@ virage_ssp virage_ssp(
 // Virtual Silicon Single-Port Synchronous SRAM
 //
 `ifdef UNUSED
-vs_hdsp_2048x32 #(1<<aw, aw-1, dw-1) vs_ssp(
-`else
+  vs_hdsp_2048x32 #(1<<aw, aw-1, dw-1) vs_ssp(
+`else // ! UNUSED
 `ifdef OR1200_BIST
-vs_hdsp_2048x32_bist vs_ssp(
-`else
-vs_hdsp_2048x32 vs_ssp(
-`endif
-`endif
+  vs_hdsp_2048x32_bist vs_ssp(
+`else // ! OR1200_BIST
+  vs_hdsp_2048x32 vs_ssp(
+`endif // OR1200_BIST
+`endif // UNUSED
+
 `ifdef OR1200_BIST
-	// RAM BIST
-	.mbist_si_i(mbist_si_i),
-	.mbist_so_o(mbist_so_o),
-	.mbist_ctrl_i(mbist_ctrl_i),
+    // RAM BIST
+    .mbist_si_i(mbist_si_i),
+    .mbist_so_o(mbist_so_o),
+    .mbist_ctrl_i(mbist_ctrl_i),
 `endif
-	.CK(clk),
-	.ADR(addr),
-	.DI(di),
-	.WEN(~we),
-	.CEN(~ce),
-	.OEN(~oe),
-	.DOUT(doq)
-);
+    .CK(clk),
+    .ADR(addr),
+    .DI(di),
+    .WEN(~we),
+    .CEN(~ce),
+    .OEN(~oe),
+    .DOUT(doq)
+  );
 
 `else
 
@@ -596,38 +598,55 @@ defparam lpm_ram_dq_component.lpm_width = dw,
 	lpm_ram_dq_component.lpm_hint = "USE_EAB=ON";
 	// examplar attribute lpm_ram_dq_component NOOPT TRUE
 
-`else
+`else // !OR1200_ALTERA_LPM
 
-//
-// Generic single-port synchronous RAM model
-//
+  //
+  // Generic single-port synchronous RAM model
+  //
 
-//
-// Generic RAM's registers and wires
-//
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
-reg	[aw-1:0]	addr_reg;		// RAM address register
+  //
+  // Generic RAM's registers and wires
+  //
+  reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
+  reg	[aw-1:0]	addr_reg;		// RAM address register
 
-//
-// Data output drivers
-//
-assign doq = (oe) ? mem[addr_reg] : {dw{1'b0}};
+  //
+  // Data output drivers
+  //
+  assign doq = (oe) ? mem[addr_reg] : {dw{1'b0}};
 
-//
-// RAM address register
-//
-always @(posedge clk or `OR1200_RST_EVENT rst)
-	if (rst == `OR1200_RST_VALUE)
-		addr_reg <=  {aw{1'b0}};
-	else if (ce)
-		addr_reg <=  addr;
+  //
+  // RAM address register
+  //
+  always @(posedge clk or `OR1200_RST_EVENT rst)
+    if (rst == `OR1200_RST_VALUE)
+      addr_reg <=  {aw{1'b0}};
+    else if (ce)
+      addr_reg <=  addr;
 
-//
-// RAM write
-//
-always @(posedge clk)
-	if (ce && we)
-		mem[addr] <=  di;
+  //
+  // RAM write
+  //
+  always @(posedge clk)
+    if (ce && we)
+      mem[addr] <=  di;
+
+  // synopsys translate_off
+  reg [31:0] wb_dat_o;
+  reg [31:0] cnt;
+  initial
+  begin
+    for(cnt=0; cnt < (1<<aw); cnt=cnt+1) 
+    begin
+      case(cnt)
+      `include "bootrom.v"
+      default:
+        wb_dat_o = 32'h00000000;
+      endcase
+      mem[cnt] =  wb_dat_o;
+    end
+  end
+  // synopsys translate_on
 
 `endif	// !OR1200_ALTERA_LPM
 `endif	// !OR1200_XILINX_RAMB16

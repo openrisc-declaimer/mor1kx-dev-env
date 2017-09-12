@@ -125,50 +125,44 @@ module or1200_immu_tlb
   //
   // Clock and reset
   //
-  input				clk;
-  input				rst;
+  input				      clk;
+  input				      rst;
 
   //
   // I/F for translation
   //
-  input				tlb_en;
+  input				      tlb_en;
   input	[aw-1:0]		vaddr;
-  output				hit;
+  output				    hit;
   output	[31:`OR1200_IMMU_PS]	ppn;
-  output				uxe;
-  output				sxe;
-  output				ci;
+  output				    uxe;
+  output				    sxe;
+  output				    ci;
 
 `ifdef OR1200_BIST
-  //
   // RAM BIST
-  //
-  input mbist_si_i;
+  input             mbist_si_i;
   input [`OR1200_MBIST_CTRL_WIDTH - 1:0] mbist_ctrl_i;
-  output mbist_so_o;
+  output            mbist_so_o;
 `endif
 
-  //
   // SPR access
-  //
-  input				spr_cs;
-  input				spr_write;
+  input				      spr_cs;
+  input				      spr_write;
   input	[31:0]			spr_addr;
   input	[31:0]			spr_dat_i;
-  output	[31:0]			spr_dat_o;
+  output	[31:0]		spr_dat_o;
 
-  //
   // Internal wires and regs
-  //
-  wire	[`OR1200_ITLB_TAG]	vpn;
-  wire				v;
+  wire	[`OR1200_ITLB_TAG]	  vpn;
+  wire				                v;
   wire	[`OR1200_ITLB_INDXW-1:0]	tlb_index;
-  wire				tlb_mr_en;
-  wire				tlb_mr_we;
+  wire				                tlb_mr_en;
+  wire				                tlb_mr_we;
   wire	[`OR1200_ITLBMRW-1:0]	tlb_mr_ram_in;
   wire	[`OR1200_ITLBMRW-1:0]	tlb_mr_ram_out;
-  wire				tlb_tr_en;
-  wire				tlb_tr_we;
+  wire				                tlb_tr_en;
+  wire				                tlb_tr_we;
   wire	[`OR1200_ITLBTRW-1:0]	tlb_tr_ram_in;
   wire	[`OR1200_ITLBTRW-1:0]	tlb_tr_ram_out;
 
@@ -241,9 +235,9 @@ module or1200_immu_tlb
   // Assign to Translate registers inputs
   //
   assign tlb_tr_ram_in = {spr_dat_i[31:`OR1200_IMMU_PS],
-        spr_dat_i[`OR1200_ITLBTR_UXE_BITS],
-        spr_dat_i[`OR1200_ITLBTR_SXE_BITS],
-        spr_dat_i[`OR1200_ITLBTR_CI_BITS]};
+                          spr_dat_i[`OR1200_ITLBTR_UXE_BITS],
+                          spr_dat_i[`OR1200_ITLBTR_SXE_BITS],
+                          spr_dat_i[`OR1200_ITLBTR_CI_BITS]};
 
   //
   // Generate hit
@@ -256,13 +250,11 @@ module or1200_immu_tlb
   //
   assign tlb_index = spr_cs ? spr_addr[`OR1200_ITLB_INDXW-1:0] : vaddr[`OR1200_ITLB_INDX];
 
-
 `ifdef OR1200_BIST
   assign itlb_mr_ram_si = mbist_si_i;
   assign itlb_tr_ram_si = itlb_mr_ram_so;
   assign mbist_so_o = itlb_tr_ram_so;
 `endif
-
 
   //
   // Instantiation of ITLB Match Registers
@@ -292,26 +284,26 @@ module or1200_immu_tlb
   //
   // Instantiation of ITLB Translate Registers
   //
-     or1200_spram #
-       (
-        .aw(6),
-        .dw(22)
-        )
-     itlb_tr_ram
-       (
-        .clk(clk),
+  or1200_spram #
+   (
+    .aw(6),
+    .dw(22)
+    )
+  itlb_tr_ram
+   (
+    .clk(clk),
 `ifdef OR1200_BIST
-        // RAM BIST
-        .mbist_si_i(itlb_tr_ram_si),
-        .mbist_so_o(itlb_tr_ram_so),
-        .mbist_ctrl_i(mbist_ctrl_i),
+    // RAM BIST
+    .mbist_si_i(itlb_tr_ram_si),
+    .mbist_so_o(itlb_tr_ram_so),
+    .mbist_ctrl_i(mbist_ctrl_i),
 `endif
-        .ce(tlb_tr_en),
-        .we(tlb_tr_we),
-        //.oe(1'b1),
-        .addr(tlb_index),
-        .di(tlb_tr_ram_in),
-        .doq(tlb_tr_ram_out)
-        );
+    .ce(tlb_tr_en),
+    .we(tlb_tr_we),
+    //.oe(1'b1),
+    .addr(tlb_index),
+    .di(tlb_tr_ram_in),
+    .doq(tlb_tr_ram_out)
+    );
 
 endmodule

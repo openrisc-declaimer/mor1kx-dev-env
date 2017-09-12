@@ -233,8 +233,8 @@ module or1200_wb_biu
       else
         wb_fsm_state_nxt = wb_fsm_idle;
     end
-    // normal TRANSFER
-    wb_fsm_trans : begin
+      // normal TRANSFER
+      wb_fsm_trans : begin
       wb_cyc_nxt = !wb_stb_o | !wb_err_i & !wb_rty_i & !(wb_ack & wb_cti_o == 3'b111);
       wb_stb_nxt = !wb_stb_o | !wb_err_i & !wb_rty_i & !wb_ack | !wb_err_i & !wb_rty_i & wb_cti_o == 3'b010 ;
       wb_cti_nxt[2] = wb_stb_o & wb_ack & burst_len == 'h0 | wb_cti_o[2];

@@ -183,16 +183,17 @@ module or1200_immu_top
   always @(`OR1200_RST_EVENT rst or posedge clk)
     // default value
     if (rst == `OR1200_RST_VALUE) begin
-            // select async. value due to reset state
-      icpu_adr_default <=  32'h0000_0100;
+      // select async. value due to reset state
+      icpu_adr_default <=  `OR1200_BOOT_ADR;
       icpu_adr_select  <=  1'b1;
     end
     // selected value (different from default) is written
-          // into FF after reset state
-    else if (icpu_adr_select) begin
-            // dynamic value can only be assigned to FF out of reset!
+    // into FF after reset state
+    else if (icpu_adr_select)
+    begin
+      // dynamic value can only be assigned to FF out of reset!
       icpu_adr_default <=  icpu_adr_boot;
-            // select FF value
+      // select FF value
       icpu_adr_select  <=  1'b0;
     end
     else begin
@@ -201,18 +202,18 @@ module or1200_immu_top
 
   // select async. value for boot address after reset - PC jumps to the address
   // selected after boot!
-     //assign icpu_adr_boot = {(boot_adr_sel_i ? `OR1200_EXCEPT_EPH1_P :
-     // `OR1200_EXCEPT_EPH0_P), 12'h100} ;
-     assign icpu_adr_boot = `OR1200_BOOT_ADR; // jb
+  // assign icpu_adr_boot = {(boot_adr_sel_i ? `OR1200_EXCEPT_EPH1_P :
+  //                                           `OR1200_EXCEPT_EPH0_P), 12'h100} ;
+  assign icpu_adr_boot = `OR1200_BOOT_ADR; // jb
 
   always @(icpu_adr_boot or icpu_adr_default or icpu_adr_select)
     if (icpu_adr_select)
-            // async. value is selected due to reset state
-      icpu_adr_o = icpu_adr_boot ;
+      // async. value is selected due to reset state
+      icpu_adr_o = icpu_adr_boot;
     else
-            // FF value is selected 2nd clock after reset state
+      // FF value is selected 2nd clock after reset state
       icpu_adr_o = icpu_adr_default ;
-`else
+`else // ! OR1200_REGISTERED_OUTPUTS: must be defined/enabled
   Unsupported !!!
 `endif
 
@@ -238,18 +239,18 @@ module or1200_immu_top
   //
   // Put all outputs in inactive state
   //
-  assign spr_dat_o      = 32'h00000000;
-  assign qmemimmu_adr_o = icpu_adr_i;
-  assign icpu_tag_o     = qmemimmu_tag_i;
-  assign qmemimmu_cycstb_o = icpu_cycstb_i & ~page_cross;
-  assign icpu_rty_o     = qmemimmu_rty_i;
-  assign icpu_err_o     = qmemimmu_err_i;
-  assign qmemimmu_ci_o  = `OR1200_IMMU_CI;
+  assign spr_dat_o          = 32'h00000000;
+  assign qmemimmu_adr_o     = icpu_adr_i;
+  assign icpu_tag_o         = qmemimmu_tag_i;
+  assign qmemimmu_cycstb_o  = icpu_cycstb_i & ~page_cross;
+  assign icpu_rty_o         = qmemimmu_rty_i;
+  assign icpu_err_o         = qmemimmu_err_i;
+  assign qmemimmu_ci_o      = `OR1200_IMMU_CI;
 `ifdef OR1200_BIST
-  assign mbist_so_o     = mbist_si_i;
+  assign mbist_so_o         = mbist_si_i;
 `endif
 
-`else
+`else // ! OR1200_NO_IMMU
 
   //
   // ITLB SPR access
@@ -353,7 +354,7 @@ module or1200_immu_top
   //assign qmemimmu_adr_o = itlb_done ? {itlb_ppn, icpu_adr_i[`OR1200_IMMU_PS-1:0]} : {icpu_vpn_r, icpu_adr_i[`OR1200_IMMU_PS-1:0]}; // DL: immu_en
   assign qmemimmu_adr_o = immu_en & itlb_done ? {itlb_ppn, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0} : {icpu_vpn_r, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0};
 
-  reg     [31:0]                  spr_dat_reg;
+  reg [31:0] spr_dat_reg;
   //
   // Output to SPRS unit
   //

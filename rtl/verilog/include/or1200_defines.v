@@ -1188,12 +1188,12 @@
 //
 // Cache inhibit while DMMU is not enabled/implemented
 //
-// cache inhibited 0GB-4GB		1'b1
-// cache inhibited 0GB-2GB		!dcpu_adr_i[31]
-// cache inhibited 0GB-1GB 2GB-3GB	!dcpu_adr_i[30]
-// cache inhibited 1GB-2GB 3GB-4GB	dcpu_adr_i[30]
+// cache inhibited 0GB-4GB		        1'b1
+// cache inhibited 0GB-2GB		        !dcpu_adr_i[31]
+// cache inhibited 0GB-1GB 2GB-3GB	  !dcpu_adr_i[30]
+// cache inhibited 1GB-2GB 3GB-4GB	  dcpu_adr_i[30]
 // cache inhibited 2GB-4GB (default)	dcpu_adr_i[31]
-// cached 0GB-4GB			1'b0
+// cached          0GB-4GB			      1'b0
 //
 `define OR1200_DMMU_CI			dcpu_adr_i[31]
 
@@ -1232,16 +1232,16 @@
 //
 // ITLB configuration
 //
-`define	OR1200_IMMU_PS		      13					// 13 for 8KB page size
-`define	OR1200_ITLB_INDXW	      6					// 6 for 64 entry ITLB	7 for 128 entries
+`define	OR1200_IMMU_PS		      13					          // 13 for 8KB page size
+`define	OR1200_ITLB_INDXW	      6					            // 6  for 64 entry ITLB	7 for 128 entries
 `define OR1200_ITLB_INDXL	      `OR1200_IMMU_PS				// 13			13
-`define OR1200_ITLB_INDXH	      `OR1200_IMMU_PS+`OR1200_ITLB_INDXW-1	// 18			19
+`define OR1200_ITLB_INDXH	      `OR1200_IMMU_PS+`OR1200_ITLB_INDXW-1	// 18			  19
 `define	OR1200_ITLB_INDX	      `OR1200_ITLB_INDXH:`OR1200_ITLB_INDXL	// 18:13		19:13
-`define OR1200_ITLB_TAGW	      32-`OR1200_ITLB_INDXW-`OR1200_IMMU_PS	// 13			12
-`define OR1200_ITLB_TAGL	      `OR1200_ITLB_INDXH+1			// 19			20
-`define	OR1200_ITLB_TAG		      31:`OR1200_ITLB_TAGL			// 31:19		31:20
-`define	OR1200_ITLBMRW		      `OR1200_ITLB_TAGW+1			// +1 because of V bit
-`define	OR1200_ITLBTRW		      32-`OR1200_IMMU_PS+3			// +3 because of protection bits and CI
+`define OR1200_ITLB_TAGW	      32-`OR1200_ITLB_INDXW-`OR1200_IMMU_PS	// 13			  12
+`define OR1200_ITLB_TAGL	      `OR1200_ITLB_INDXH+1	// 19			  20
+`define	OR1200_ITLB_TAG		      31:`OR1200_ITLB_TAGL	// 31:19		31:20
+`define	OR1200_ITLBMRW		      `OR1200_ITLB_TAGW+1		// +1 because of V bit
+`define	OR1200_ITLBTRW		      32-`OR1200_IMMU_PS+3	// +3 because of protection bits and CI
 
 //
 // Cache inhibit while IMMU is not enabled/implemented
@@ -1828,10 +1828,16 @@
 // Boot from 0xf0000100
 //`define OR1200_BOOT_PCREG_DEFAULT 30'h3c00003f
 //`define OR1200_BOOT_ADR 32'hf0000100
+
 // Boot from 0x100
 // `define OR1200_BOOT_PCREG_DEFAULT 30'h0000003f
 // `define OR1200_BOOT_ADR 	32'h00000100
+
 // Boot from 0xf0000000 <-- ROM
-`define OR1200_BOOT_PCREG_DEFAULT   30'h3BFFFFFF
-`define OR1200_BOOT_ADR             32'hf0000000
+//`define OR1200_BOOT_PCREG_DEFAULT   30'h3BFFFFFF
+// `define OR1200_BOOT_ADR             32'hf000_0000
+
+  // Boot from 0x00800000 <-- QMEM
+`define OR1200_BOOT_PCREG_DEFAULT   30'h1FFFFF
+`define OR1200_BOOT_ADR             32'h0080_0000
 

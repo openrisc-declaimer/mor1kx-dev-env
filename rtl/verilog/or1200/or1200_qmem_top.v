@@ -147,6 +147,9 @@ module or1200_qmem_top
 	 dcqmem_tag_i
   );
 
+  // ---------------------------------------------------------------------------
+  // Parameters
+  // ---------------------------------------------------------------------------
   parameter dw = `OR1200_OPERAND_WIDTH;
 
   //
@@ -255,73 +258,80 @@ module or1200_qmem_top
   //
   // QMEM and CPU/IMMU
   //
-  assign qmemicpu_dat_o = qmem_iack ? qmem_do : icqmem_dat_i;
-  assign qmemicpu_ack_o = qmem_iack ? 1'b1 : icqmem_ack_i;
-  assign qmemimmu_rty_o = qmem_iack ? 1'b0 : icqmem_rty_i;
-  assign qmemimmu_err_o = qmem_iack ? 1'b0 : icqmem_err_i;
-  assign qmemimmu_tag_o = qmem_iack ? 4'h0 : icqmem_tag_i;
+  assign qmemicpu_dat_o   = qmem_iack ? qmem_do : icqmem_dat_i;
+  assign qmemicpu_ack_o   = qmem_iack ? 1'b1    : icqmem_ack_i;
+  assign qmemimmu_rty_o   = qmem_iack ? 1'b0    : icqmem_rty_i;
+  assign qmemimmu_err_o   = qmem_iack ? 1'b0    : icqmem_err_i;
+  assign qmemimmu_tag_o   = qmem_iack ? 4'h0    : icqmem_tag_i;
 
   //
   // QMEM and IC
   //
-  assign icqmem_adr_o   = iaddr_qmem_hit ? 32'h0000_0000 : qmemimmu_adr_i;
-  assign icqmem_cycstb_o = iaddr_qmem_hit ? 1'b0 : qmemimmu_cycstb_i;
-  assign icqmem_ci_o = iaddr_qmem_hit ? 1'b0 : qmemimmu_ci_i;
-  assign icqmem_sel_o = iaddr_qmem_hit ? 4'h0 : qmemicpu_sel_i;
-  assign icqmem_tag_o = iaddr_qmem_hit ? 4'h0 : qmemicpu_tag_i;
+  assign icqmem_adr_o     = iaddr_qmem_hit ? 32'h0000_0000 : qmemimmu_adr_i;
+  assign icqmem_cycstb_o  = iaddr_qmem_hit ? 1'b0 : qmemimmu_cycstb_i;
+  assign icqmem_ci_o      = iaddr_qmem_hit ? 1'b0 : qmemimmu_ci_i;
+  assign icqmem_sel_o     = iaddr_qmem_hit ? 4'h0 : qmemicpu_sel_i;
+  assign icqmem_tag_o     = iaddr_qmem_hit ? 4'h0 : qmemicpu_tag_i;
 
   //
   // QMEM and CPU/DMMU
   //
-  assign qmemdcpu_dat_o = daddr_qmem_hit ? qmem_do : dcqmem_dat_i;
-  assign qmemdcpu_ack_o = daddr_qmem_hit ? qmem_dack : dcqmem_ack_i;
-  assign qmemdcpu_rty_o = daddr_qmem_hit ? ~qmem_dack : dcqmem_rty_i;
-  assign qmemdmmu_err_o = daddr_qmem_hit ? 1'b0 : dcqmem_err_i;
-  assign qmemdmmu_tag_o = daddr_qmem_hit ? 4'h0 : dcqmem_tag_i;
+  assign qmemdcpu_dat_o   = daddr_qmem_hit ? qmem_do : dcqmem_dat_i;
+  assign qmemdcpu_ack_o   = daddr_qmem_hit ? qmem_dack : dcqmem_ack_i;
+  assign qmemdcpu_rty_o   = daddr_qmem_hit ? ~qmem_dack : dcqmem_rty_i;
+  assign qmemdmmu_err_o   = daddr_qmem_hit ? 1'b0 : dcqmem_err_i;
+  assign qmemdmmu_tag_o   = daddr_qmem_hit ? 4'h0 : dcqmem_tag_i;
 
   //
   // QMEM and DC
   //
-  assign dcqmem_adr_o = daddr_qmem_hit ? 32'h0000_0000 : qmemdmmu_adr_i;
+  assign dcqmem_adr_o    = daddr_qmem_hit ? 32'h0000_0000 : qmemdmmu_adr_i;
   assign dcqmem_cycstb_o = daddr_qmem_hit ? 1'b0 : qmemdmmu_cycstb_i;
-  assign dcqmem_ci_o = daddr_qmem_hit ? 1'b0 : qmemdmmu_ci_i;
-  assign dcqmem_we_o = daddr_qmem_hit ? 1'b0 : qmemdcpu_we_i;
-  assign dcqmem_sel_o = daddr_qmem_hit ? 4'h0 : qmemdcpu_sel_i;
-  assign dcqmem_tag_o = daddr_qmem_hit ? 4'h0 : qmemdcpu_tag_i;
-  assign dcqmem_dat_o = daddr_qmem_hit ? 32'h0000_0000 : qmemdcpu_dat_i;
+  assign dcqmem_ci_o     = daddr_qmem_hit ? 1'b0 : qmemdmmu_ci_i;
+  assign dcqmem_we_o     = daddr_qmem_hit ? 1'b0 : qmemdcpu_we_i;
+  assign dcqmem_sel_o    = daddr_qmem_hit ? 4'h0 : qmemdcpu_sel_i;
+  assign dcqmem_tag_o    = daddr_qmem_hit ? 4'h0 : qmemdcpu_tag_i;
+  assign dcqmem_dat_o    = daddr_qmem_hit ? 32'h0000_0000 : qmemdcpu_dat_i;
 
   //
   // Address comparison whether QMEM was hit
   //
+  // OR1200_QMEM_IADDR	  32'h0080_0000
+  // OR1200_QMEM_IMASK	  32'hfff0_0000
 `ifdef OR1200_QMEM_IADDR
+  // 比较地址查看QMEM是否作为指令存储器
   assign iaddr_qmem_hit = (qmemimmu_adr_i & `OR1200_QMEM_IMASK) == `OR1200_QMEM_IADDR;
 `else
   assign iaddr_qmem_hit = 1'b0;
 `endif
 
+  // OR1200_QMEM_DADDR	  32'h0080_0000
+  // OR1200_QMEM_DMASK	  32'hfff0_0000， 表示最大尺寸为1MB
 `ifdef OR1200_QMEM_DADDR
   assign daddr_qmem_hit = (qmemdmmu_adr_i & `OR1200_QMEM_DMASK) == `OR1200_QMEM_DADDR;
 `else
   assign daddr_qmem_hit = 1'b0;
 `endif
 
-  //
-  //
-  //
-  assign qmem_en = iaddr_qmem_hit & qmemimmu_cycstb_i | daddr_qmem_hit & qmemdmmu_cycstb_i;
+  // 地址在QMEM的范围内，同时对QMEM有总线操作信号
+  assign qmem_en = iaddr_qmem_hit & qmemimmu_cycstb_i | 
+                   daddr_qmem_hit & qmemdmmu_cycstb_i;
+  // 注意写操作只能在数据总线上出现
   assign qmem_we = qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i;
 `ifdef OR1200_QMEM_BSEL
   assign qmem_sel = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdcpu_sel_i : qmemicpu_sel_i;
 `endif
   assign qmem_di = qmemdcpu_dat_i;
+  // 实际上是优先级的判断，如果有数据总线和指令总线同时的请求，数据总线优先操作
   assign qmem_addr = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdmmu_adr_i : qmemimmu_adr_i;
 
   //
   // QMEM control FSM
   //
   always @(`OR1200_RST_EVENT rst or posedge clk)
-    if (rst == `OR1200_RST_VALUE) begin
-      state <=  `OR1200_QMEMFSM_IDLE;
+    if (rst == `OR1200_RST_VALUE) 
+    begin
+      state     <=  `OR1200_QMEMFSM_IDLE;
       qmem_dack <=  1'b0;
       qmem_iack <=  1'b0;
     end
@@ -329,7 +339,7 @@ module or1200_qmem_top
       case (state)	// synopsys parallel_case
       `OR1200_QMEMFSM_IDLE: begin
         if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i & qmem_ack) begin
-          state <=  `OR1200_QMEMFSM_STORE;
+          state     <=  `OR1200_QMEMFSM_STORE;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
@@ -429,7 +439,9 @@ module or1200_qmem_top
     .mbist_so_o(mbist_so_o),
     .mbist_ctrl_i(mbist_ctrl_i),
 `endif
-    .addr(qmem_addr[12:2]),
+    // 注意： QMEM的地址空间有1M，但是这里直到第12位，实际上只有4K的地址空间
+    //      所以，会有地址环绕的现象出现！
+    .addr(qmem_addr[12:2]), 
 `ifdef OR1200_QMEM_BSEL
     .sel(qmem_sel),
 `endif
@@ -443,49 +455,49 @@ module or1200_qmem_top
     .doq(qmem_do)
   );
 
-`else  // OR1200_QMEM_IMPLEMENTED
+`else  // ! OR1200_QMEM_IMPLEMENTED
 
   //
   // QMEM and CPU/IMMU
   //
-  assign qmemicpu_dat_o = icqmem_dat_i;
-  assign qmemicpu_ack_o = icqmem_ack_i;
-  assign qmemimmu_rty_o = icqmem_rty_i;
-  assign qmemimmu_err_o = icqmem_err_i;
-  assign qmemimmu_tag_o = icqmem_tag_i;
+  assign qmemicpu_dat_o   = icqmem_dat_i;
+  assign qmemicpu_ack_o   = icqmem_ack_i;
+  assign qmemimmu_rty_o   = icqmem_rty_i;
+  assign qmemimmu_err_o   = icqmem_err_i;
+  assign qmemimmu_tag_o   = icqmem_tag_i;
 
   //
   // QMEM and IC
   //
-  assign icqmem_adr_o = qmemimmu_adr_i;
-  assign icqmem_cycstb_o = qmemimmu_cycstb_i;
-  assign icqmem_ci_o = qmemimmu_ci_i;
-  assign icqmem_sel_o = qmemicpu_sel_i;
-  assign icqmem_tag_o = qmemicpu_tag_i;
+  assign icqmem_adr_o     = qmemimmu_adr_i;
+  assign icqmem_cycstb_o  = qmemimmu_cycstb_i;
+  assign icqmem_ci_o      = qmemimmu_ci_i;
+  assign icqmem_sel_o     = qmemicpu_sel_i;
+  assign icqmem_tag_o     = qmemicpu_tag_i;
 
   //
   // QMEM and CPU/DMMU
   //
-  assign qmemdcpu_dat_o = dcqmem_dat_i;
-  assign qmemdcpu_ack_o = dcqmem_ack_i;
-  assign qmemdcpu_rty_o = dcqmem_rty_i;
-  assign qmemdmmu_err_o = dcqmem_err_i;
-  assign qmemdmmu_tag_o = dcqmem_tag_i;
+  assign qmemdcpu_dat_o   = dcqmem_dat_i;
+  assign qmemdcpu_ack_o   = dcqmem_ack_i;
+  assign qmemdcpu_rty_o   = dcqmem_rty_i;
+  assign qmemdmmu_err_o   = dcqmem_err_i;
+  assign qmemdmmu_tag_o   = dcqmem_tag_i;
 
   //
   // QMEM and DC
   //
-  assign dcqmem_adr_o = qmemdmmu_adr_i;
-  assign dcqmem_cycstb_o = qmemdmmu_cycstb_i;
-  assign dcqmem_ci_o = qmemdmmu_ci_i;
-  assign dcqmem_we_o = qmemdcpu_we_i;
-  assign dcqmem_sel_o = qmemdcpu_sel_i;
-  assign dcqmem_tag_o = qmemdcpu_tag_i;
-  assign dcqmem_dat_o = qmemdcpu_dat_i;
+  assign dcqmem_adr_o     = qmemdmmu_adr_i;
+  assign dcqmem_cycstb_o  = qmemdmmu_cycstb_i;
+  assign dcqmem_ci_o      = qmemdmmu_ci_i;
+  assign dcqmem_we_o      = qmemdcpu_we_i;
+  assign dcqmem_sel_o     = qmemdcpu_sel_i;
+  assign dcqmem_tag_o     = qmemdcpu_tag_i;
+  assign dcqmem_dat_o     = qmemdcpu_dat_i;
 
 `ifdef OR1200_BIST
-  assign mbist_so_o = mbist_si_i;
-`endif
+  assign mbist_so_o       = mbist_si_i;
+`endif // OR1200_BIST
 
 `endif
 
