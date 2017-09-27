@@ -53,13 +53,13 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-`define OR1200_DCFSM_IDLE	3'd0
+`define OR1200_DCFSM_IDLE	      3'd0
 `define OR1200_DCFSM_CLOADSTORE	3'd1
-`define OR1200_DCFSM_LOOP2	3'd2
-`define OR1200_DCFSM_LOOP3	3'd3
-`define OR1200_DCFSM_LOOP4	3'd4
-`define OR1200_DCFSM_FLUSH5	3'd5
-`define OR1200_DCFSM_INV6	3'd6
+`define OR1200_DCFSM_LOOP2	    3'd2
+`define OR1200_DCFSM_LOOP3	    3'd3
+`define OR1200_DCFSM_LOOP4	    3'd4
+`define OR1200_DCFSM_FLUSH5	    3'd5
+`define OR1200_DCFSM_INV6	      3'd6
 `define OR1200_DCFSM_WAITSPRCS7	3'd7
 
 //

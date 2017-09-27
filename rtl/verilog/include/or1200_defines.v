@@ -81,22 +81,22 @@
 //
 // Do not implement Data cache
 //
-//`define OR1200_NO_DC
+`define OR1200_NO_DC
 
 //
 // Do not implement Insn cache
 //
-//`define OR1200_NO_IC
+`define OR1200_NO_IC
 
 //
 // Do not implement Data MMU
 //
-//`define OR1200_NO_DMMU
+`define OR1200_NO_DMMU
 
 //
 // Do not implement Insn MMU
 //
-//`define OR1200_NO_IMMU
+`define OR1200_NO_IMMU
 
 //
 // Select between ASIC optimized and generic multiplier
@@ -923,7 +923,7 @@
 //
 
 // Define it if you want DU implemented
-`define OR1200_DU_IMPLEMENTED
+// `define OR1200_DU_IMPLEMENTED
 
 //
 // Define if you want HW Breakpoints
@@ -1068,7 +1068,7 @@
 //
 
 // Define it if you want PIC implemented
-`define OR1200_PIC_IMPLEMENTED
+// `define OR1200_PIC_IMPLEMENTED
 
 // Define number of interrupt inputs (2-31)
 `define OR1200_PIC_INTS     20
@@ -1096,7 +1096,7 @@
 //
 
 // Define it if you want TT implemented
-`define OR1200_TT_IMPLEMENTED
+// `define OR1200_TT_IMPLEMENTED
 
 // Address offsets of TT registers inside TT group
 `define OR1200_TT_OFS_TTMR  1'd0
@@ -1450,7 +1450,7 @@
 // memory in the system). IC/DC are sitting behind QMEM so the
 // whole design timing might be worse with QMEM implemented.
 //
-`define OR1200_QMEM_IMPLEMENTED
+// `define OR1200_QMEM_IMPLEMENTED
 
 //
 // Base address and mask of QMEM
@@ -1834,10 +1834,10 @@
 // `define OR1200_BOOT_ADR 	32'h00000100
 
 // Boot from 0xf0000000 <-- ROM
-//`define OR1200_BOOT_PCREG_DEFAULT   30'h3BFFFFFF
-// `define OR1200_BOOT_ADR             32'hf000_0000
+`define OR1200_BOOT_PCREG_DEFAULT   30'h3BFFFFFF
+`define OR1200_BOOT_ADR             32'hf000_0000
 
-  // Boot from 0x00800000 <-- QMEM
-`define OR1200_BOOT_PCREG_DEFAULT   30'h1FFFFF
-`define OR1200_BOOT_ADR             32'h0080_0000
+// Boot from 0x00800000 <-- QMEM
+// `define OR1200_BOOT_PCREG_DEFAULT   30'h1FFFFF
+// `define OR1200_BOOT_ADR             32'h0080_0000
 

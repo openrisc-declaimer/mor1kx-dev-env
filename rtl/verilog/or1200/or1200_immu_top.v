@@ -235,7 +235,6 @@ module or1200_immu_top
       icpu_vpn_r <=  icpu_adr_i[31:`OR1200_IMMU_PS];
 
 `ifdef OR1200_NO_IMMU
-
   //
   // Put all outputs in inactive state
   //
@@ -304,7 +303,7 @@ module or1200_immu_top
   // icpu_rty_o
   //
   // assign icpu_rty_o = !icpu_err_o & qmemimmu_rty_i;
-  //assign icpu_rty_o = qmemimmu_rty_i | itlb_spr_access & immu_en;
+  // assign icpu_rty_o = qmemimmu_rty_i | itlb_spr_access & immu_en;
   assign icpu_rty_o = qmemimmu_rty_i;
 
   //

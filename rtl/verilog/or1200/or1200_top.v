@@ -54,44 +54,47 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_top(
-  // System
-  clk_i, rst_i, pic_ints_i, clmode_i,
+module or1200_top
+  (
+   // System
+   clk_i, rst_i, pic_ints_i, clmode_i,
 
-  // Instruction WISHBONE INTERFACE
-  iwb_clk_i, iwb_rst_i, iwb_ack_i, iwb_err_i, iwb_rty_i, iwb_dat_i,
-  iwb_cyc_o, iwb_adr_o, iwb_stb_o, iwb_we_o, iwb_sel_o, iwb_dat_o,
+   // Instruction WISHBONE INTERFACE
+   iwb_clk_i, iwb_rst_i, iwb_ack_i, iwb_err_i, iwb_rty_i, iwb_dat_i,
+   iwb_cyc_o, iwb_adr_o, iwb_stb_o, iwb_we_o, iwb_sel_o, iwb_dat_o,
 `ifdef OR1200_WB_CAB
-  iwb_cab_o,
-`endif
-`ifdef OR1200_WB_B3
-  iwb_cti_o, iwb_bte_o,
-`endif
-  // Data WISHBONE INTERFACE
-  dwb_clk_i, dwb_rst_i, dwb_ack_i, dwb_err_i, dwb_rty_i, dwb_dat_i,
-  dwb_cyc_o, dwb_adr_o, dwb_stb_o, dwb_we_o, dwb_sel_o, dwb_dat_o,
-`ifdef OR1200_WB_CAB
-  dwb_cab_o,
-`endif
-`ifdef OR1200_WB_B3
-  dwb_cti_o, dwb_bte_o,
+   iwb_cab_o,
 `endif
 
-  // External Debug Interface
-  dbg_stall_i, dbg_ewt_i,	dbg_lss_o, dbg_is_o, dbg_wp_o, dbg_bp_o,
-  dbg_stb_i, dbg_we_i, dbg_adr_i, dbg_dat_i, dbg_dat_o, dbg_ack_o,
+`ifdef OR1200_WB_B3
+   iwb_cti_o, iwb_bte_o,
+`endif
+
+   // Data WISHBONE INTERFACE
+   dwb_clk_i, dwb_rst_i, dwb_ack_i, dwb_err_i, dwb_rty_i, dwb_dat_i,
+   dwb_cyc_o, dwb_adr_o, dwb_stb_o, dwb_we_o, dwb_sel_o, dwb_dat_o,
+`ifdef OR1200_WB_CAB
+   dwb_cab_o,
+`endif
+
+`ifdef OR1200_WB_B3
+   dwb_cti_o, dwb_bte_o,
+`endif
+
+   // External Debug Interface
+   dbg_stall_i, dbg_ewt_i,	dbg_lss_o, dbg_is_o, dbg_wp_o, dbg_bp_o,
+   dbg_stb_i, dbg_we_i, dbg_adr_i, dbg_dat_i, dbg_dat_o, dbg_ack_o,
 
 `ifdef OR1200_BIST
-  // RAM BIST
-  mbist_si_i, mbist_so_o, mbist_ctrl_i,
+   // RAM BIST
+   mbist_si_i, mbist_so_o, mbist_ctrl_i,
 `endif
-  // Power Management
-  pm_cpustall_i,
-  pm_clksd_o, pm_dc_gate_o, pm_ic_gate_o, pm_dmmu_gate_o,
-  pm_immu_gate_o, pm_tt_gate_o, pm_cpu_gate_o, pm_wakeup_o, pm_lvolt_o
+   // Power Management
+   pm_cpustall_i,
+   pm_clksd_o, pm_dc_gate_o, pm_ic_gate_o, pm_dmmu_gate_o,
+   pm_immu_gate_o, pm_tt_gate_o, pm_cpu_gate_o, pm_wakeup_o, pm_lvolt_o,
 
-  ,sig_tick		
-
+   sig_tick
   );
 
   // ---------------------------------------------------------------------------
@@ -125,7 +128,7 @@ module or1200_top(
   output			        iwb_cyc_o;	// cycle valid output
   output	[aw-1:0]	  iwb_adr_o;	// address bus outputs
   output			        iwb_stb_o;	// strobe output
-  output			        iwb_we_o;	// indicates write transfer
+  output			        iwb_we_o;	  // indicates write transfer
   output	[3:0]		    iwb_sel_o;	// byte select outputs
   output	[dw-1:0]	  iwb_dat_o;	// output data bus
 `ifdef OR1200_WB_CAB
@@ -285,84 +288,84 @@ module or1200_top(
   //
   // CPU and data memory subsystem
   //
-  wire			dc_en;
-  wire	[31:0]		dcpu_adr_cpu;
-  wire			dcpu_cycstb_cpu;
-  wire			dcpu_we_cpu;
-  wire	[3:0]		dcpu_sel_cpu;
-  wire	[3:0]		dcpu_tag_cpu;
-  wire	[31:0]		dcpu_dat_cpu;
-  wire	[31:0]		dcpu_dat_qmem;
-  wire			dcpu_ack_qmem;
-  wire			dcpu_rty_qmem;
-  wire			dcpu_err_dmmu;
-  wire	[3:0]		dcpu_tag_dmmu;
-  wire    		dc_no_writethrough;
+  wire			          dc_en;
+  wire	[31:0]		    dcpu_adr_cpu;
+  wire			          dcpu_cycstb_cpu;
+  wire			          dcpu_we_cpu;
+  wire	[3:0]		      dcpu_sel_cpu;
+  wire	[3:0]		      dcpu_tag_cpu;
+  wire	[31:0]		    dcpu_dat_cpu;
+  wire	[31:0]		    dcpu_dat_qmem;
+  wire			          dcpu_ack_qmem;
+  wire			          dcpu_rty_qmem;
+  wire			          dcpu_err_dmmu;
+  wire	[3:0]		      dcpu_tag_dmmu;
+  wire    		        dc_no_writethrough;
 
   //
   // IMMU and CPU
   //
-  wire			immu_en;
-  wire	[31:0]		spr_dat_immu;
+  wire			          immu_en;
+  wire	[31:0]		    spr_dat_immu;
 
   //
   // CPU and insn memory subsystem
   //
-  wire			ic_en;
-  wire	[31:0]		icpu_adr_cpu;
-  wire			icpu_cycstb_cpu;
-  wire	[3:0]		icpu_sel_cpu;
-  wire	[3:0]		icpu_tag_cpu;
-  wire	[31:0]		icpu_dat_qmem;
-  wire			icpu_ack_qmem;
-  wire	[31:0]		icpu_adr_immu;
-  wire			icpu_err_immu;
-  wire	[3:0]		icpu_tag_immu;
-  wire			icpu_rty_immu;
+  wire			          ic_en;
+  wire	[31:0]		    icpu_adr_cpu;
+  wire			          icpu_cycstb_cpu;
+  wire	[3:0]		      icpu_sel_cpu;
+  wire	[3:0]		      icpu_tag_cpu;
+  wire	[31:0]		    icpu_dat_qmem;
+  wire			          icpu_ack_qmem;
+  wire	[31:0]		    icpu_adr_immu;
+  wire			          icpu_err_immu;
+  wire	[3:0]		      icpu_tag_immu;
+  wire			          icpu_rty_immu;
 
   //
   // IMMU and QMEM
   //
-  wire	[aw-1:0]	qmemimmu_adr_immu;
-  wire			qmemimmu_rty_qmem;
-  wire			qmemimmu_err_qmem;
-  wire	[3:0]		qmemimmu_tag_qmem;
-  wire			qmemimmu_cycstb_immu;
-  wire			qmemimmu_ci_immu;
+  wire	[aw-1:0]	    qmemimmu_adr_immu;
+  wire			          qmemimmu_rty_qmem;
+  wire			          qmemimmu_err_qmem;
+  wire	[3:0]		      qmemimmu_tag_qmem;
+  wire			          qmemimmu_cycstb_immu;
+  wire			          qmemimmu_ci_immu;
 
   //
   // QMEM and IC
   //
-  wire	[aw-1:0]	icqmem_adr_qmem;
-  wire			icqmem_rty_ic;
-  wire			icqmem_err_ic;
-  wire	[3:0]		icqmem_tag_ic;
-  wire			icqmem_cycstb_qmem;
-  wire			icqmem_ci_qmem;
-  wire	[31:0]		icqmem_dat_ic;
-  wire			icqmem_ack_ic;
+  wire	[aw-1:0]	    icqmem_adr_qmem;
+  wire			          icqmem_rty_ic;
+  wire			          icqmem_err_ic;
+  wire	[3:0]		      icqmem_tag_ic;
+  wire			          icqmem_cycstb_qmem;
+  wire			          icqmem_ci_qmem;
+  wire	[31:0]		    icqmem_dat_ic;
+  wire			          icqmem_ack_ic;
 
   //
   // QMEM and DC
   //
-  wire	[aw-1:0]	dcqmem_adr_qmem;
-  wire			dcqmem_rty_dc;
-  wire			dcqmem_err_dc;
-  wire	[3:0]		dcqmem_tag_dc;
-  wire			dcqmem_cycstb_qmem;
-  wire			dcqmem_ci_qmem;
-  wire	[31:0]		dcqmem_dat_dc;
-  wire	[31:0]		dcqmem_dat_qmem;
-  wire			dcqmem_we_qmem;
-  wire	[3:0]		dcqmem_sel_qmem;
-  wire			dcqmem_ack_dc;
+  wire	[aw-1:0]	    dcqmem_adr_qmem;
+  wire			          dcqmem_rty_dc;
+  wire			          dcqmem_err_dc;
+  wire	[3:0]		      dcqmem_tag_dc;
+  wire			          dcqmem_cycstb_qmem;
+  wire			          dcqmem_ci_qmem;
+  wire	[31:0]		    dcqmem_dat_dc;
+  wire	[31:0]		    dcqmem_dat_qmem;
+  wire			          dcqmem_we_qmem;
+  wire	[3:0]		      dcqmem_sel_qmem;
+  wire			          dcqmem_ack_dc;
 
   //
   // Connection between CPU and PIC
   //
-  wire	[dw-1:0]	spr_dat_pic;
-  wire			pic_wakeup;
-  wire			sig_int;
+  wire	[dw-1:0]	    spr_dat_pic;
+  wire			          pic_wakeup;
+  wire			          sig_int;
 
   //
   // Connection between CPU and PM
@@ -414,17 +417,17 @@ module or1200_top(
   //
   // RAM BIST
   //
-  wire			  mbist_immu_so;
-  wire			  mbist_ic_so;
-  wire			  mbist_dmmu_so;
-  wire			  mbist_dc_so;
-  wire			  mbist_qmem_so;
-  wire			  mbist_immu_si = mbist_si_i;
-  wire			  mbist_ic_si = mbist_immu_so;
-  wire			  mbist_qmem_si = mbist_ic_so;
-  wire			  mbist_dmmu_si = mbist_qmem_so;
-  wire			  mbist_dc_si = mbist_dmmu_so;
-  assign			mbist_so_o = mbist_dc_so;
+  wire			          mbist_immu_so;
+  wire			          mbist_ic_so;
+  wire			          mbist_dmmu_so;
+  wire			          mbist_dc_so;
+  wire			          mbist_qmem_so;
+  wire			          mbist_immu_si = mbist_si_i;
+  wire			          mbist_ic_si = mbist_immu_so;
+  wire			          mbist_qmem_si = mbist_ic_so;
+  wire			          mbist_dmmu_si = mbist_qmem_so;
+  wire			          mbist_dc_si = mbist_dmmu_so;
+  assign			        mbist_so_o = mbist_dc_so;
 `endif
 
   wire  [3:0]         icqmem_sel_qmem;
@@ -452,7 +455,7 @@ module or1200_top(
      .wb_cyc_o(iwb_cyc_o),
      .wb_adr_o(iwb_adr_o),
      .wb_stb_o(iwb_stb_o),
-     .wb_we_o(iwb_we_o),
+     .wb_we_o (iwb_we_o),
      .wb_sel_o(iwb_sel_o),
      .wb_dat_o(iwb_dat_o),
 `ifdef OR1200_WB_CAB
@@ -468,7 +471,7 @@ module or1200_top(
      .biu_adr_i(icbiu_adr_ic_word),
      .biu_cyc_i(icbiu_cyc_ic),
      .biu_stb_i(icbiu_stb_ic),
-     .biu_we_i(icbiu_we_ic),
+     .biu_we_i (icbiu_we_ic),
      .biu_sel_i(icbiu_sel_ic),
      .biu_cab_i(icbiu_cab_ic),
      .biu_dat_o(icbiu_dat_biu),
@@ -514,7 +517,7 @@ module or1200_top(
     .biu_adr_i(sbbiu_adr_sb),
     .biu_cyc_i(sbbiu_cyc_sb),
     .biu_stb_i(sbbiu_stb_sb),
-    .biu_we_i(sbbiu_we_sb),
+    .biu_we_i (sbbiu_we_sb),
     .biu_sel_i(sbbiu_sel_sb),
     .biu_cab_i(sbbiu_cab_sb),
     .biu_dat_o(sbbiu_dat_biu),
@@ -541,12 +544,12 @@ module or1200_top(
     .ic_en(ic_en),
     .immu_en(immu_en),
     .supv(supv),
-    .icpu_adr_i(icpu_adr_cpu),
+    .icpu_adr_i   (icpu_adr_cpu),
     .icpu_cycstb_i(icpu_cycstb_cpu),
-    .icpu_adr_o(icpu_adr_immu),
-    .icpu_tag_o(icpu_tag_immu),
-    .icpu_rty_o(icpu_rty_immu),
-    .icpu_err_o(icpu_err_immu),
+    .icpu_adr_o   (icpu_adr_immu),
+    .icpu_tag_o   (icpu_tag_immu),
+    .icpu_rty_o   (icpu_rty_immu),
+    .icpu_err_o   (icpu_err_immu),
 
     // SR Interface
     .boot_adr_sel_i(boot_adr_sel),
@@ -582,17 +585,17 @@ module or1200_top(
 `endif
 
     // IC and QMEM
-    .ic_en(ic_en),
-    .icqmem_adr_i(icqmem_adr_qmem),
+    .ic_en        (ic_en),
+    .icqmem_adr_i (icqmem_adr_qmem),
     .icqmem_cycstb_i(icqmem_cycstb_qmem),
-    .icqmem_ci_i(icqmem_ci_qmem),
-    .icqmem_sel_i(icqmem_sel_qmem),
-    .icqmem_tag_i(icqmem_tag_qmem),
-    .icqmem_dat_o(icqmem_dat_ic),
-    .icqmem_ack_o(icqmem_ack_ic),
-    .icqmem_rty_o(icqmem_rty_ic),
-    .icqmem_err_o(icqmem_err_ic),
-    .icqmem_tag_o(icqmem_tag_ic),
+    .icqmem_ci_i  (icqmem_ci_qmem),
+    .icqmem_sel_i (icqmem_sel_qmem),
+    .icqmem_tag_i (icqmem_tag_qmem),
+    .icqmem_dat_o (icqmem_dat_ic),
+    .icqmem_ack_o (icqmem_ack_ic),
+    .icqmem_rty_o (icqmem_rty_ic),
+    .icqmem_err_o (icqmem_err_ic),
+    .icqmem_tag_o (icqmem_tag_ic),
 
     // SPR access
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_IC]),
@@ -668,17 +671,17 @@ module or1200_top(
 
     // Connection QMEM and CPU
     .dc_en(dc_en),
-    .dcpu_adr_o(dcpu_adr_cpu),
+    .dcpu_adr_o   (dcpu_adr_cpu),
     .dcpu_cycstb_o(dcpu_cycstb_cpu),
-    .dcpu_we_o(dcpu_we_cpu),
-    .dcpu_sel_o(dcpu_sel_cpu),
-    .dcpu_tag_o(dcpu_tag_cpu),
-    .dcpu_dat_o(dcpu_dat_cpu),
-          .dcpu_dat_i(dcpu_dat_qmem),
-    .dcpu_ack_i(dcpu_ack_qmem),
-    .dcpu_rty_i(dcpu_rty_qmem),
-    .dcpu_err_i(dcpu_err_dmmu),
-    .dcpu_tag_i(dcpu_tag_dmmu),
+    .dcpu_we_o    (dcpu_we_cpu),
+    .dcpu_sel_o   (dcpu_sel_cpu),
+    .dcpu_tag_o   (dcpu_tag_cpu),
+    .dcpu_dat_o   (dcpu_dat_cpu),
+    .dcpu_dat_i   (dcpu_dat_qmem),
+    .dcpu_ack_i   (dcpu_ack_qmem),
+    .dcpu_rty_i   (dcpu_rty_qmem),
+    .dcpu_err_i   (dcpu_err_dmmu),
+    .dcpu_tag_i   (dcpu_tag_dmmu),
     .dc_no_writethrough(dc_no_writethrough),
 
     // Connection DMMU and CPU internally
@@ -705,9 +708,9 @@ module or1200_top(
     .spr_dat_immu(spr_dat_immu),
     .spr_dat_du(spr_dat_du),
     .spr_dat_npc(spr_dat_npc),
-    .spr_cs(spr_cs),
-    .spr_we(spr_we),
-          .mtspr_dc_done(mtspr_dc_done)
+    .spr_cs     (spr_cs),
+    .spr_we     (spr_we),
+    .mtspr_dc_done(mtspr_dc_done)
   );
 
   //
@@ -720,9 +723,9 @@ module or1200_top(
 
 `ifdef OR1200_BIST
     // RAM BIST
-    .mbist_si_i(mbist_dmmu_si),
-    .mbist_so_o(mbist_dmmu_so),
-    .mbist_ctrl_i(mbist_ctrl_i),
+    .mbist_si_i   (mbist_dmmu_si),
+    .mbist_so_o   (mbist_dmmu_so),
+    .mbist_ctrl_i (mbist_ctrl_i),
 `endif
 
     // CPU i/f
@@ -759,25 +762,25 @@ module or1200_top(
 
 `ifdef OR1200_BIST
     // RAM BIST
-    .mbist_si_i(mbist_dc_si),
-    .mbist_so_o(mbist_dc_so),
-    .mbist_ctrl_i(mbist_ctrl_i),
+    .mbist_si_i   (mbist_dc_si),
+    .mbist_so_o   (mbist_dc_so),
+    .mbist_ctrl_i (mbist_ctrl_i),
 `endif
 
     // DC and QMEM
-    .dc_en(dc_en),
-    .dcqmem_adr_i(dcqmem_adr_qmem),
+    .dc_en          (dc_en),
+    .dcqmem_adr_i   (dcqmem_adr_qmem),
     .dcqmem_cycstb_i(dcqmem_cycstb_qmem),
-    .dcqmem_ci_i(dcqmem_ci_qmem),
-    .dcqmem_we_i(dcqmem_we_qmem),
-    .dcqmem_sel_i(dcqmem_sel_qmem),
-    .dcqmem_tag_i(dcqmem_tag_qmem),
-    .dcqmem_dat_i(dcqmem_dat_qmem),
-    .dcqmem_dat_o(dcqmem_dat_dc),
-    .dcqmem_ack_o(dcqmem_ack_dc),
-    .dcqmem_rty_o(dcqmem_rty_dc),
-    .dcqmem_err_o(dcqmem_err_dc),
-    .dcqmem_tag_o(dcqmem_tag_dc),
+    .dcqmem_ci_i    (dcqmem_ci_qmem),
+    .dcqmem_we_i    (dcqmem_we_qmem),
+    .dcqmem_sel_i   (dcqmem_sel_qmem),
+    .dcqmem_tag_i   (dcqmem_tag_qmem),
+    .dcqmem_dat_i   (dcqmem_dat_qmem),
+    .dcqmem_dat_o   (dcqmem_dat_dc),
+    .dcqmem_ack_o   (dcqmem_ack_dc),
+    .dcqmem_rty_o   (dcqmem_rty_dc),
+    .dcqmem_err_o   (dcqmem_err_dc),
+    .dcqmem_tag_o   (dcqmem_tag_dc),
 
     .dc_no_writethrough(dc_no_writethrough),
 
@@ -786,7 +789,7 @@ module or1200_top(
     .spr_addr(spr_addr),
     .spr_write(spr_we),
     .spr_dat_i(spr_dat_cpu),
-          .mtspr_dc_done(mtspr_dc_done),
+    .mtspr_dc_done(mtspr_dc_done),
 
     // DC and BIU
     .dcsb_dat_o(dcsb_dat_dc),
@@ -810,9 +813,9 @@ module or1200_top(
 
 `ifdef OR1200_BIST
     // RAM BIST
-    .mbist_si_i(mbist_qmem_si),
-    .mbist_so_o(mbist_qmem_so),
-    .mbist_ctrl_i(mbist_ctrl_i),
+    .mbist_si_i   (mbist_qmem_si),
+    .mbist_so_o   (mbist_qmem_so),
+    .mbist_ctrl_i (mbist_ctrl_i),
 `endif
 
     // QMEM and CPU/IMMU
@@ -912,17 +915,17 @@ module or1200_top(
     .clk(clk_i),
     .rst(rst_i),
     .dcpu_cycstb_i(dcpu_cycstb_cpu),
-    .dcpu_we_i(dcpu_we_cpu),
-    .dcpu_adr_i(dcpu_adr_cpu),
-    .dcpu_dat_lsu(dcpu_dat_cpu),
-    .dcpu_dat_dc(dcpu_dat_qmem),
+    .dcpu_we_i    (dcpu_we_cpu),
+    .dcpu_adr_i   (dcpu_adr_cpu),
+    .dcpu_dat_lsu (dcpu_dat_cpu),
+    .dcpu_dat_dc  (dcpu_dat_qmem),
     .icpu_cycstb_i(icpu_cycstb_cpu),
-    .ex_freeze(ex_freeze),
-    .branch_op(branch_op),
-    .ex_insn(ex_insn),
-    .id_pc(id_pc),
-    .du_dsr(du_dsr),
-    .du_dmr1(du_dmr1),
+    .ex_freeze    (ex_freeze),
+    .branch_op    (branch_op),
+    .ex_insn      (ex_insn),
+    .id_pc        (id_pc),
+    .du_dsr       (du_dsr),
+    .du_dmr1      (du_dmr1),
 
     // For Trace buffer
     .spr_dat_npc(spr_dat_npc),
@@ -947,17 +950,17 @@ module or1200_top(
 
     // External Debug Interface
     .dbg_stall_i(dbg_stall_i),
-    .dbg_ewt_i(dbg_ewt_i),
-    .dbg_lss_o(dbg_lss_o),
-    .dbg_is_o(dbg_is_o),
-    .dbg_wp_o(dbg_wp_o),
-    .dbg_bp_o(dbg_bp_o),
-    .dbg_stb_i(dbg_stb_i),
-    .dbg_we_i(dbg_we_i),
-    .dbg_adr_i(dbg_adr_i),
-    .dbg_dat_i(dbg_dat_i),
-    .dbg_dat_o(dbg_dat_o),
-    .dbg_ack_o(dbg_ack_o)
+    .dbg_ewt_i  (dbg_ewt_i),
+    .dbg_lss_o  (dbg_lss_o),
+    .dbg_is_o   (dbg_is_o),
+    .dbg_wp_o   (dbg_wp_o),
+    .dbg_bp_o   (dbg_bp_o),
+    .dbg_stb_i  (dbg_stb_i),
+    .dbg_we_i   (dbg_we_i),
+    .dbg_adr_i  (dbg_adr_i),
+    .dbg_dat_i  (dbg_dat_i),
+    .dbg_dat_o  (dbg_dat_o),
+    .dbg_ack_o  (dbg_ack_o)
   );
 
   //
@@ -969,7 +972,7 @@ module or1200_top(
     .rst(rst_i),
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_PIC]),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_pic),
     .pic_wakeup(pic_wakeup),

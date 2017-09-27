@@ -130,8 +130,11 @@ module or1200_if
   //
   assign if_insn = no_more_dslot | rfe | if_bypass ? 
                       {`OR1200_OR32_NOP, 26'h041_0000} : 
-                      saved ? insn_saved : icpu_ack_i ? 
-                        icpu_dat_i : {`OR1200_OR32_NOP, 26'h061_0000};
+                        saved ? 
+                          insn_saved : 
+                            icpu_ack_i ? 
+                              icpu_dat_i : 
+                                {`OR1200_OR32_NOP, 26'h061_0000};
   assign if_pc = saved ? addr_saved : {icpu_adr_i[31:2], 2'h0};
   assign if_stall = !icpu_err_i & !icpu_ack_i & !saved;
   assign genpc_refetch = saved & icpu_ack_i;

@@ -49,8 +49,8 @@
 //
 // $Log: or1200_wb_biu.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Major update: 
-// Structure reordered and bugs fixed. 
+// Major update:
+// Structure reordered and bugs fixed.
 //
 
 // synopsys translate_off
@@ -80,12 +80,11 @@ module or1200_wb_biu
 
   // ---------------------------------------------------------------------------
   // Parameters
-  // ---------------------------------------------------------------------------    
+  // ---------------------------------------------------------------------------
   parameter dw = `OR1200_OPERAND_WIDTH;
   parameter aw = `OR1200_OPERAND_WIDTH;
   parameter bl = 4; /* Can currently be either 4 or 8 - the two optional line sizes for the OR1200. */
-	      
-  
+
   //
   // RISC clock, reset and clock control
   //
@@ -146,12 +145,12 @@ module or1200_wb_biu
   reg [2:0] 				      wb_cti_o;	// cycle type identifier
   reg [1:0] 				      wb_bte_o;	// burst type extension
 `endif
-`ifdef OR1200_NO_DC   
+`ifdef OR1200_NO_DC
   reg [dw-1:0] 			      wb_dat_o;	// output data bus
-`else   
+`else
   assign wb_dat_o = biu_dat_i;    // No register on this - straight from DCRAM
 `endif
-   
+
 `ifdef OR1200_WB_RETRY
   reg [`OR1200_WB_RETRY-1:0] 		retry_cnt;	// Retry counter
 `else
@@ -190,17 +189,17 @@ module or1200_wb_biu
 
   //
   // WB FSM - register part
-  // 
+  //
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
-    if (wb_rst_i == `OR1200_RST_VALUE) 
+    if (wb_rst_i == `OR1200_RST_VALUE)
       wb_fsm_state_cur <=  wb_fsm_idle;
-    else 
+    else
       wb_fsm_state_cur <=  wb_fsm_state_nxt;
     end
 
   //
   // WB burst tength counter
-  // 
+  //
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
     if (wb_rst_i == `OR1200_RST_VALUE) begin
       burst_len <= 0;
@@ -214,16 +213,16 @@ module or1200_wb_biu
     end
   end
 
-  // 
+  //
   // WB FSM - combinatorial part
-  // 
-  always @(wb_fsm_state_cur or burst_len or wb_err_i or wb_rty_i or wb_ack or 
-	         wb_cti_o or wb_sel_o or wb_stb_o or wb_we_o or biu_cyc_i or 
-	         biu_stb or biu_cab_i or biu_sel_i or biu_we_i) 
+  //
+  always @(wb_fsm_state_cur or burst_len or wb_err_i or wb_rty_i or wb_ack or
+	         wb_cti_o or wb_sel_o or wb_stb_o or wb_we_o or biu_cyc_i or
+	         biu_stb or biu_cab_i or biu_sel_i or biu_we_i)
   begin
     // States of WISHBONE Finite State Machine
     case(wb_fsm_state_cur)
-    // IDLE 
+    // IDLE
     wb_fsm_idle : begin
       wb_cyc_nxt = biu_cyc_i & biu_stb;
       wb_stb_nxt = biu_cyc_i & biu_stb;
@@ -272,7 +271,7 @@ module or1200_wb_biu
 
   //
   // WB FSM - output signals
-  // 
+  //
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
     if (wb_rst_i == `OR1200_RST_VALUE) begin
 			wb_cyc_o	<=  1'b0;
@@ -285,33 +284,33 @@ module or1200_wb_biu
 			wb_we_o		<=  1'b0;
 			wb_sel_o	<=  4'hf;
 			wb_adr_o	<=  {aw{1'b0}};
-`ifdef OR1200_NO_DC	 
+`ifdef OR1200_NO_DC
 			wb_dat_o	<=  {dw{1'b0}};
-`endif	 
+`endif
     end
     else begin
 			wb_cyc_o	<=  wb_cyc_nxt;
 
-      if (wb_ack & wb_cti_o == 3'b111) 
+      if (wb_ack & wb_cti_o == 3'b111)
 				wb_stb_o        <=  1'b0;
       else
 				wb_stb_o        <=  wb_stb_nxt;
 `ifndef OR1200_NO_BURSTS
         wb_cti_o	<=  wb_cti_nxt;
-`endif	 
+`endif
         wb_bte_o	<=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
 `ifdef OR1200_WB_CAB
         wb_cab_o	<=  biu_cab_i;
 `endif
-			// we and sel - set at beginning of access 
+			// we and sel - set at beginning of access
 			if (wb_fsm_state_cur == wb_fsm_idle) begin
 				wb_we_o		<=  biu_we_i;
 				wb_sel_o	<=  biu_sel_i;
 			end
-			// adr - set at beginning of access and changed at every termination 
+			// adr - set at beginning of access and changed at every termination
 			if (wb_fsm_state_cur == wb_fsm_idle) begin
 				wb_adr_o	<=  biu_adr_i;
-			end 
+			end
 			else if (wb_stb_o & wb_ack) begin
 				if (bl==4) begin
 					wb_adr_o[3:2]	<=  wb_adr_o[3:2] + 1;
@@ -320,18 +319,18 @@ module or1200_wb_biu
 					wb_adr_o[4:2]	<=  wb_adr_o[4:2] + 1;
 				end
 			end
-`ifdef OR1200_NO_DC	 
+`ifdef OR1200_NO_DC
 			// dat - write data changed after avery subsequent write access
 			if (!wb_stb_o) begin
 				wb_dat_o 	<=  biu_dat_i;
 			end
-`endif	 
+`endif
       end
    end
 
   //
   // WB & BIU termination toggle counters
-  // 
+  //
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
     if (wb_rst_i == `OR1200_RST_VALUE) begin
       wb_ack_cnt	<=  1'b0;
@@ -357,7 +356,7 @@ module or1200_wb_biu
      end
   end
 
-  always @(posedge clk or `OR1200_RST_EVENT rst) 
+  always @(posedge clk or `OR1200_RST_EVENT rst)
   begin
     if (rst == `OR1200_RST_VALUE) begin
       biu_stb_reg	<=  1'b0;
@@ -406,7 +405,7 @@ module or1200_wb_biu
   assign	biu_dat_o	= wb_dat_i;
 
   //
-  // Input BIU termination signals 
+  // Input BIU termination signals
   //
   assign	biu_rty		= (wb_fsm_state_cur == wb_fsm_trans) & wb_rty_i & wb_stb_o & (wb_rty_cnt ~^ biu_rty_cnt);
   assign	biu_ack_o	= (wb_fsm_state_cur == wb_fsm_trans) & wb_ack & wb_stb_o & (wb_ack_cnt ~^ biu_ack_cnt);

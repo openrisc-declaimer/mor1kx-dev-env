@@ -248,12 +248,12 @@ module or1200_immu_tlb
   // TLB index is normally vaddr[18:13]. If it is SPR access then index is
   // spr_addr[5:0].
   //
-  assign tlb_index = spr_cs ? spr_addr[`OR1200_ITLB_INDXW-1:0] : vaddr[`OR1200_ITLB_INDX];
+  assign tlb_index      = spr_cs ? spr_addr[`OR1200_ITLB_INDXW-1:0] : vaddr[`OR1200_ITLB_INDX];
 
 `ifdef OR1200_BIST
   assign itlb_mr_ram_si = mbist_si_i;
   assign itlb_tr_ram_si = itlb_mr_ram_so;
-  assign mbist_so_o = itlb_tr_ram_so;
+  assign mbist_so_o     = itlb_tr_ram_so;
 `endif
 
   //

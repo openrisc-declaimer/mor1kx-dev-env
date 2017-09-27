@@ -43,7 +43,7 @@
 //
 // $Log: or1200_ic_top.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// No update 
+// No update
 
 // synopsys translate_off
 `include "timescale.v"
@@ -58,7 +58,7 @@ module or1200_ic_top(
 	clk, rst,
 
 	// External i/f
-	icbiu_dat_o, icbiu_adr_o, icbiu_cyc_o, icbiu_stb_o, icbiu_we_o, 
+	icbiu_dat_o, icbiu_adr_o, icbiu_cyc_o, icbiu_stb_o, icbiu_we_o,
 	icbiu_sel_o, icbiu_cab_o, icbiu_dat_i, icbiu_ack_i, icbiu_err_i,
 
 	// Internal i/f
@@ -77,7 +77,7 @@ module or1200_ic_top(
 
   // ---------------------------------------------------------------------------
   // Parameters
-  // --------------------------------------------------------------------------- 
+  // ---------------------------------------------------------------------------
 parameter dw = `OR1200_OPERAND_WIDTH;
 
 //
@@ -87,37 +87,37 @@ parameter dw = `OR1200_OPERAND_WIDTH;
 //
 // Clock and reset
 //
-input				clk;
-input				rst;
+input				          clk;
+input				          rst;
 
 //
 // External I/F
 //
-output	[dw-1:0]		icbiu_dat_o;
-output	[31:0]			icbiu_adr_o;
-output				icbiu_cyc_o;
-output				icbiu_stb_o;
-output				icbiu_we_o;
-output	[3:0]			icbiu_sel_o;
-output				icbiu_cab_o;
-input	[dw-1:0]		icbiu_dat_i;
-input				icbiu_ack_i;
-input				icbiu_err_i;
+output	[dw-1:0]		  icbiu_dat_o;
+output	[31:0]			  icbiu_adr_o;
+output				        icbiu_cyc_o;
+output				        icbiu_stb_o;
+output				        icbiu_we_o;
+output	[3:0]			    icbiu_sel_o;
+output				        icbiu_cab_o;
+input	[dw-1:0]		    icbiu_dat_i;
+input				          icbiu_ack_i;
+input				          icbiu_err_i;
 
 //
 // Internal I/F
 //
-input				ic_en;
-input	[31:0]			icqmem_adr_i;
-input				icqmem_cycstb_i;
-input				icqmem_ci_i;
-input	[3:0]			icqmem_sel_i;
-input	[3:0]			icqmem_tag_i;
-output	[dw-1:0]		icqmem_dat_o;
-output				icqmem_ack_o;
-output				icqmem_rty_o;
-output				icqmem_err_o;
-output	[3:0]			icqmem_tag_o;
+input				          ic_en;
+input	[31:0]			    icqmem_adr_i;
+input				          icqmem_cycstb_i;
+input				          icqmem_ci_i;
+input	[3:0]			      icqmem_sel_i;
+input	[3:0]			      icqmem_tag_i;
+output	[dw-1:0]		  icqmem_dat_o;
+output				        icqmem_ack_o;
+output				        icqmem_rty_o;
+output				        icqmem_err_o;
+output	[3:0]			    icqmem_tag_o;
 
 `ifdef OR1200_BIST
 //
@@ -131,44 +131,44 @@ output mbist_so_o;
 //
 // SPR access
 //
-input				spr_cs;
-input				spr_write;
-input	[31:0]			spr_dat_i;
+input				          spr_cs;
+input				          spr_write;
+input	[31:0]			    spr_dat_i;
 
 //
 // Internal wires and regs
 //
-wire				tag_v;
+wire				          tag_v;
 wire	[`OR1200_ICTAG_W-2:0]	tag;
-wire	[dw-1:0]		to_icram;
-wire	[dw-1:0]		from_icram;
-wire	[31:0]			saved_addr;
-wire	[3:0]			icram_we;
-wire				ictag_we;
-wire	[31:0]			ic_addr;
-wire				icfsm_biu_read;
-/* verilator lint_off UNOPTFLAT */    
-reg				tagcomp_miss;
-/* verilator lint_on UNOPTFLAT */    
+wire	[dw-1:0]		    to_icram;
+wire	[dw-1:0]		    from_icram;
+wire	[31:0]			    saved_addr;
+wire	[3:0]			      icram_we;
+wire				          ictag_we;
+wire	[31:0]			    ic_addr;
+wire				          icfsm_biu_read;
+/* verilator lint_off UNOPTFLAT */
+reg				            tagcomp_miss;
+/* verilator lint_on UNOPTFLAT */
 wire	[`OR1200_ICINDXH:`OR1200_ICLS]	ictag_addr;
-wire				ictag_en;
-wire				ictag_v; 
-wire				ic_inv;
-wire				icfsm_first_hit_ack;
-wire				icfsm_first_miss_ack;
-wire				icfsm_first_miss_err;
-wire				icfsm_burst;
-wire				icfsm_tag_we;
-reg 				ic_inv_q;
-   
+wire				          ictag_en;
+wire				          ictag_v;
+wire				          ic_inv;
+wire				          icfsm_first_hit_ack;
+wire				          icfsm_first_miss_ack;
+wire				          icfsm_first_miss_err;
+wire				          icfsm_burst;
+wire				          icfsm_tag_we;
+reg 				          ic_inv_q;
+
 `ifdef OR1200_BIST
 //
 // RAM BIST
 //
-wire				mbist_ram_so;
-wire				mbist_tag_so;
-wire				mbist_ram_si = mbist_si_i;
-wire				mbist_tag_si = mbist_ram_so;
+wire				  mbist_ram_so;
+wire				  mbist_tag_so;
+wire				  mbist_ram_si = mbist_si_i;
+wire				  mbist_tag_si = mbist_ram_so;
 assign				mbist_so_o = mbist_tag_so;
 `endif
 
@@ -178,8 +178,8 @@ assign				mbist_so_o = mbist_tag_so;
 assign icbiu_adr_o = ic_addr;
 assign ic_inv = spr_cs & spr_write;
 assign ictag_we = icfsm_tag_we | ic_inv;
-assign ictag_addr = ic_inv ? 
-		    spr_dat_i[`OR1200_ICINDXH:`OR1200_ICLS] : 
+assign ictag_addr = ic_inv ?
+		    spr_dat_i[`OR1200_ICINDXH:`OR1200_ICLS] :
 		    ic_addr[`OR1200_ICINDXH:`OR1200_ICLS];
 assign ictag_en = ic_inv | ic_en;
 assign ictag_v = ~ic_inv;
@@ -224,14 +224,13 @@ assign icqmem_dat_o = icfsm_first_miss_ack | !ic_en ? icbiu_dat_i : from_icram;
 
 //
 // Detect falling edge of IC invalidate signal
-// 
+//
 always @(posedge clk or `OR1200_RST_EVENT rst)
    if (rst==`OR1200_RST_VALUE)
      ic_inv_q <= 1'b0;
    else
      ic_inv_q <= ic_inv;
-   
-   
+
 //
 // Tag comparison
 //

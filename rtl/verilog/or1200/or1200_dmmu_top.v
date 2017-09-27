@@ -325,6 +325,6 @@ module or1200_dmmu_top
     .spr_dat_o(dtlb_dat_o)
   );
 
-`endif
+`endif // !OR1200_NO_DMMU
 
 endmodule

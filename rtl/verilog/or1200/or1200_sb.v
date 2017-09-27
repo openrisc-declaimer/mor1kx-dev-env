@@ -91,14 +91,14 @@ module or1200_sb
   //
   input	[dw-1:0]	dcsb_dat_i;	// input data bus
   input	[aw-1:0]	dcsb_adr_i;	// address bus
-  input			dcsb_cyc_i;	// WB cycle
-  input			dcsb_stb_i;	// WB strobe
-  input			dcsb_we_i;	// WB write enable
-  input			dcsb_cab_i;	// CAB input
-  input	[3:0]		dcsb_sel_i;	// byte selects
+  input			      dcsb_cyc_i;	// WB cycle
+  input			      dcsb_stb_i;	// WB strobe
+  input			      dcsb_we_i;	// WB write enable
+  input			      dcsb_cab_i;	// CAB input
+  input	[3:0]		  dcsb_sel_i;	// byte selects
   output	[dw-1:0]	dcsb_dat_o;	// output data bus
-  output			dcsb_ack_o;	// ack output
-  output			dcsb_err_o;	// err output
+  output			    dcsb_ack_o;	// ack output
+  output			    dcsb_err_o;	// err output
 
   //
   // BIU bus
@@ -122,14 +122,14 @@ module or1200_sb
   // 32+32+4位，深度为4的FIFO
   wire	[4+dw+aw-1:0]	fifo_dat_i;	// FIFO data in
   wire	[4+dw+aw-1:0]	fifo_dat_o;	// FIFO data out
-  wire			fifo_wr;
-  wire			fifo_rd;
-  wire			fifo_full;
-  wire			fifo_empty;
-  wire			sel_sb;
-  reg			sb_en_reg;
-  reg			outstanding_store;
-  reg			fifo_wr_ack;
+  wire			          fifo_wr;
+  wire			          fifo_rd;
+  wire			          fifo_full;
+  wire			          fifo_empty;
+  wire			          sel_sb;
+  reg			            sb_en_reg;
+  reg			            outstanding_store;
+  reg			            fifo_wr_ack;
 
   //
   // FIFO data in/out
@@ -211,6 +211,6 @@ module or1200_sb
   assign dcsb_ack_o = sbbiu_ack_i;
   assign dcsb_err_o = sbbiu_err_i;
 
-`endif
+`endif // !OR1200_SB_IMPLEMENTED
 
 endmodule

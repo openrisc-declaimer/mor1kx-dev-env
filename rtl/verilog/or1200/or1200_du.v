@@ -162,9 +162,9 @@ module or1200_du(
   // Some connections go directly from Debug I/F through DU to the CPU
   //
   assign du_stall = dbg_stall_i;
-  assign du_addr = dbg_adr_i;
+  assign du_addr  = dbg_adr_i;
   assign du_dat_o = dbg_dat_i;
-  assign du_read = dbg_stb_i && !dbg_we_i;
+  assign du_read  = dbg_stb_i && !dbg_we_i;
   assign du_write = dbg_stb_i && dbg_we_i;
 
   reg				dbg_ack;
