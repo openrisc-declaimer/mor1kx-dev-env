@@ -65,7 +65,6 @@ module or1200_top
 `ifdef OR1200_WB_CAB
    iwb_cab_o,
 `endif
-
 `ifdef OR1200_WB_B3
    iwb_cti_o, iwb_bte_o,
 `endif
@@ -76,13 +75,12 @@ module or1200_top
 `ifdef OR1200_WB_CAB
    dwb_cab_o,
 `endif
-
 `ifdef OR1200_WB_B3
    dwb_cti_o, dwb_bte_o,
 `endif
 
    // External Debug Interface
-   dbg_stall_i, dbg_ewt_i,	dbg_lss_o, dbg_is_o, dbg_wp_o, dbg_bp_o,
+   dbg_stall_i, dbg_ewt_i,  dbg_lss_o, dbg_is_o, dbg_wp_o, dbg_bp_o,
    dbg_stb_i, dbg_we_i, dbg_adr_i, dbg_dat_i, dbg_dat_o, dbg_ack_o,
 
 `ifdef OR1200_BIST
@@ -111,95 +109,95 @@ module or1200_top
   //
   // System
   //
-  input			          clk_i;
-  input			          rst_i;
-  input	[1:0]		      clmode_i;	// 00 WB=RISC, 01 WB=RISC/2, 10 N/A, 11 WB=RISC/4
-  input	[ppic_ints-1:0]	pic_ints_i;
+  input                   clk_i;
+  input                   rst_i;
+  input  [1:0]            clmode_i;   // 00 WB=RISC, 01 WB=RISC/2, 10 N/A, 11 WB=RISC/4
+  input  [ppic_ints-1:0]  pic_ints_i;
 
   //
   // Instruction WISHBONE interface
   //
-  input			          iwb_clk_i;	// clock input
-  input			          iwb_rst_i;	// reset input
-  input			          iwb_ack_i;	// normal termination
-  input			          iwb_err_i;	// termination w/ error
-  input			          iwb_rty_i;	// termination w/ retry
-  input	  [dw-1:0]	  iwb_dat_i;	// input data bus
-  output			        iwb_cyc_o;	// cycle valid output
-  output	[aw-1:0]	  iwb_adr_o;	// address bus outputs
-  output			        iwb_stb_o;	// strobe output
-  output			        iwb_we_o;	  // indicates write transfer
-  output	[3:0]		    iwb_sel_o;	// byte select outputs
-  output	[dw-1:0]	  iwb_dat_o;	// output data bus
+  input                   iwb_clk_i;  // clock input
+  input                   iwb_rst_i;  // reset input
+  input                   iwb_ack_i;  // normal termination
+  input                   iwb_err_i;  // termination w/ error
+  input                   iwb_rty_i;  // termination w/ retry
+  input   [dw-1:0]        iwb_dat_i;  // input data bus
+  output                  iwb_cyc_o;  // cycle valid output
+  output  [aw-1:0]        iwb_adr_o;  // address bus outputs
+  output                  iwb_stb_o;  // strobe output
+  output                  iwb_we_o;   // indicates write transfer
+  output  [3:0]           iwb_sel_o;  // byte select outputs
+  output  [dw-1:0]        iwb_dat_o;  // output data bus
 `ifdef OR1200_WB_CAB
-  output			        iwb_cab_o;	// indicates consecutive address burst
+  output                  iwb_cab_o;  // indicates consecutive address burst
 `endif
 `ifdef OR1200_WB_B3
-  output	[2:0]		    iwb_cti_o;	// cycle type identifier
-  output	[1:0]		    iwb_bte_o;	// burst type extension
+  output  [2:0]           iwb_cti_o;  // cycle type identifier
+  output  [1:0]           iwb_bte_o;  // burst type extension
 `endif
 
   //
   // Data WISHBONE interface
   //
-  input			          dwb_clk_i;	// clock input
-  input			          dwb_rst_i;	// reset input
-  input			          dwb_ack_i;	// normal termination
-  input			          dwb_err_i;	// termination w/ error
-  input			          dwb_rty_i;	// termination w/ retry
-  input	  [dw-1:0]	  dwb_dat_i;	// input data bus
-  output			        dwb_cyc_o;	// cycle valid output
-  output	[aw-1:0]	  dwb_adr_o;	// address bus outputs
-  output			        dwb_stb_o;	// strobe output
-  output			        dwb_we_o;	// indicates write transfer
-  output	   [3:0]		dwb_sel_o;	// byte select outputs
-  output	[dw-1:0]	  dwb_dat_o;	// output data bus
+  input                   dwb_clk_i;  // clock input
+  input                   dwb_rst_i;  // reset input
+  input                   dwb_ack_i;  // normal termination
+  input                   dwb_err_i;  // termination w/ error
+  input                   dwb_rty_i;  // termination w/ retry
+  input   [dw-1:0]        dwb_dat_i;  // input data bus
+  output                  dwb_cyc_o;  // cycle valid output
+  output  [aw-1:0]        dwb_adr_o;  // address bus outputs
+  output                  dwb_stb_o;  // strobe output
+  output                  dwb_we_o;   // indicates write transfer
+  output     [3:0]        dwb_sel_o;  // byte select outputs
+  output  [dw-1:0]        dwb_dat_o;  // output data bus
 `ifdef OR1200_WB_CAB
-  output			        dwb_cab_o;	// indicates consecutive address burst
+  output                  dwb_cab_o;  // indicates consecutive address burst
 `endif
 `ifdef OR1200_WB_B3
-  output	[2:0]		    dwb_cti_o;	// cycle type identifier
-  output	[1:0]		    dwb_bte_o;	// burst type extension
+  output  [2:0]           dwb_cti_o;  // cycle type identifier
+  output  [1:0]           dwb_bte_o;  // burst type extension
 `endif
 
   //
   // External Debug Interface
   //
-  input			          dbg_stall_i;	// External Stall Input
-  input			          dbg_ewt_i;	  // External Watchpoint Trigger Input
-  output	   [3:0]		dbg_lss_o;	  // External Load/Store Unit Status
-  output	   [1:0]		dbg_is_o;	    // External Insn Fetch Status
-  output	  [10:0]		dbg_wp_o;	    // Watchpoints Outputs
-  output			        dbg_bp_o;	    // Breakpoint Output
-  input			          dbg_stb_i;    // External Address/Data Strobe
-  input			          dbg_we_i;     // External Write Enable
-  input	  [aw-1:0]	  dbg_adr_i;	  // External Address Input
-  input	  [dw-1:0]	  dbg_dat_i;	  // External Data Input
-  output	[dw-1:0]	  dbg_dat_o;	  // External Data Output
-  output			        dbg_ack_o;	  // External Data Acknowledge (not WB compatible)
+  input                   dbg_stall_i;  // External Stall Input
+  input                   dbg_ewt_i;    // External Watchpoint Trigger Input
+  output     [3:0]        dbg_lss_o;    // External Load/Store Unit Status
+  output     [1:0]        dbg_is_o;      // External Insn Fetch Status
+  output    [10:0]        dbg_wp_o;      // Watchpoints Outputs
+  output                  dbg_bp_o;      // Breakpoint Output
+  input                   dbg_stb_i;    // External Address/Data Strobe
+  input                   dbg_we_i;     // External Write Enable
+  input    [aw-1:0]       dbg_adr_i;    // External Address Input
+  input    [dw-1:0]       dbg_dat_i;    // External Data Input
+  output   [dw-1:0]       dbg_dat_o;    // External Data Output
+  output                  dbg_ack_o;    // External Data Acknowledge (not WB compatible)
 
 `ifdef OR1200_BIST
   //
   // RAM BIST
   //
-  input               mbist_si_i;
+  input                   mbist_si_i;
   input [`OR1200_MBIST_CTRL_WIDTH - 1:0] mbist_ctrl_i;
-  output              mbist_so_o;
+  output                  mbist_so_o;
 `endif
 
   //
   // Power Management
   //
-  input			          pm_cpustall_i;
-  output	[3:0]		    pm_clksd_o;
-  output			        pm_dc_gate_o;
-  output			        pm_ic_gate_o;
-  output			        pm_dmmu_gate_o;
-  output			        pm_immu_gate_o;
-  output			        pm_tt_gate_o;
-  output			        pm_cpu_gate_o;
-  output			        pm_wakeup_o;
-  output			        pm_lvolt_o;
+  input                   pm_cpustall_i;
+  output  [3:0]           pm_clksd_o;
+  output                  pm_dc_gate_o;
+  output                  pm_ic_gate_o;
+  output                  pm_dmmu_gate_o;
+  output                  pm_immu_gate_o;
+  output                  pm_tt_gate_o;
+  output                  pm_cpu_gate_o;
+  output                  pm_wakeup_o;
+  output                  pm_lvolt_o;
 
   //
   // Internal wires and regs
@@ -208,47 +206,47 @@ module or1200_top
   //
   // DC to SB
   //
-  wire	[dw-1:0]	    dcsb_dat_dc;
-  wire	[aw-1:0]	    dcsb_adr_dc;
-  wire			          dcsb_cyc_dc;
-  wire			          dcsb_stb_dc;
-  wire			          dcsb_we_dc;
-  wire	[3:0]		      dcsb_sel_dc;
-  wire			          dcsb_cab_dc;
-  wire	[dw-1:0]	    dcsb_dat_sb;
-  wire			          dcsb_ack_sb;
-  wire			          dcsb_err_sb;
+  wire  [dw-1:0]          dcsb_dat_dc;
+  wire  [aw-1:0]          dcsb_adr_dc;
+  wire                    dcsb_cyc_dc;
+  wire                    dcsb_stb_dc;
+  wire                    dcsb_we_dc;
+  wire  [3:0]             dcsb_sel_dc;
+  wire                    dcsb_cab_dc;
+  wire  [dw-1:0]          dcsb_dat_sb;
+  wire                    dcsb_ack_sb;
+  wire                    dcsb_err_sb;
 
   //
   // SB to BIU
   //
-  wire	[dw-1:0]	    sbbiu_dat_sb;
-  wire	[aw-1:0]	    sbbiu_adr_sb;
-  wire			          sbbiu_cyc_sb;
-  wire			          sbbiu_stb_sb;
-  wire			          sbbiu_we_sb;
-  wire	[3:0]		      sbbiu_sel_sb;
-  wire			          sbbiu_cab_sb;
-  wire	[dw-1:0]	    sbbiu_dat_biu;
-  wire			          sbbiu_ack_biu;
-  wire			          sbbiu_err_biu;
+  wire  [dw-1:0]          sbbiu_dat_sb;
+  wire  [aw-1:0]          sbbiu_adr_sb;
+  wire                    sbbiu_cyc_sb;
+  wire                    sbbiu_stb_sb;
+  wire                    sbbiu_we_sb;
+  wire  [3:0]             sbbiu_sel_sb;
+  wire                    sbbiu_cab_sb;
+  wire  [dw-1:0]          sbbiu_dat_biu;
+  wire                    sbbiu_ack_biu;
+  wire                    sbbiu_err_biu;
 
   //
   // IC to BIU
   //
-  wire	[dw-1:0]	    icbiu_dat_ic;
-  wire	[aw-1:0]	    icbiu_adr_ic;
-  wire	[aw-1:0]	    icbiu_adr_ic_word;
-  wire			          icbiu_cyc_ic;
-  wire			          icbiu_stb_ic;
-  wire			          icbiu_we_ic;
-  wire	[3:0]		      icbiu_sel_ic;
-  wire	[3:0]		      icbiu_tag_ic;
-  wire			          icbiu_cab_ic;
-  wire	[dw-1:0]	    icbiu_dat_biu;
-  wire			          icbiu_ack_biu;
-  wire			          icbiu_err_biu;
-  wire	[3:0]		      icbiu_tag_biu;
+  wire  [dw-1:0]          icbiu_dat_ic;
+  wire  [aw-1:0]          icbiu_adr_ic;
+  wire  [aw-1:0]          icbiu_adr_ic_word;
+  wire                    icbiu_cyc_ic;
+  wire                    icbiu_stb_ic;
+  wire                    icbiu_we_ic;
+  wire  [3:0]             icbiu_sel_ic;
+  wire  [3:0]             icbiu_tag_ic;
+  wire                    icbiu_cab_ic;
+  wire  [dw-1:0]          icbiu_dat_biu;
+  wire                    icbiu_ack_biu;
+  wire                    icbiu_err_biu;
+  wire  [3:0]             icbiu_tag_biu;
 
   //
   // SR Interface (this signal can be connected to the input pin)
@@ -258,181 +256,181 @@ module or1200_top
   //
   // CPU's SPR access to various RISC units (shared wires)
   //
-  wire			          supv;
-  wire	[aw-1:0]	    spr_addr;
-  wire	[dw-1:0]	    spr_dat_cpu;
-  wire	[31:0]		    spr_cs;
-  wire			          spr_we;
-  wire    		        mtspr_dc_done;
+  wire                    supv;
+  wire  [aw-1:0]          spr_addr;
+  wire  [dw-1:0]          spr_dat_cpu;
+  wire  [31:0]            spr_cs;
+  wire                    spr_we;
+  wire                    mtspr_dc_done;
 
   //
   // SB
   //
-  wire			          sb_en;
+  wire                    sb_en;
 
   //
   // DMMU and CPU
   //
-  wire			          dmmu_en;
-  wire	[31:0]		    spr_dat_dmmu;
+  wire                    dmmu_en;
+  wire  [31:0]            spr_dat_dmmu;
 
   //
   // DMMU and QMEM
   //
-  wire			          qmemdmmu_err_qmem;
-  wire	[3:0]		      qmemdmmu_tag_qmem;
-  wire	[aw-1:0]	    qmemdmmu_adr_dmmu;
-  wire			          qmemdmmu_cycstb_dmmu;
-  wire			          qmemdmmu_ci_dmmu;
+  wire                    qmemdmmu_err_qmem;
+  wire  [3:0]             qmemdmmu_tag_qmem;
+  wire  [aw-1:0]          qmemdmmu_adr_dmmu;
+  wire                    qmemdmmu_cycstb_dmmu;
+  wire                    qmemdmmu_ci_dmmu;
 
   //
   // CPU and data memory subsystem
   //
-  wire			          dc_en;
-  wire	[31:0]		    dcpu_adr_cpu;
-  wire			          dcpu_cycstb_cpu;
-  wire			          dcpu_we_cpu;
-  wire	[3:0]		      dcpu_sel_cpu;
-  wire	[3:0]		      dcpu_tag_cpu;
-  wire	[31:0]		    dcpu_dat_cpu;
-  wire	[31:0]		    dcpu_dat_qmem;
-  wire			          dcpu_ack_qmem;
-  wire			          dcpu_rty_qmem;
-  wire			          dcpu_err_dmmu;
-  wire	[3:0]		      dcpu_tag_dmmu;
-  wire    		        dc_no_writethrough;
+  wire                    dc_en;
+  wire  [31:0]            dcpu_adr_cpu;
+  wire                    dcpu_cycstb_cpu;
+  wire                    dcpu_we_cpu;
+  wire  [3:0]             dcpu_sel_cpu;
+  wire  [3:0]             dcpu_tag_cpu;
+  wire  [31:0]            dcpu_dat_cpu;
+  wire  [31:0]            dcpu_dat_qmem;
+  wire                    dcpu_ack_qmem;
+  wire                    dcpu_rty_qmem;
+  wire                    dcpu_err_dmmu;
+  wire  [3:0]             dcpu_tag_dmmu;
+  wire                    dc_no_writethrough;
 
   //
   // IMMU and CPU
   //
-  wire			          immu_en;
-  wire	[31:0]		    spr_dat_immu;
+  wire                    immu_en;
+  wire  [31:0]            spr_dat_immu;
 
   //
   // CPU and insn memory subsystem
   //
-  wire			          ic_en;
-  wire	[31:0]		    icpu_adr_cpu;
-  wire			          icpu_cycstb_cpu;
-  wire	[3:0]		      icpu_sel_cpu;
-  wire	[3:0]		      icpu_tag_cpu;
-  wire	[31:0]		    icpu_dat_qmem;
-  wire			          icpu_ack_qmem;
-  wire	[31:0]		    icpu_adr_immu;
-  wire			          icpu_err_immu;
-  wire	[3:0]		      icpu_tag_immu;
-  wire			          icpu_rty_immu;
+  wire                    ic_en;
+  wire  [31:0]            icpu_adr_cpu;
+  wire                    icpu_cycstb_cpu;
+  wire  [3:0]             icpu_sel_cpu;
+  wire  [3:0]             icpu_tag_cpu;
+  wire  [31:0]            icpu_dat_qmem;
+  wire                    icpu_ack_qmem;
+  wire  [31:0]            icpu_adr_immu;
+  wire                    icpu_err_immu;
+  wire  [3:0]             icpu_tag_immu;
+  wire                    icpu_rty_immu;
 
   //
   // IMMU and QMEM
   //
-  wire	[aw-1:0]	    qmemimmu_adr_immu;
-  wire			          qmemimmu_rty_qmem;
-  wire			          qmemimmu_err_qmem;
-  wire	[3:0]		      qmemimmu_tag_qmem;
-  wire			          qmemimmu_cycstb_immu;
-  wire			          qmemimmu_ci_immu;
+  wire  [aw-1:0]          qmemimmu_adr_immu;
+  wire                    qmemimmu_rty_qmem;
+  wire                    qmemimmu_err_qmem;
+  wire  [3:0]             qmemimmu_tag_qmem;
+  wire                    qmemimmu_cycstb_immu;
+  wire                    qmemimmu_ci_immu;
 
   //
   // QMEM and IC
   //
-  wire	[aw-1:0]	    icqmem_adr_qmem;
-  wire			          icqmem_rty_ic;
-  wire			          icqmem_err_ic;
-  wire	[3:0]		      icqmem_tag_ic;
-  wire			          icqmem_cycstb_qmem;
-  wire			          icqmem_ci_qmem;
-  wire	[31:0]		    icqmem_dat_ic;
-  wire			          icqmem_ack_ic;
+  wire  [aw-1:0]          icqmem_adr_qmem;
+  wire                    icqmem_rty_ic;
+  wire                    icqmem_err_ic;
+  wire  [3:0]             icqmem_tag_ic;
+  wire                    icqmem_cycstb_qmem;
+  wire                    icqmem_ci_qmem;
+  wire  [31:0]            icqmem_dat_ic;
+  wire                    icqmem_ack_ic;
 
   //
   // QMEM and DC
   //
-  wire	[aw-1:0]	    dcqmem_adr_qmem;
-  wire			          dcqmem_rty_dc;
-  wire			          dcqmem_err_dc;
-  wire	[3:0]		      dcqmem_tag_dc;
-  wire			          dcqmem_cycstb_qmem;
-  wire			          dcqmem_ci_qmem;
-  wire	[31:0]		    dcqmem_dat_dc;
-  wire	[31:0]		    dcqmem_dat_qmem;
-  wire			          dcqmem_we_qmem;
-  wire	[3:0]		      dcqmem_sel_qmem;
-  wire			          dcqmem_ack_dc;
+  wire  [aw-1:0]          dcqmem_adr_qmem;
+  wire                    dcqmem_rty_dc;
+  wire                    dcqmem_err_dc;
+  wire  [3:0]             dcqmem_tag_dc;
+  wire                    dcqmem_cycstb_qmem;
+  wire                    dcqmem_ci_qmem;
+  wire  [31:0]            dcqmem_dat_dc;
+  wire  [31:0]            dcqmem_dat_qmem;
+  wire                    dcqmem_we_qmem;
+  wire  [3:0]             dcqmem_sel_qmem;
+  wire                    dcqmem_ack_dc;
 
   //
   // Connection between CPU and PIC
   //
-  wire	[dw-1:0]	    spr_dat_pic;
-  wire			          pic_wakeup;
-  wire			          sig_int;
+  wire  [dw-1:0]          spr_dat_pic;
+  wire                    pic_wakeup;
+  wire                    sig_int;
 
   //
   // Connection between CPU and PM
   //
-  wire	[dw-1:0]	    spr_dat_pm;
+  wire  [dw-1:0]          spr_dat_pm;
 
   //
   // CPU and TT
   //
-  wire	[dw-1:0]	    spr_dat_tt;
-  output wire			    sig_tick; // jb
+  wire  [dw-1:0]          spr_dat_tt;
+  output wire             sig_tick; // jb
 
   //
   // Debug port and caches/MMUs
   //
-  wire	[dw-1:0]	    spr_dat_du;
-  wire			          du_stall;
-  wire	[dw-1:0]	    du_addr;
-  wire	[dw-1:0]	    du_dat_du;
-  wire			          du_read;
-  wire			          du_write;
-  wire	[13:0]		    du_except_trig;
-  wire	[13:0]		    du_except_stop;
-  wire	[`OR1200_DU_DSR_WIDTH-1:0]     du_dsr;
-  wire	[24:0]		    du_dmr1;
-  wire	[dw-1:0]	    du_dat_cpu;
-  wire	[dw-1:0]	    du_lsu_store_dat;
-  wire	[dw-1:0]	    du_lsu_load_dat;
-  wire			          du_hwbkpt;
-  wire			          du_hwbkpt_ls_r = 1'b0;
-  wire			          flushpipe;
-  wire			          ex_freeze;
-  wire			          wb_freeze;
-  wire			          id_void;
-  wire			          ex_void;
-  wire	[31:0]		    id_insn;
-  wire	[31:0]		    ex_insn;
-  wire	[31:0]		    wb_insn;
-  wire	[31:0]		    id_pc;
-  wire	[31:0]		    ex_pc;
-  wire	[31:0]		    wb_pc;
-  wire	[`OR1200_BRANCHOP_WIDTH-1:0]	branch_op;
-  wire	[31:0]		    spr_dat_npc;
-  wire	[31:0]		    rf_dataw;
-  wire			          abort_ex;
-  wire			          abort_mvspr;
+  wire  [dw-1:0]          spr_dat_du;
+  wire                    du_stall;
+  wire  [dw-1:0]          du_addr;
+  wire  [dw-1:0]          du_dat_du;
+  wire                    du_read;
+  wire                    du_write;
+  wire  [13:0]            du_except_trig;
+  wire  [13:0]            du_except_stop;
+  wire  [`OR1200_DU_DSR_WIDTH-1:0]     du_dsr;
+  wire  [24:0]            du_dmr1;
+  wire  [dw-1:0]          du_dat_cpu;
+  wire  [dw-1:0]          du_lsu_store_dat;
+  wire  [dw-1:0]          du_lsu_load_dat;
+  wire                    du_hwbkpt;
+  wire                    du_hwbkpt_ls_r = 1'b0;
+  wire                    flushpipe;
+  wire                    ex_freeze;
+  wire                    wb_freeze;
+  wire                    id_void;
+  wire                    ex_void;
+  wire  [31:0]            id_insn;
+  wire  [31:0]            ex_insn;
+  wire  [31:0]            wb_insn;
+  wire  [31:0]            id_pc;
+  wire  [31:0]            ex_pc;
+  wire  [31:0]            wb_pc;
+  wire  [`OR1200_BRANCHOP_WIDTH-1:0]  branch_op;
+  wire  [31:0]            spr_dat_npc;
+  wire  [31:0]            rf_dataw;
+  wire                    abort_ex;
+  wire                    abort_mvspr;
 
 `ifdef OR1200_BIST
   //
   // RAM BIST
   //
-  wire			          mbist_immu_so;
-  wire			          mbist_ic_so;
-  wire			          mbist_dmmu_so;
-  wire			          mbist_dc_so;
-  wire			          mbist_qmem_so;
-  wire			          mbist_immu_si = mbist_si_i;
-  wire			          mbist_ic_si = mbist_immu_so;
-  wire			          mbist_qmem_si = mbist_ic_so;
-  wire			          mbist_dmmu_si = mbist_qmem_so;
-  wire			          mbist_dc_si = mbist_dmmu_so;
-  assign			        mbist_so_o = mbist_dc_so;
+  wire                    mbist_immu_so;
+  wire                    mbist_ic_so;
+  wire                    mbist_dmmu_so;
+  wire                    mbist_dc_so;
+  wire                    mbist_qmem_so;
+  wire                    mbist_immu_si = mbist_si_i;
+  wire                    mbist_ic_si = mbist_immu_so;
+  wire                    mbist_qmem_si = mbist_ic_so;
+  wire                    mbist_dmmu_si = mbist_qmem_so;
+  wire                    mbist_dc_si = mbist_dmmu_so;
+  assign                  mbist_so_o = mbist_dc_so;
 `endif
 
-  wire  [3:0]         icqmem_sel_qmem;
-  wire  [3:0]         icqmem_tag_qmem;
-  wire  [3:0]         dcqmem_tag_qmem;
+  wire  [3:0]             icqmem_sel_qmem;
+  wire  [3:0]             icqmem_tag_qmem;
+  wire  [3:0]             dcqmem_tag_qmem;
 
   //
   // Instantiation of Instruction WISHBONE BIU
@@ -535,8 +533,8 @@ module or1200_top
 
 `ifdef OR1200_BIST
     // RAM BIST
-    .mbist_si_i(mbist_immu_si),
-    .mbist_so_o(mbist_immu_so),
+    .mbist_si_i  (mbist_immu_si),
+    .mbist_so_o  (mbist_immu_so),
     .mbist_ctrl_i(mbist_ctrl_i),
 `endif
 
@@ -557,7 +555,7 @@ module or1200_top
     // SPR access
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_IMMU]),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_immu),
 
@@ -567,7 +565,7 @@ module or1200_top
     .qmemimmu_tag_i(qmemimmu_tag_qmem),
     .qmemimmu_adr_o(qmemimmu_adr_immu),
     .qmemimmu_cycstb_o(qmemimmu_cycstb_immu),
-    .qmemimmu_ci_o(qmemimmu_ci_immu)
+    .qmemimmu_ci_o (qmemimmu_ci_immu)
   );
 
   //
@@ -607,7 +605,7 @@ module or1200_top
     .icbiu_adr_o(icbiu_adr_ic),
     .icbiu_cyc_o(icbiu_cyc_ic),
     .icbiu_stb_o(icbiu_stb_ic),
-    .icbiu_we_o(icbiu_we_ic),
+    .icbiu_we_o (icbiu_we_ic),
     .icbiu_sel_o(icbiu_sel_ic),
     .icbiu_cab_o(icbiu_cab_ic),
     .icbiu_dat_i(icbiu_dat_biu),
@@ -706,7 +704,7 @@ module or1200_top
     .spr_dat_pm(spr_dat_pm),
     .spr_dat_dmmu(spr_dat_dmmu),
     .spr_dat_immu(spr_dat_immu),
-    .spr_dat_du(spr_dat_du),
+    .spr_dat_du (spr_dat_du),
     .spr_dat_npc(spr_dat_npc),
     .spr_cs     (spr_cs),
     .spr_we     (spr_we),
@@ -734,14 +732,14 @@ module or1200_top
     .supv(supv),
     .dcpu_adr_i(dcpu_adr_cpu),
     .dcpu_cycstb_i(dcpu_cycstb_cpu),
-    .dcpu_we_i(dcpu_we_cpu),
+    .dcpu_we_i (dcpu_we_cpu),
     .dcpu_tag_o(dcpu_tag_dmmu),
     .dcpu_err_o(dcpu_err_dmmu),
 
     // SPR access
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_DMMU]),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_dmmu),
 
@@ -750,7 +748,7 @@ module or1200_top
     .qmemdmmu_tag_i(qmemdmmu_tag_qmem),
     .qmemdmmu_adr_o(qmemdmmu_adr_dmmu),
     .qmemdmmu_cycstb_o(qmemdmmu_cycstb_dmmu),
-    .qmemdmmu_ci_o(qmemdmmu_ci_dmmu)
+    .qmemdmmu_ci_o (qmemdmmu_ci_dmmu)
   );
 
   //
@@ -785,8 +783,8 @@ module or1200_top
     .dc_no_writethrough(dc_no_writethrough),
 
     // SPR access
-    .spr_cs(spr_cs[`OR1200_SPR_GROUP_DC]),
-    .spr_addr(spr_addr),
+    .spr_cs   (spr_cs[`OR1200_SPR_GROUP_DC]),
+    .spr_addr (spr_addr),
     .spr_write(spr_we),
     .spr_dat_i(spr_dat_cpu),
     .mtspr_dc_done(mtspr_dc_done),
@@ -796,7 +794,7 @@ module or1200_top
     .dcsb_adr_o(dcsb_adr_dc),
     .dcsb_cyc_o(dcsb_cyc_dc),
     .dcsb_stb_o(dcsb_stb_dc),
-    .dcsb_we_o(dcsb_we_dc),
+    .dcsb_we_o (dcsb_we_dc),
     .dcsb_sel_o(dcsb_sel_dc),
     .dcsb_cab_o(dcsb_cab_dc),
     .dcsb_dat_i(dcsb_dat_sb),
@@ -859,8 +857,8 @@ module or1200_top
     // QMEM and DC
     .dcqmem_adr_o(dcqmem_adr_qmem),
     .dcqmem_cycstb_o(dcqmem_cycstb_qmem),
-    .dcqmem_ci_o(dcqmem_ci_qmem),
-    .dcqmem_we_o(dcqmem_we_qmem),
+    .dcqmem_ci_o (dcqmem_ci_qmem),
+    .dcqmem_we_o (dcqmem_we_qmem),
     .dcqmem_sel_o(dcqmem_sel_qmem),
     .dcqmem_tag_o(dcqmem_tag_qmem),
     .dcqmem_dat_o(dcqmem_dat_qmem),
@@ -887,7 +885,7 @@ module or1200_top
     .dcsb_adr_i(dcsb_adr_dc),
     .dcsb_cyc_i(dcsb_cyc_dc),
     .dcsb_stb_i(dcsb_stb_dc),
-    .dcsb_we_i(dcsb_we_dc),
+    .dcsb_we_i (dcsb_we_dc),
     .dcsb_sel_i(dcsb_sel_dc),
     .dcsb_cab_i(dcsb_cab_dc),
     .dcsb_dat_o(dcsb_dat_sb),
@@ -899,7 +897,7 @@ module or1200_top
     .sbbiu_adr_o(sbbiu_adr_sb),
     .sbbiu_cyc_o(sbbiu_cyc_sb),
     .sbbiu_stb_o(sbbiu_stb_sb),
-    .sbbiu_we_o(sbbiu_we_sb),
+    .sbbiu_we_o (sbbiu_we_sb),
     .sbbiu_sel_o(sbbiu_sel_sb),
     .sbbiu_cab_o(sbbiu_cab_sb),
     .sbbiu_dat_i(sbbiu_dat_biu),
@@ -933,10 +931,10 @@ module or1200_top
 
     // DU's access to SPR unit
     .du_stall(du_stall),
-    .du_addr(du_addr),
+    .du_addr (du_addr),
     .du_dat_i(du_dat_cpu),
     .du_dat_o(du_dat_du),
-    .du_read(du_read),
+    .du_read (du_read),
     .du_write(du_write),
     .du_except_stop(du_except_stop),
     .du_hwbkpt(du_hwbkpt),
@@ -944,7 +942,7 @@ module or1200_top
     // Access to DU's SPRs
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_DU]),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_du),
 
@@ -992,7 +990,7 @@ module or1200_top
     .du_stall(du_stall),
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_TT]),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_tt),
     .intr(sig_tick)
@@ -1007,7 +1005,7 @@ module or1200_top
     .rst(rst_i),
     .pic_wakeup(pic_wakeup),
     .spr_write(spr_we),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_cpu),
     .spr_dat_o(spr_dat_pm),
 

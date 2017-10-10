@@ -43,8 +43,8 @@
 //
 // $Log: or1200_rf.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Minor update: 
-// Bugs fixed, coding style changed. 
+// Minor update:
+// Bugs fixed, coding style changed.
 //
 
 // synopsys translate_off
@@ -54,22 +54,26 @@
 
 module or1200_rf
   (
-	 // Clock and reset
-	 clk, rst,
+   // Clock and reset
+   // 时钟和复位信号
+   clk, rst,
 
-	 // Write i/f
-	 cy_we_i, cy_we_o, supv, wb_freeze, addrw, dataw, we, flushpipe,
+   // Write i/f
+   // 写接口
+   cy_we_i, cy_we_o, supv, wb_freeze, addrw, dataw, we, flushpipe,
 
-	 // Read i/f
-	 id_freeze, addra, addrb, dataa, datab, rda, rdb,
+   // Read i/f
+   // 读接口
+   id_freeze, addra, addrb, dataa, datab, rda, rdb,
 
-	 // Debug
-	 spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o, du_read
+   // Debug
+   // 调试接口
+   spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o, du_read
   );
 
   // ---------------------------------------------------------------------------
   // Parameters
-  // ---------------------------------------------------------------------------   
+  // ---------------------------------------------------------------------------
   parameter dw = `OR1200_OPERAND_WIDTH;
   parameter aw = `OR1200_REGFILE_ADDR_WIDTH;
 
@@ -80,55 +84,55 @@ module or1200_rf
   //
   // Clock and reset
   //
-  input				            clk;
-  input				            rst;
+  input                   clk;
+  input                   rst;
 
   //
   // Write i/f
   //
-  input				            cy_we_i;
-  output				          cy_we_o;
-  input				            supv;
-  input				            wb_freeze;
-  input	[aw-1:0]		      addrw;
-  input	[dw-1:0]		      dataw;
-  input				            we;
-  input				            flushpipe;
+  input                   cy_we_i;
+  output                  cy_we_o;
+  input                   supv;
+  input                   wb_freeze;
+  input  [aw-1:0]         addrw;
+  input  [dw-1:0]         dataw;
+  input                   we;
+  input                   flushpipe;
 
   //
   // Read i/f
   //
-  input				            id_freeze;
-  input	[aw-1:0]		      addra;
-  input	[aw-1:0]		      addrb;
-  output	[dw-1:0]		    dataa;
-  output	[dw-1:0]		    datab;
-  input				            rda;
-  input				            rdb;
+  input                   id_freeze;
+  input  [aw-1:0]         addra;
+  input  [aw-1:0]         addrb;
+  output [dw-1:0]         dataa;
+  output [dw-1:0]         datab;
+  input                   rda;
+  input                   rdb;
 
   //
   // SPR access for debugging purposes
   //
-  input				            spr_cs;
-  input				            spr_write;
-  input	[31:0]			      spr_addr;
-  input	[31:0]			      spr_dat_i;
-  output	[31:0]			    spr_dat_o;
-  input    			          du_read;
-     
+  input                   spr_cs;
+  input                   spr_write;
+  input  [31:0]           spr_addr;
+  input  [31:0]           spr_dat_i;
+  output [31:0]           spr_dat_o;
+  input                   du_read;
+
   //
   // Internal wires and regs
   //
-  wire	[dw-1:0]		      from_rfa;
-  wire	[dw-1:0]		      from_rfb;
-  wire	[aw-1:0]		      rf_addra;
-  wire	[aw-1:0]		      rf_addrw;
-  wire	[dw-1:0]		      rf_dataw;
-  wire				            rf_we;
-  wire				            spr_valid;
-  wire				            rf_ena;
-  wire				            rf_enb;
-  reg				              rf_we_allow;
+  wire  [dw-1:0]          from_rfa;
+  wire  [dw-1:0]          from_rfb;
+  wire  [aw-1:0]          rf_addra;
+  wire  [aw-1:0]          rf_addrw;
+  wire  [dw-1:0]          rf_dataw;
+  wire                    rf_we;
+  wire                    spr_valid;
+  wire                    rf_ena;
+  wire                    rf_enb;
+  reg                     rf_we_allow;
 
   // Logic to restore output on RFA after debug unit has read out via SPR if.
   // Problem was that the incorrect output would be on RFA after debug unit
@@ -137,12 +141,12 @@ module or1200_rf
   // and re-read it whenever the SPR select goes low, so we must remember
   // the last address and generate a signal for falling edge of SPR cs.
   // -- Julius
-  
-  // Detect falling edge of SPR select 
-  reg 				spr_du_cs;
-  wire 			spr_cs_fe;
+
+  // Detect falling edge of SPR select
+  reg             spr_du_cs;
+  wire            spr_cs_fe;
   // Track RF A's address each time it's enabled
-  reg	[aw-1:0]		addra_last;
+  reg  [aw-1:0]   addra_last;
 
 
   always @(posedge clk)
@@ -154,76 +158,93 @@ module or1200_rf
 
   assign spr_cs_fe = spr_du_cs & !(spr_cs & du_read);
 
-     
+
   //
   // SPR access is valid when spr_cs is asserted and
   // SPR address matches GPR addresses
   //
+  // 当spr_cs被声明且SPR地址匹配GPR地址时，SPR访问是有效的。
   assign spr_valid = spr_cs & (spr_addr[10:5] == `OR1200_SPR_RF);
 
   //
   // SPR data output is always from RF A
   //
+  // SPR数据输出总是来自通用寄存器A，即来自A双端口RAM。
   assign spr_dat_o = from_rfa;
 
   //
   // Operand A comes from RF or from saved A register
   //
+  // 操作数A来自内部暂存寄存器或存储的A寄存器堆，即来自A双端口RAM。
   assign dataa = from_rfa;
 
   //
   // Operand B comes from RF or from saved B register
   //
+  // 操作数B来自部暂存寄存器或存储的B寄存器堆，即来自B双端口RAM。
   assign datab = from_rfb;
 
   //
   // RF A read address is either from SPRS or normal from CPU control
   //
-  assign rf_addra = (spr_valid & !spr_write) ? spr_addr[4:0] : 
-        spr_cs_fe ? addra_last : addra;
+  // A双端口RAM读地址来自SPRS或正常来自CPU控制
+  assign rf_addra = (spr_valid & !spr_write) ? spr_addr[4:0] :
+                                   spr_cs_fe ? addra_last : addra;
 
   //
   // RF write address is either from SPRS or normal from CPU control
   //
+  // RF写地址来自SPRS或正常来自CPU控制
   assign rf_addrw = (spr_valid & spr_write) ? spr_addr[4:0] : addrw;
 
   //
   // RF write data is either from SPRS or normal from CPU datapath
   //
+  // RF写数据来自SPRS或正常来自CPU数据路径
   assign rf_dataw = (spr_valid & spr_write) ? spr_dat_i : dataw;
 
   //
   // RF write enable is either from SPRS or normal from CPU control
   //
+  // RF写使能来自SPRS或正常来自CPU控制
   always @(`OR1200_RST_EVENT rst or posedge clk)
     if (rst == `OR1200_RST_VALUE)
       rf_we_allow <=  1'b1;
+
     else if (~wb_freeze)
       rf_we_allow <=  ~flushpipe;
 
+  // rf写使能信号=(SPR有效且写使能) | (数据输入写使能且WB级非停止) & rf允许写 & (超级监管模式 | rf写地址不为0)
   assign rf_we = ((spr_valid & spr_write) | (we & ~wb_freeze)) & rf_we_allow;
 
   assign cy_we_o = cy_we_i && ~wb_freeze && rf_we_allow;
-     
+
   //
   // CS RF A asserted when instruction reads operand A and ID stage
   // is not stalled
   //
+  // 当指令读操作数A并且ID阶段还没停止时，读A双端口RAM的A端口使能信号被声明。
   assign rf_ena = (rda & ~id_freeze) | (spr_valid & !spr_write) | spr_cs_fe;
 
   //
   // CS RF B asserted when instruction reads operand B and ID stage
   // is not stalled
   //
+  // 当指令读操作数B并且ID阶段还没停止时，读B双端口RAM的A端口使能信号被声明。
   assign rf_enb = rdb & ~id_freeze;
 
 `ifdef OR1200_RFRAM_TWOPORT
+  // 实例化2个双端口RAM，即实例rf_a和rf_b。
+  // 这2个实例的A端口用来读出数据(对应操作数A和B)，
+  // B端口用来写入数据(2个B端口写入同样的数据)。也就是说2个双端口RAM，同时保存同样的数据。
 
   //
   // Instantiation of register file two-port RAM A
   //
+  // 寄存器文件双端口RAM A的实例化
   or1200_tpram_32x32 rf_a(
     // Port A
+    // 从 Port A读出操作数A
     .clk_a(clk),
     .rst_a(rst),
     .ce_a(rf_ena),
@@ -234,6 +255,7 @@ module or1200_rf
     .do_a(from_rfa),
 
     // Port B
+    // 从Port B写入数据。
     .clk_b(clk),
     .rst_b(rst),
     .ce_b(rf_we),
@@ -247,8 +269,10 @@ module or1200_rf
   //
   // Instantiation of register file two-port RAM B
   //
+  // 寄存器文件双端口RAM B的实例化
   or1200_tpram_32x32 rf_b(
     // Port A
+    // 从Port A读出操作数B
     .clk_a(clk),
     .rst_a(rst),
     .ce_a(rf_enb),
@@ -259,6 +283,7 @@ module or1200_rf
     .do_a(from_rfb),
 
     // Port B
+    // 从 Port B写入数据
     .clk_b(clk),
     .rst_b(rst),
     .ce_b(rf_we),
@@ -269,10 +294,10 @@ module or1200_rf
     .do_b()
   );
 
-`else
+`else // !OR1200_RFRAM_TWOPORT
 
 `ifdef OR1200_RFRAM_DUALPORT
-
+  // 双端口RAM的实例化
   //
   // Instantiation of register file two-port RAM A
   //
@@ -288,7 +313,7 @@ module or1200_rf
         .ce_a(rf_ena),
         .addr_a(rf_addra),
         .do_a(from_rfa),
-        
+
         // Port B
         .clk_b(clk),
         .ce_b(rf_we),
@@ -312,7 +337,7 @@ module or1200_rf
         .ce_a(rf_enb),
         .addr_a(addrb),
         .do_a(from_rfb),
-        
+
         // Port B
         .clk_b(clk),
         .ce_b(rf_we),
@@ -320,11 +345,11 @@ module or1200_rf
         .addr_b(rf_addrw),
         .di_b(rf_dataw)
         );
-     
-`else
+
+`else // !OR1200_RFRAM_DUALPORT
 
 `ifdef OR1200_RFRAM_GENERIC
-
+  // 通用基于触发器的寄存器实例化
   //
   // Instantiation of generic (flip-flop based) register file
   //
@@ -350,18 +375,21 @@ module or1200_rf
     .di_w(rf_dataw)
   );
 
-`else
+`else // ! OR1200_RFRAM_GENERIC
 
   //
   // RFRAM type not specified
   //
+  // RFRAM类型没被定义时，打印信息
   initial begin
     $display("Define RFRAM type.");
     $finish;
   end
 
-`endif
-`endif
-`endif
+`endif // OR1200_RFRAM_GENERIC
+
+`endif // OR1200_RFRAM_DUALPORT
+
+`endif // OR1200_RFRAM_TWOPORT
 
 endmodule

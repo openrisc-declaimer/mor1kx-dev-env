@@ -64,7 +64,7 @@
 //
 // $Log: or1200_tpram_32x32.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Minor update: 
+// Minor update:
 // Coding style changed.
 //
 // Revision 1.5  2005/10/19 11:37:56  jcastillo
@@ -107,320 +107,337 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
-module or1200_tpram_32x32(
-	// Generic synchronous two-port RAM interface
-	clk_a, rst_a, ce_a, we_a, oe_a, addr_a, di_a, do_a,
-	clk_b, rst_b, ce_b, we_b, oe_b, addr_b, di_b, do_b
-);
+module or1200_tpram_32x32
+  (
+   // Generic synchronous two-port RAM interface
+   // 通用同步双端口RAM接口
+   clk_a, rst_a, ce_a, we_a, oe_a, addr_a, di_a, do_a,
+   clk_b, rst_b, ce_b, we_b, oe_b, addr_b, di_b, do_b
+  );
 
-//
-// Default address and data buses width
-//
-parameter aw = 5;
-parameter dw = 32;
+  // ---------------------------------------------------------------------------
+  // Parameters
+  // ---------------------------------------------------------------------------
+  //
+  // Default address and data buses width
+  //
+  // 缺省的地址和数据总线宽度
+  parameter aw = 5;
+  parameter dw = 32;
 
-//
-// Generic synchronous two-port RAM interface
-//
-input			clk_a;	// Clock
-input			rst_a;	// Reset
-input			ce_a;	// Chip enable input
-input			we_a;	// Write enable input
-input			oe_a;	// Output enable input
-input 	[aw-1:0]	addr_a;	// address bus inputs
-input	[dw-1:0]	di_a;	// input data bus
-output	[dw-1:0]	do_a;	// output data bus
-input			clk_b;	// Clock
-input			rst_b;	// Reset
-input			ce_b;	// Chip enable input
-input			we_b;	// Write enable input
-input			oe_b;	// Output enable input
-input 	[aw-1:0]	addr_b;	// address bus inputs
-input	[dw-1:0]	di_b;	// input data bus
-output	[dw-1:0]	do_b;	// output data bus
+  //
+  // Generic synchronous two-port RAM interface
+  //
+  // 通用同步双端口RAM接口
+  // A端口引脚
+  input             clk_a;  // Clock 时钟
+  input             rst_a;  // Reset 复位
+  input             ce_a;   // Chip enable input 芯片选择使能信号
+  input             we_a;   // Write enable input 写使能信号
+  input             oe_a;   // Output enable input 输出使能信号
+  input  [aw-1:0]   addr_a; // address bus inputs 地址
+  input  [dw-1:0]   di_a;   // input data bus 输入的数据总线
+  output [dw-1:0]   do_a;   // output data bus 输出的数据总线
 
-//
-// Internal wires and registers
-//
+  // B端口引脚
+  input             clk_b;  // Clock 时钟
+  input             rst_b;  // Reset 复位
+  input             ce_b;   // Chip enable input 芯片选择使能信号
+  input             we_b;   // Write enable input 写使能信号
+  input             oe_b;   // Output enable input 输出使能信号
+  input  [aw-1:0]   addr_b; // address bus inputs 地址总线
+  input  [dw-1:0]   di_b;   // input data bus 输入数据总线
+  output [dw-1:0]   do_b;   // output data bus 输出数据总线
 
+  //
+  // Internal wires and registers
+  //
 
 `ifdef OR1200_ARTISAN_SDP
 
-//
-// Instantiation of ASIC memory:
-//
-// Artisan Synchronous Double-Port RAM (ra2sh)
-//
+  //
+  // Instantiation of ASIC memory:
+  //
+  // Artisan Synchronous Double-Port RAM (ra2sh)
+  //
 `ifdef UNUSED
-art_hsdp_32x32 #(dw, 1<<aw, aw) artisan_sdp(
+  art_hsdp_32x32 #(dw, 1<<aw, aw) artisan_sdp(
 `else
-art_hsdp_32x32 artisan_sdp(
+  art_hsdp_32x32 artisan_sdp(
 `endif
-	.qa(do_a),
-	.clka(clk_a),
-	.cena(~ce_a),
-	.wena(~we_a),
-	.aa(addr_a),
-	.da(di_a),
-	.oena(~oe_a),
-	.qb(do_b),
-	.clkb(clk_b),
-	.cenb(~ce_b),
-	.wenb(~we_b),
-	.ab(addr_b),
-	.db(di_b),
-	.oenb(~oe_b)
-);
+    .qa(do_a),
+    .clka(clk_a),
+    .cena(~ce_a),
+    .wena(~we_a),
+    .aa(addr_a),
+    .da(di_a),
+    .oena(~oe_a),
+    .qb(do_b),
+    .clkb(clk_b),
+    .cenb(~ce_b),
+    .wenb(~we_b),
+    .ab(addr_b),
+    .db(di_b),
+    .oenb(~oe_b)
+  );
 
-`else
+`else // !OR1200_ARTISAN_SDP
 
 `ifdef OR1200_AVANT_ATP
 
-//
-// Instantiation of ASIC memory:
-//
-// Avant! Asynchronous Two-Port RAM
-//
-avant_atp avant_atp(
-	.web(~we),
-	.reb(),
-	.oeb(~oe),
-	.rcsb(),
-	.wcsb(),
-	.ra(addr),
-	.wa(addr),
-	.di(di),
-	.doq(doq)
-);
+  //
+  // Instantiation of ASIC memory:
+  //
+  // Avant! Asynchronous Two-Port RAM
+  //
+  avant_atp avant_atp(
+    .web(~we),
+    .reb(),
+    .oeb(~oe),
+    .rcsb(),
+    .wcsb(),
+    .ra(addr),
+    .wa(addr),
+    .di(di),
+    .doq(doq)
+  );
 
-`else
+`else // !OR1200_AVANT_ATP
 
 `ifdef OR1200_VIRAGE_STP
 
-//
-// Instantiation of ASIC memory:
-//
-// Virage Synchronous 2-port R/W RAM
-//
-virage_stp virage_stp(
-	.QA(do_a),
-	.QB(do_b),
+  //
+  // Instantiation of ASIC memory:
+  //
+  // Virage Synchronous 2-port R/W RAM
+  //
+  virage_stp virage_stp(
+    .QA(do_a),
+    .QB(do_b),
 
-	.ADRA(addr_a),
-	.DA(di_a),
-	.WEA(we_a),
-	.OEA(oe_a),
-	.MEA(ce_a),
-	.CLKA(clk_a),
+    .ADRA(addr_a),
+    .DA(di_a),
+    .WEA(we_a),
+    .OEA(oe_a),
+    .MEA(ce_a),
+    .CLKA(clk_a),
 
-	.ADRB(adr_b),
-	.DB(di_b),
-	.WEB(we_b),
-	.OEB(oe_b),
-	.MEB(ce_b),
-	.CLKB(clk_b)
-);
+    .ADRB(adr_b),
+    .DB(di_b),
+    .WEB(we_b),
+    .OEB(oe_b),
+    .MEB(ce_b),
+    .CLKB(clk_b)
+  );
 
-`else
+`else // !OR1200_VIRAGE_STP
 
 `ifdef OR1200_XILINX_RAMB4
 
-//
-// Instantiation of FPGA memory:
-//
-// Virtex/Spartan2
-//
+  //
+  // Instantiation of FPGA memory:
+  //
+  // Virtex/Spartan2
+  //
 
-//
-// Block 0
-//
-RAMB4_S16_S16 ramb4_s16_s16_0(
-	.CLKA(clk_a),
-	.RSTA(1'b0),
-	.ADDRA(addr_a),
-	.DIA(di_a[15:0]),
-	.ENA(ce_a),
-	.WEA(we_a),
-	.DOA(do_a[15:0]),
+  //
+  // Block 0
+  //
+  RAMB4_S16_S16 ramb4_s16_s16_0(
+    .CLKA(clk_a),
+    .RSTA(1'b0),
+    .ADDRA(addr_a),
+    .DIA(di_a[15:0]),
+    .ENA(ce_a),
+    .WEA(we_a),
+    .DOA(do_a[15:0]),
 
-	.CLKB(clk_b),
-	.RSTB(1'b0),
-	.ADDRB(addr_b),
-	.DIB(di_b[15:0]),
-	.ENB(ce_b),
-	.WEB(we_b),
-	.DOB(do_b[15:0])
-);
+    .CLKB(clk_b),
+    .RSTB(1'b0),
+    .ADDRB(addr_b),
+    .DIB(di_b[15:0]),
+    .ENB(ce_b),
+    .WEB(we_b),
+    .DOB(do_b[15:0])
+  );
 
-//
-// Block 1
-//
-RAMB4_S16_S16 ramb4_s16_s16_1(
-	.CLKA(clk_a),
-	.RSTA(1'b0),
-	.ADDRA(addr_a),
-	.DIA(di_a[31:16]),
-	.ENA(ce_a),
-	.WEA(we_a),
-	.DOA(do_a[31:16]),
+  //
+  // Block 1
+  //
+  RAMB4_S16_S16 ramb4_s16_s16_1(
+    .CLKA(clk_a),
+    .RSTA(1'b0),
+    .ADDRA(addr_a),
+    .DIA(di_a[31:16]),
+    .ENA(ce_a),
+    .WEA(we_a),
+    .DOA(do_a[31:16]),
 
-	.CLKB(clk_b),
-	.RSTB(1'b0),
-	.ADDRB(addr_b),
-	.DIB(di_b[31:16]),
-	.ENB(ce_b),
-	.WEB(we_b),
-	.DOB(do_b[31:16])
-);
+    .CLKB(clk_b),
+    .RSTB(1'b0),
+    .ADDRB(addr_b),
+    .DIB(di_b[31:16]),
+    .ENB(ce_b),
+    .WEB(we_b),
+    .DOB(do_b[31:16])
+  );
 
-`else
+`else // !OR1200_XILINX_RAMB4
 
 `ifdef OR1200_XILINX_RAMB16
 
-//
-// Instantiation of FPGA memory:
-//
-// Virtex4/Spartan3E
-//
-// Added By Nir Mor
-//
+  //
+  // Instantiation of FPGA memory:
+  //
+  // Virtex4/Spartan3E
+  //
+  // Added By Nir Mor
+  //
 
-RAMB16_S36_S36 ramb16_s36_s36(
-	.CLKA(clk_a),
-	.SSRA(1'b0),
-	.ADDRA({4'b0000,addr_a}),
-	.DIA(di_a),
-	.DIPA(4'h0),
-	.ENA(ce_a),
-	.WEA(we_a),
-	.DOA(do_a),
-	.DOPA(),
+  RAMB16_S36_S36 ramb16_s36_s36(
+    .CLKA(clk_a),
+    .SSRA(1'b0),
+    .ADDRA({4'b0000,addr_a}),
+    .DIA(di_a),
+    .DIPA(4'h0),
+    .ENA(ce_a),
+    .WEA(we_a),
+    .DOA(do_a),
+    .DOPA(),
 
-	.CLKB(clk_b),
-	.SSRB(1'b0),
-	.ADDRB({4'b0000,addr_b}),
-	.DIB(di_b),
-	.DIPB(4'h0),
-	.ENB(ce_b),
-	.WEB(we_b),
-	.DOB(do_b),
-	.DOPB()
-);
+    .CLKB(clk_b),
+    .SSRB(1'b0),
+    .ADDRB({4'b0000,addr_b}),
+    .DIB(di_b),
+    .DIPB(4'h0),
+    .ENB(ce_b),
+    .WEB(we_b),
+    .DOB(do_b),
+    .DOPB()
+  );
 
-`else
+`else // !OR1200_XILINX_RAMB16
 
 `ifdef OR1200_ALTERA_LPM_XXX
 
-//
-// Instantiation of FPGA memory:
-//
-// Altera LPM
-//
-// Added By Jamil Khatib
-//
-altqpram altqpram_component (
-	.wraddress_a (addr_a),
-	.inclocken_a (ce_a),
-	.wraddress_b (addr_b),
-	.wren_a (we_a),
-	.inclocken_b (ce_b),
-	.wren_b (we_b),
-	.inaclr_a (1'b0),
-	.inaclr_b (1'b0),
-	.inclock_a (clk_a),
-	.inclock_b (clk_b),
-	.data_a (di_a),
-	.data_b (di_b),
-	.q_a (do_a),
-	.q_b (do_b)
-);
+  //
+  // Instantiation of FPGA memory:
+  //
+  // Altera LPM
+  //
+  // Added By Jamil Khatib
+  //
+  altqpram altqpram_component (
+    .wraddress_a (addr_a),
+    .inclocken_a (ce_a),
+    .wraddress_b (addr_b),
+    .wren_a (we_a),
+    .inclocken_b (ce_b),
+    .wren_b (we_b),
+    .inaclr_a (1'b0),
+    .inaclr_b (1'b0),
+    .inclock_a (clk_a),
+    .inclock_b (clk_b),
+    .data_a (di_a),
+    .data_b (di_b),
+    .q_a (do_a),
+    .q_b (do_b)
+  );
 
-defparam altqpram_component.operation_mode = "BIDIR_DUAL_PORT",
-	altqpram_component.width_write_a = dw,
-	altqpram_component.widthad_write_a = aw,
-	altqpram_component.numwords_write_a = dw,
-	altqpram_component.width_read_a = dw,
-	altqpram_component.widthad_read_a = aw,
-	altqpram_component.numwords_read_a = dw,
-	altqpram_component.width_write_b = dw,
-	altqpram_component.widthad_write_b = aw,
-	altqpram_component.numwords_write_b = dw,
-	altqpram_component.width_read_b = dw,
-	altqpram_component.widthad_read_b = aw,
-	altqpram_component.numwords_read_b = dw,
-	altqpram_component.indata_reg_a = "INCLOCK_A",
-	altqpram_component.wrcontrol_wraddress_reg_a = "INCLOCK_A",
-	altqpram_component.outdata_reg_a = "INCLOCK_A",
-	altqpram_component.indata_reg_b = "INCLOCK_B",
-	altqpram_component.wrcontrol_wraddress_reg_b = "INCLOCK_B",
-	altqpram_component.outdata_reg_b = "INCLOCK_B",
-	altqpram_component.indata_aclr_a = "INACLR_A",
-	altqpram_component.wraddress_aclr_a = "INACLR_A",
-	altqpram_component.wrcontrol_aclr_a = "INACLR_A",
-	altqpram_component.outdata_aclr_a = "INACLR_A",
-	altqpram_component.indata_aclr_b = "NONE",
-	altqpram_component.wraddress_aclr_b = "NONE",
-	altqpram_component.wrcontrol_aclr_b = "NONE",
-	altqpram_component.outdata_aclr_b = "INACLR_B",
-	altqpram_component.lpm_hint = "USE_ESB=ON";
-	//examplar attribute altqpram_component NOOPT TRUE
+  defparam altqpram_component.operation_mode = "BIDIR_DUAL_PORT",
+    altqpram_component.width_write_a = dw,
+    altqpram_component.widthad_write_a = aw,
+    altqpram_component.numwords_write_a = dw,
+    altqpram_component.width_read_a = dw,
+    altqpram_component.widthad_read_a = aw,
+    altqpram_component.numwords_read_a = dw,
+    altqpram_component.width_write_b = dw,
+    altqpram_component.widthad_write_b = aw,
+    altqpram_component.numwords_write_b = dw,
+    altqpram_component.width_read_b = dw,
+    altqpram_component.widthad_read_b = aw,
+    altqpram_component.numwords_read_b = dw,
+    altqpram_component.indata_reg_a = "INCLOCK_A",
+    altqpram_component.wrcontrol_wraddress_reg_a = "INCLOCK_A",
+    altqpram_component.outdata_reg_a = "INCLOCK_A",
+    altqpram_component.indata_reg_b = "INCLOCK_B",
+    altqpram_component.wrcontrol_wraddress_reg_b = "INCLOCK_B",
+    altqpram_component.outdata_reg_b = "INCLOCK_B",
+    altqpram_component.indata_aclr_a = "INACLR_A",
+    altqpram_component.wraddress_aclr_a = "INACLR_A",
+    altqpram_component.wrcontrol_aclr_a = "INACLR_A",
+    altqpram_component.outdata_aclr_a = "INACLR_A",
+    altqpram_component.indata_aclr_b = "NONE",
+    altqpram_component.wraddress_aclr_b = "NONE",
+    altqpram_component.wrcontrol_aclr_b = "NONE",
+    altqpram_component.outdata_aclr_b = "INACLR_B",
+    altqpram_component.lpm_hint = "USE_ESB=ON";
+    //examplar attribute altqpram_component NOOPT TRUE
 
-`else
+`else // !OR1200_ALTERA_LPM_XXX
 
-//
-// Generic two-port synchronous RAM model
-//
+  //
+  // Generic two-port synchronous RAM model
+  //
 
-//
-// Generic RAM's registers and wires
-//
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
-reg	[aw-1:0]	addr_a_reg;		// RAM read address register
-reg	[aw-1:0]	addr_b_reg;		// RAM read address register
+  //
+  // Generic RAM's registers and wires
+  //
+  // 通用RAM的寄存器和连线
+  reg  [dw-1:0]  mem [(1<<aw)-1:0];  // RAM content
+  // RAM读地址寄存器
+  reg  [aw-1:0]  addr_a_reg;    // RAM read address register
+  // RAM读地址寄存器
+  reg  [aw-1:0]  addr_b_reg;    // RAM read address register
 
-//
-// Data output drivers
-//
-assign do_a = (oe_a) ? mem[addr_a_reg] : {dw{1'b0}};
-assign do_b = (oe_b) ? mem[addr_b_reg] : {dw{1'b0}};
+  //
+  // Data output drivers
+  //
+  // 数据输出驱动
+  assign do_a = (oe_a) ? mem[addr_a_reg] : {dw{1'b0}};
+  assign do_b = (oe_b) ? mem[addr_b_reg] : {dw{1'b0}};
 
-//
-// RAM write
-//
-always @(posedge clk_a)
-	if (ce_a && we_a)
-		mem[addr_a] <=  di_a;
+  //
+  // RAM write
+  //
+  // RAM从端口A写
+  always @(posedge clk_a)
+    if (ce_a && we_a)
+      mem[addr_a] <=  di_a;
 
-//
-// RAM write
-//
-always @(posedge clk_b)
-	if (ce_b && we_b)
-		mem[addr_b] <=  di_b;
+  //
+  // RAM write
+  //
+  // RAM从端口B写
+  always @(posedge clk_b)
+    if (ce_b && we_b)
+      mem[addr_b] <=  di_b;
 
-//
-// RAM read address register
-//
-always @(posedge clk_a or `OR1200_RST_EVENT rst_a)
-	if (rst_a == `OR1200_RST_VALUE)
-		addr_a_reg <=  {aw{1'b0}};
-	else if (ce_a)
-		addr_a_reg <=  addr_a;
+  //
+  // RAM read address register
+  //
+  // RAM从端口A读地址寄存器
+  always @(posedge clk_a or `OR1200_RST_EVENT rst_a)
+    if (rst_a == `OR1200_RST_VALUE)
+      addr_a_reg <=  {aw{1'b0}};
+    else if (ce_a)
+      addr_a_reg <=  addr_a;
 
-//
-// RAM read address register
-//
-always @(posedge clk_b or `OR1200_RST_EVENT rst_b)
-	if (rst_b == `OR1200_RST_VALUE)
-		addr_b_reg <=  {aw{1'b0}};
-	else if (ce_b)
-		addr_b_reg <=  addr_b;
+  //
+  // RAM read address register
+  //
+  // RAM从端口B读地址寄存器
+  always @(posedge clk_b or `OR1200_RST_EVENT rst_b)
+    if (rst_b == `OR1200_RST_VALUE)
+      addr_b_reg <=  {aw{1'b0}};
+    else if (ce_b)
+      addr_b_reg <=  addr_b;
 
-`endif	// !OR1200_ALTERA_LPM
-`endif	// !OR1200_XILINX_RAMB16
-`endif	// !OR1200_XILINX_RAMB4
-`endif	// !OR1200_VIRAGE_STP
-`endif	// !OR1200_AVANT_ATP
-`endif	// !OR1200_ARTISAN_SDP
+`endif  // !OR1200_ALTERA_LPM
+`endif  // !OR1200_XILINX_RAMB16
+`endif  // !OR1200_XILINX_RAMB4
+`endif  // !OR1200_VIRAGE_STP
+`endif  // !OR1200_AVANT_ATP
+`endif  // !OR1200_ARTISAN_SDP
 
 endmodule

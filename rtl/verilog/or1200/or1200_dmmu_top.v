@@ -43,8 +43,8 @@
 //
 // $Log: or1200_dmmu_top.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// Minor update: 
-// Bugs fixed. 
+// Minor update:
+// Bugs fixed.
 //
 
 // synopsys translate_off
@@ -58,28 +58,28 @@
 
 module or1200_dmmu_top
   (
-	 // Rst and clk
-	 clk, rst,
-   
-	 // CPU i/f
-	 dc_en, dmmu_en, supv, dcpu_adr_i, dcpu_cycstb_i, dcpu_we_i,
-	 dcpu_tag_o, dcpu_err_o,
-   
-	 // SPR access
-	 spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o,
-   
+   // Rst and clk
+   clk, rst,
+
+   // CPU i/f
+   dc_en, dmmu_en, supv, dcpu_adr_i, dcpu_cycstb_i, dcpu_we_i,
+   dcpu_tag_o, dcpu_err_o,
+
+   // SPR access
+   spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o,
+
 `ifdef OR1200_BIST
-	 // RAM BIST
-	 mbist_si_i, mbist_so_o, mbist_ctrl_i,
+   // RAM BIST
+   mbist_si_i, mbist_so_o, mbist_ctrl_i,
 `endif
 
-	 // DC i/f
-	 qmemdmmu_err_i, qmemdmmu_tag_i, qmemdmmu_adr_o, qmemdmmu_cycstb_o, qmemdmmu_ci_o
+   // DC i/f
+   qmemdmmu_err_i, qmemdmmu_tag_i, qmemdmmu_adr_o, qmemdmmu_cycstb_o, qmemdmmu_ci_o
   );
 
   // ---------------------------------------------------------------------------
   // Parameters
-  // ---------------------------------------------------------------------------    
+  // ---------------------------------------------------------------------------
   parameter dw = `OR1200_OPERAND_WIDTH;
   parameter aw = `OR1200_OPERAND_WIDTH;
 
@@ -90,29 +90,29 @@ module or1200_dmmu_top
   //
   // Clock and reset
   //
-  input				        clk;
-  input				        rst;
+  input                clk;
+  input                rst;
 
   //
   // CPU I/F
   //
-  input				        dc_en;          /* SR[3]: Enable Data Cache */
-  input				        dmmu_en;        /* SR[5]: Enable Data MMU */
-  input				        supv;           /* SR[0]: Super Model */
-  input	[aw-1:0]		  dcpu_adr_i;     /* Virtual Address Input*/
-  input				        dcpu_cycstb_i;  /* WB BUS */
-  input				        dcpu_we_i;
-  output	[3:0]			  dcpu_tag_o;
-  output				      dcpu_err_o;
+  input                dc_en;          /* SR[3]: Enable Data Cache */
+  input                dmmu_en;        /* SR[5]: Enable Data MMU */
+  input                supv;           /* SR[0]: Super Model */
+  input  [aw-1:0]      dcpu_adr_i;     /* Virtual Address Input*/
+  input                dcpu_cycstb_i;  /* WB BUS */
+  input                dcpu_we_i;
+  output  [3:0]        dcpu_tag_o;
+  output              dcpu_err_o;
 
   //
   // SPR access
   //
-  input				            spr_cs;     /* MMU specify register select */
-  input				            spr_write;  /* MMU specify register write enable */
-  input	[aw-1:0]		      spr_addr;   /* MMU specify register address */
-  input	[31:0]			      spr_dat_i;  /* MMU specify register input data */
-  output	[31:0]			    spr_dat_o;  /* MMU specify register output data */
+  input                    spr_cs;     /* MMU specify register select */
+  input                    spr_write;  /* MMU specify register write enable */
+  input  [aw-1:0]          spr_addr;   /* MMU specify register address */
+  input  [31:0]            spr_dat_i;  /* MMU specify register input data */
+  output  [31:0]          spr_dat_o;  /* MMU specify register output data */
 
 `ifdef OR1200_BIST
   //
@@ -126,31 +126,31 @@ module or1200_dmmu_top
   //
   // DC I/F
   //
-  input				        qmemdmmu_err_i;
-  input	[3:0]			    qmemdmmu_tag_i;
-  output	[aw-1:0]		qmemdmmu_adr_o;
-  output				      qmemdmmu_cycstb_o;
-  output				      qmemdmmu_ci_o;  /* Data Cache Disable */
+  input                qmemdmmu_err_i;
+  input  [3:0]          qmemdmmu_tag_i;
+  output  [aw-1:0]    qmemdmmu_adr_o;
+  output              qmemdmmu_cycstb_o;
+  output              qmemdmmu_ci_o;  /* Data Cache Disable */
 
   //
   // Internal wires and regs
   //
-  wire				        dtlb_spr_access;
-  wire	[31:`OR1200_DMMU_PS]	dtlb_ppn;
-  wire				        dtlb_hit;
-  wire				        dtlb_uwe;
-  wire				        dtlb_ure;
-  wire				        dtlb_swe;
-  wire				        dtlb_sre;
-  wire	[31:0]			  dtlb_dat_o;
-  wire				        dtlb_en;
-  wire				        dtlb_ci;
-  wire				        fault;
-  wire				        miss;
+  wire                dtlb_spr_access;
+  wire  [31:`OR1200_DMMU_PS]  dtlb_ppn;
+  wire                dtlb_hit;
+  wire                dtlb_uwe;
+  wire                dtlb_ure;
+  wire                dtlb_swe;
+  wire                dtlb_sre;
+  wire  [31:0]        dtlb_dat_o;
+  wire                dtlb_en;
+  wire                dtlb_ci;
+  wire                fault;
+  wire                miss;
 `ifdef OR1200_NO_DMMU
 `else
-  reg				          dtlb_done;
-  reg	[31:`OR1200_DMMU_PS]	dcpu_vpn_r;
+  reg                  dtlb_done;
+  reg  [31:`OR1200_DMMU_PS]  dcpu_vpn_r;
 `endif
 
   //
@@ -202,7 +202,7 @@ module or1200_dmmu_top
   // OR1200_DTAG_PE - Page fault Exception
   //
   // 数据MMU总线周期标签信号输出，`OR1200_DTAG_TE表示TLB脱靶例外；`OR1200_DTAG_PE表示页访问出错例外
-  assign dcpu_tag_o = miss ? `OR1200_DTAG_TE : 
+  assign dcpu_tag_o = miss ? `OR1200_DTAG_TE :
                               fault ? `OR1200_DTAG_PE : qmemdmmu_tag_i;
 
   //
@@ -225,12 +225,12 @@ module or1200_dmmu_top
       dtlb_done <=  1'b0;
 
   //
-  // Cut transfer if something goes wrong with translation. Also delayed signals 
+  // Cut transfer if something goes wrong with translation. Also delayed signals
   // because of translation delay.
-  // 
+  //
   // 如果翻译失败，给出中止传输信号，翻译延迟导致信号延迟。dc_en表示dcache激活，dmmu_en表示dmmu激活，miss表示dtlb失靶，fault表示也出错
-  assign qmemdmmu_cycstb_o = (dc_en & dmmu_en) ? 
-                             !(miss | fault) & dtlb_done & dcpu_cycstb_i : 
+  assign qmemdmmu_cycstb_o = (dc_en & dmmu_en) ?
+                             !(miss | fault) & dtlb_done & dcpu_cycstb_i :
                              !(miss | fault) & dcpu_cycstb_i;
 
   //
@@ -240,7 +240,7 @@ module or1200_dmmu_top
   assign qmemdmmu_ci_o = dmmu_en ? dtlb_ci : `OR1200_DMMU_CI;
 
   //
-  // Register dcpu_adr_i's VPN for use when DMMU is not enabled but PPN is 
+  // Register dcpu_adr_i's VPN for use when DMMU is not enabled but PPN is
   // expected to come one clock cycle after offset part.
   //
   // dcpu_vpn_r表示为虚拟页号
@@ -256,7 +256,7 @@ module or1200_dmmu_top
   //
   // dtlb_ppn是寄存器DTLBWTR[31:13]值，即翻译后的物理页面，dcpu_adr_i[13-1:0]为页内地址。
   // 当DMMU未激活时，将来自CPU核心的虚拟地址dcpu_adr_i送到QMEM
-  assign qmemdmmu_adr_o = dmmu_en ? 
+  assign qmemdmmu_adr_o = dmmu_en ?
                                 {dtlb_ppn, dcpu_adr_i[`OR1200_DMMU_PS-1:0]} :
                                 dcpu_adr_i;
 

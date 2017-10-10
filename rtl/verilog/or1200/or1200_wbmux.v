@@ -44,27 +44,37 @@
 //
 // $Log: or1200_wbmux.v,v $
 // Revision 2.0  2010/06/30 11:00:00  ORSoC
-// No update 
+// No update
 
 // synopsys translate_off
 `include "timescale.v"
 // synopsys translate_on
 `include "or1200_defines.v"
 
+// OR1200的回写复用器，它使用了一个4选1的选路器，从4路输入中选择1路进行输出，在流水线回写暂停时，
+// 使用rfwb_op[0]设置muxreg_valid输出。这个回写复用器是CPU的流水线的回写阶段。
+//
+// 这个选路器输入数据来自alu的计算结果、lsu的输出、sprs的输出和except，选路器控制信号rfwb_op来自ctrl模块
+// 对load/store指令的解码。例如，l.mfspr指令将选择sprs的数据进行输出，l.lwz指令将通过lsu单元装载数据，
+// 即输出lsu的数据。
+
+// 选路器选择输出的数据输出到rf，或前推到需要该数据的模块。
 module or1200_wbmux
   (
-	 // Clock and reset
-	 clk, rst,
+   // Clock and reset
+   // 时钟和复位信号
+   clk, rst,
 
-	 // Internal i/f
-	 wb_freeze, rfwb_op,
-	 muxin_a, muxin_b, muxin_c, muxin_d, muxin_e,
-	 muxout, muxreg, muxreg_valid
+   // Internal i/f
+   // 内部接口
+   wb_freeze, rfwb_op,
+   muxin_a, muxin_b, muxin_c, muxin_d, muxin_e,
+   muxout, muxreg, muxreg_valid
   );
 
   // ---------------------------------------------------------------------------
   // Parameters
-  // ---------------------------------------------------------------------------  
+  // ---------------------------------------------------------------------------
   parameter width = `OR1200_OPERAND_WIDTH;
 
   //
@@ -74,39 +84,41 @@ module or1200_wbmux
   //
   // Clock and reset
   //
-  input				clk;
-  input				rst;
+  input        clk;
+  input        rst;
 
   //
   // Internal i/f
   //
-  input				              wb_freeze;
-  input	[`OR1200_RFWBOP_WIDTH-1:0]	rfwb_op;
-  input	[width-1:0]		      muxin_a;
-  input	[width-1:0]		      muxin_b;
-  input	[width-1:0]		      muxin_c;
-  input	[width-1:0]		      muxin_d;
-  input	[width-1:0]		      muxin_e;   
-  output	[width-1:0]		    muxout;
-  output	[width-1:0]		    muxreg;
-  output				            muxreg_valid;
+  input                   wb_freeze;
+  input  [`OR1200_RFWBOP_WIDTH-1:0]  rfwb_op;
+  input  [width-1:0]      muxin_a;
+  input  [width-1:0]      muxin_b;
+  input  [width-1:0]      muxin_c;
+  input  [width-1:0]      muxin_d;
+  input  [width-1:0]      muxin_e;
+  output [width-1:0]      muxout;
+  output [width-1:0]      muxreg;
+  output                  muxreg_valid;
 
   //
   // Internal wires and regs
   //
-  reg	[width-1:0]		        muxout;
-  reg	[width-1:0]		        muxreg;
-  reg				                muxreg_valid;
+  reg  [width-1:0]        muxout;
+  reg  [width-1:0]        muxreg;
+  reg                     muxreg_valid;
 
   //
   // Registered output from the write-back multiplexer
   //
+  // 来自回写复用器寄存器的输出
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
-    if (rst == `OR1200_RST_VALUE) begin
+    if (rst == `OR1200_RST_VALUE) begin // 复位
       muxreg <=  32'd0;
       muxreg_valid <=  1'b0;
     end
-    else if (!wb_freeze) begin
+
+    else if (!wb_freeze) begin // WB级没有暂停，将数据输出到operandmuxes.wbforw上
       muxreg <=  muxout;
       muxreg_valid <=  rfwb_op[0];
     end
@@ -115,6 +127,7 @@ module or1200_wbmux
   //
   // Write-back multiplexer
   //
+  // 4选1回写复用器，根据rfwb_op[3-1:0]从4路输入中选择1路到输出muxout
   always @(muxin_a or muxin_b or muxin_c or muxin_d or muxin_e or rfwb_op) begin
 `ifdef OR1200_ADDITIONAL_SYNOPSYS_DIRECTIVES
     casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case infer_mux
@@ -138,6 +151,7 @@ module or1200_wbmux
       // synopsys translate_on
 `endif
     end
+
     `OR1200_RFWBOP_LR: begin
       muxout = muxin_d + 32'h8;
 `ifdef OR1200_VERBOSE
@@ -146,20 +160,21 @@ module or1200_wbmux
       // synopsys translate_on
 `endif
     end
+
 `ifdef OR1200_FPU_IMPLEMENTED
     `OR1200_RFWBOP_FPU : begin
-      muxout = muxin_e;	     
+      muxout = muxin_e;
 `ifdef OR1200_VERBOSE
       // synopsys translate_off
       $display("  WBMUX: muxin_e %h", muxin_e);
       // synopsys translate_on
 `endif
-    end		      
+    end
 `endif
-    default : 
-    begin
+    default : begin
       muxout = 0;
-    end  
+    end
+
     endcase
   end
 

@@ -52,26 +52,26 @@
 
 module or1200_immu_top
   (
-	 // Rst and clk
-	 clk, rst,
+   // Rst and clk
+   clk, rst,
 
-	 // CPU i/f
-	 ic_en, immu_en, supv, icpu_adr_i, icpu_cycstb_i,
-	 icpu_adr_o, icpu_tag_o, icpu_rty_o, icpu_err_o,
+   // CPU i/f
+   ic_en, immu_en, supv, icpu_adr_i, icpu_cycstb_i,
+   icpu_adr_o, icpu_tag_o, icpu_rty_o, icpu_err_o,
 
-	 // SR Interface
-	 boot_adr_sel_i,
+   // SR Interface
+   boot_adr_sel_i,
 
-	 // SPR access
-	 spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o,
+   // SPR access
+   spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o,
 
 `ifdef OR1200_BIST
-	 // RAM BIST
-	 mbist_si_i, mbist_so_o, mbist_ctrl_i,
+   // RAM BIST
+   mbist_si_i, mbist_so_o, mbist_ctrl_i,
 `endif
 
-	 // QMEM i/f
-	 qmemimmu_rty_i, qmemimmu_err_i, qmemimmu_tag_i, qmemimmu_adr_o, qmemimmu_cycstb_o, qmemimmu_ci_o
+   // QMEM i/f
+   qmemimmu_rty_i, qmemimmu_err_i, qmemimmu_tag_i, qmemimmu_adr_o, qmemimmu_cycstb_o, qmemimmu_ci_o
   );
 
   // ---------------------------------------------------------------------------
@@ -87,35 +87,35 @@ module or1200_immu_top
   //
   // Clock and reset
   //
-  input				            clk;
-  input				            rst;
+  input                   clk;
+  input                   rst;
 
   //
   // CPU I/F
   //
-  input				            ic_en;
-  input				            immu_en;
-  input				            supv;
-  input	[aw-1:0]		      icpu_adr_i;
-  input				            icpu_cycstb_i;
-  output	[aw-1:0]		    icpu_adr_o;
-  output	[3:0]			      icpu_tag_o;
-  output				          icpu_rty_o;
-  output				          icpu_err_o;
+  input                   ic_en;
+  input                   immu_en;
+  input                   supv;
+  input   [aw-1:0]        icpu_adr_i;
+  input                   icpu_cycstb_i;
+  output  [aw-1:0]        icpu_adr_o;
+  output  [3:0]           icpu_tag_o;
+  output                  icpu_rty_o;
+  output                  icpu_err_o;
 
   //
   // SR Interface
   //
-  input				            boot_adr_sel_i;
+  input                   boot_adr_sel_i;
 
   //
   // SPR access
   //
-  input				            spr_cs;
-  input				            spr_write;
-  input	[aw-1:0]		      spr_addr;
-  input	[31:0]			      spr_dat_i;
-  output	[31:0]			    spr_dat_o;
+  input                   spr_cs;
+  input                   spr_write;
+  input  [aw-1:0]         spr_addr;
+  input  [31:0]           spr_dat_i;
+  output  [31:0]          spr_dat_o;
 
 `ifdef OR1200_BIST
   //
@@ -129,38 +129,38 @@ module or1200_immu_top
   //
   // IC I/F
   //
-  input				            qmemimmu_rty_i;
-  input				            qmemimmu_err_i;
-  input	[3:0]			        qmemimmu_tag_i;
-  output	[aw-1:0]		    qmemimmu_adr_o;
-  output				          qmemimmu_cycstb_o;
-  output				          qmemimmu_ci_o;
+  input                   qmemimmu_rty_i;
+  input                   qmemimmu_err_i;
+  input   [3:0]           qmemimmu_tag_i;
+  output  [aw-1:0]        qmemimmu_adr_o;
+  output                  qmemimmu_cycstb_o;
+  output                  qmemimmu_ci_o;
 
   //
   // Internal wires and regs
   //
-  wire				            itlb_spr_access;
-  wire	[31:`OR1200_IMMU_PS]	itlb_ppn;
-  wire				            itlb_hit;
-  wire				            itlb_uxe;
-  wire				            itlb_sxe;
-  wire	[31:0]			      itlb_dat_o;
-  wire				            itlb_en;
-  wire				            itlb_ci;
-  wire				            itlb_done;
-  wire				            fault;
-  wire				            miss;
-  wire				            page_cross;
-  reg	[31:0]			        icpu_adr_default;
-  wire	[31:0]			      icpu_adr_boot;
-  reg				              icpu_adr_select;
-  reg		[31:0]		        icpu_adr_o;
-  reg	[31:`OR1200_IMMU_PS]	icpu_vpn_r;
+  wire                    itlb_spr_access;
+  wire  [31:`OR1200_IMMU_PS]  itlb_ppn;
+  wire                    itlb_hit;
+  wire                    itlb_uxe;
+  wire                    itlb_sxe;
+  wire  [31:0]            itlb_dat_o;
+  wire                    itlb_en;
+  wire                    itlb_ci;
+  wire                    itlb_done;
+  wire                    fault;
+  wire                    miss;
+  wire                    page_cross;
+  reg  [31:0]             icpu_adr_default;
+  wire [31:0]             icpu_adr_boot;
+  reg                     icpu_adr_select;
+  reg  [31:0]             icpu_adr_o;
+  reg  [31:`OR1200_IMMU_PS]  icpu_vpn_r;
 `ifdef OR1200_NO_IMMU
 `else
-  reg				              itlb_en_r;
-  reg				              dis_spr_access_frst_clk;
-  reg				              dis_spr_access_scnd_clk;
+  reg                     itlb_en_r;
+  reg                     dis_spr_access_frst_clk;
+  reg                     dis_spr_access_scnd_clk;
 `endif
 
   //
@@ -371,8 +371,8 @@ module or1200_immu_top
   // Page fault exception logic
   //
   assign fault = itlb_done &
-        (  (!supv & !itlb_uxe)		// Execute in user mode not enabled
-        || (supv & !itlb_sxe));		// Execute in supv mode not enabled
+        (  (!supv & !itlb_uxe)    // Execute in user mode not enabled
+        || (supv & !itlb_sxe));    // Execute in supv mode not enabled
 
   //
   // TLB Miss exception logic

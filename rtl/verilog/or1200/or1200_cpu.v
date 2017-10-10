@@ -54,39 +54,39 @@
 
 module or1200_cpu
   (
-	 // Clk & Rst
-	 clk, rst,
+   // Clk & Rst
+   clk, rst,
 
-	 // Insn interface
-	 ic_en,
+   // Insn interface
+   ic_en,
    icpu_adr_o, icpu_cycstb_o, icpu_sel_o, icpu_tag_o,
    icpu_dat_i, icpu_ack_i, icpu_rty_i, icpu_err_i, icpu_adr_i, icpu_tag_i,
    immu_en,
 
-	 // Debug unit
-	 id_void, id_insn, ex_void,
-	 ex_insn, ex_freeze, wb_insn, wb_freeze, id_pc, ex_pc, wb_pc, branch_op,
-	 spr_dat_npc, rf_dataw, ex_flushpipe,
-	 du_stall, du_addr, du_dat_du, du_read, du_write, du_except_stop,
-	 du_except_trig, du_dsr, du_dmr1, du_hwbkpt, du_hwbkpt_ls_r, du_dat_cpu,
-	 du_lsu_store_dat, du_lsu_load_dat,
-	 abort_mvspr, abort_ex,
-	
-	 // Data interface
-	 dc_en,
-	 dcpu_adr_o, dcpu_cycstb_o, dcpu_we_o, dcpu_sel_o, dcpu_tag_o, dcpu_dat_o,
+   // Debug unit
+   id_void, id_insn, ex_void,
+   ex_insn, ex_freeze, wb_insn, wb_freeze, id_pc, ex_pc, wb_pc, branch_op,
+   spr_dat_npc, rf_dataw, ex_flushpipe,
+   du_stall, du_addr, du_dat_du, du_read, du_write, du_except_stop,
+   du_except_trig, du_dsr, du_dmr1, du_hwbkpt, du_hwbkpt_ls_r, du_dat_cpu,
+   du_lsu_store_dat, du_lsu_load_dat,
+   abort_mvspr, abort_ex,
+
+   // Data interface
+   dc_en,
+   dcpu_adr_o, dcpu_cycstb_o, dcpu_we_o, dcpu_sel_o, dcpu_tag_o, dcpu_dat_o,
    dcpu_dat_i, dcpu_ack_i, dcpu_rty_i, dcpu_err_i, dcpu_tag_i,
-	 sb_en, dmmu_en, dc_no_writethrough,
+   sb_en, dmmu_en, dc_no_writethrough,
 
-	 // SR Interface
-	 boot_adr_sel_i,
+   // SR Interface
+   boot_adr_sel_i,
 
-	 // Interrupt & tick exceptions
-	 sig_int, sig_tick,
+   // Interrupt & tick exceptions
+   sig_int, sig_tick,
 
-	 // SPR interface
-	 supv, spr_addr, spr_dat_cpu, spr_dat_pic, spr_dat_tt, spr_dat_pm,
-	 spr_dat_dmmu, spr_dat_immu, spr_dat_du, spr_cs, spr_we, mtspr_dc_done
+   // SPR interface
+   supv, spr_addr, spr_dat_cpu, spr_dat_pic, spr_dat_tt, spr_dat_pm,
+   spr_dat_dmmu, spr_dat_immu, spr_dat_du, spr_cs, spr_we, mtspr_dc_done
   );
 
   // ---------------------------------------------------------------------------
@@ -98,222 +98,222 @@ module or1200_cpu
   // I/O ports
 
   // Clk & Rst
-  input 				      clk;
-  input 				      rst;
+  input                 clk;
+  input                 rst;
 
   // Insn (IC) interface
-  output				      ic_en;
-  output	[31:0]			icpu_adr_o;
-  output				      icpu_cycstb_o;
-  output	 [3:0]			icpu_sel_o;
-  output	 [3:0]			icpu_tag_o;
-  input	  [31:0]			icpu_dat_i;
-  input				        icpu_ack_i;
-  input				        icpu_rty_i;
-  input				        icpu_err_i;
-  input	  [31:0]			icpu_adr_i;
-  input	   [3:0]			icpu_tag_i;
+  output                ic_en;
+  output  [31:0]        icpu_adr_o;
+  output                icpu_cycstb_o;
+  output   [3:0]        icpu_sel_o;
+  output   [3:0]        icpu_tag_o;
+  input   [31:0]        icpu_dat_i;
+  input                 icpu_ack_i;
+  input                 icpu_rty_i;
+  input                 icpu_err_i;
+  input   [31:0]        icpu_adr_i;
+  input    [3:0]        icpu_tag_i;
 
   // Insn (IMMU) interface
-  output				      immu_en;
+  output                immu_en;
 
   // Debug interface
-  output              id_void;
-  output	[31:0]			id_insn;
-  output              ex_void;
-  output	[31:0]			ex_insn;
-  output				      ex_freeze;
-  output	[31:0]			wb_insn;
-  output				      wb_freeze;
-  output	[31:0]			id_pc;
-  output	[31:0]			ex_pc;
-  output	[31:0]			wb_pc;
-  output              ex_flushpipe;
-  output	[`OR1200_BRANCHOP_WIDTH-1:0]	branch_op;
+  output                id_void;
+  output  [31:0]        id_insn;
+  output                ex_void;
+  output  [31:0]        ex_insn;
+  output                ex_freeze;
+  output  [31:0]        wb_insn;
+  output                wb_freeze;
+  output  [31:0]        id_pc;
+  output  [31:0]        ex_pc;
+  output  [31:0]        wb_pc;
+  output                ex_flushpipe;
+  output  [`OR1200_BRANCHOP_WIDTH-1:0]  branch_op;
 
-  input				        du_stall;
-  input	[dw-1:0]		  du_addr;
-  input	[dw-1:0]		  du_dat_du;
-  input				        du_read;
-  input				        du_write;
-  input	[`OR1200_DU_DSR_WIDTH-1:0]	du_dsr;
-  input	  [24:0]			du_dmr1;
-  input				        du_hwbkpt;
-  input				        du_hwbkpt_ls_r;
-  output	[13:0]			du_except_trig;
-  output	[13:0]			du_except_stop;
-  output	[dw-1:0]		du_dat_cpu;
-  output	[dw-1:0]		rf_dataw;
-  output	[dw-1:0]		du_lsu_store_dat;
-  output	[dw-1:0]		du_lsu_load_dat;
+  input                 du_stall;
+  input  [dw-1:0]       du_addr;
+  input  [dw-1:0]       du_dat_du;
+  input                 du_read;
+  input                 du_write;
+  input  [`OR1200_DU_DSR_WIDTH-1:0]  du_dsr;
+  input  [24:0]         du_dmr1;
+  input                 du_hwbkpt;
+  input                 du_hwbkpt_ls_r;
+  output  [13:0]        du_except_trig;
+  output  [13:0]        du_except_stop;
+  output  [dw-1:0]      du_dat_cpu;
+  output  [dw-1:0]      rf_dataw;
+  output  [dw-1:0]      du_lsu_store_dat;
+  output  [dw-1:0]      du_lsu_load_dat;
 
   // Data (DC) interface
-  output	[31:0]			dcpu_adr_o;
-  output				      dcpu_cycstb_o;
-  output				      dcpu_we_o;
-  output	 [3:0]			dcpu_sel_o;
-  output	 [3:0]			dcpu_tag_o;
-  output	[31:0]			dcpu_dat_o;
-  input	  [31:0]			dcpu_dat_i;
-  input				        dcpu_ack_i;
-  input				        dcpu_rty_i;
-  input				        dcpu_err_i;
-  input	   [3:0]			dcpu_tag_i;
-  output				      dc_en;
-  output  			      dc_no_writethrough;
+  output  [31:0]        dcpu_adr_o;
+  output                dcpu_cycstb_o;
+  output                dcpu_we_o;
+  output  [3:0]         dcpu_sel_o;
+  output  [3:0]         dcpu_tag_o;
+  output  [31:0]        dcpu_dat_o;
+  input   [31:0]        dcpu_dat_i;
+  input                 dcpu_ack_i;
+  input                 dcpu_rty_i;
+  input                 dcpu_err_i;
+  input   [3:0]         dcpu_tag_i;
+  output                dc_en;
+  output                dc_no_writethrough;
 
   // Data (DMMU) interface
-  output				      sb_en;
-  output				      dmmu_en;
-  output				      abort_ex;
-  output				      abort_mvspr;
+  output                sb_en;
+  output                dmmu_en;
+  output                abort_ex;
+  output                abort_mvspr;
 
   // SR Interface
-  input				        boot_adr_sel_i;
+  input                 boot_adr_sel_i;
 
   // SPR interface
-  output				      supv;
-  input	  [dw-1:0]		spr_dat_pic;
-  input	  [dw-1:0]		spr_dat_tt;
-  input	  [dw-1:0]		spr_dat_pm;
-  input	  [dw-1:0]		spr_dat_dmmu;
-  input	  [dw-1:0]		spr_dat_immu;
-  input	  [dw-1:0]		spr_dat_du;
-  output	[dw-1:0]		spr_addr;
-  output	[dw-1:0]		spr_dat_cpu;
-  output	[dw-1:0]		spr_dat_npc;
-  output	  [31:0]		spr_cs;
-  output				      spr_we;
-  input   			      mtspr_dc_done;
+  output                supv;
+  input   [dw-1:0]      spr_dat_pic;
+  input   [dw-1:0]      spr_dat_tt;
+  input   [dw-1:0]      spr_dat_pm;
+  input   [dw-1:0]      spr_dat_dmmu;
+  input   [dw-1:0]      spr_dat_immu;
+  input   [dw-1:0]      spr_dat_du;
+  output  [dw-1:0]      spr_addr;
+  output  [dw-1:0]      spr_dat_cpu;
+  output  [dw-1:0]      spr_dat_npc;
+  output  [31:0]        spr_cs;
+  output                spr_we;
+  input                 mtspr_dc_done;
 
   // Interrupt exceptions
-  input				        sig_int;
-  input				        sig_tick;
+  input                 sig_int;
+  input                 sig_tick;
 
   // Internal wires
-  wire	  [31:0]			if_insn;
-  wire				        saving_if_insn;
-  wire	  [31:0]			if_pc;
-  wire	[aw-1:0]		  rf_addrw;
-  wire	[aw-1:0] 		  rf_addra;
-  wire	[aw-1:0] 		  rf_addrb;
-  wire				        rf_rda;
-  wire				        rf_rdb;
-  wire	[dw-1:0]		  id_simm;
-  wire	[dw-1:2]		  id_branch_addrtarget;
-  wire	[dw-1:2]		  ex_branch_addrtarget;
-  wire	[`OR1200_ALUOP_WIDTH-1:0]	    alu_op;
-  wire	[`OR1200_ALUOP2_WIDTH-1:0]	  alu_op2;
-  wire	[`OR1200_COMPOP_WIDTH-1:0]	  comp_op;
-  wire	[`OR1200_BRANCHOP_WIDTH-1:0]	pre_branch_op;
-  wire	[`OR1200_BRANCHOP_WIDTH-1:0]	branch_op;
-  wire	[`OR1200_LSUOP_WIDTH-1:0]	    id_lsu_op;
-  wire				        genpc_freeze;
-  wire				        if_freeze;
-  wire				        id_freeze;
-  wire				        ex_freeze;
-  wire				        wb_freeze;
-  wire	[`OR1200_SEL_WIDTH-1:0]	      sel_a;
-  wire	[`OR1200_SEL_WIDTH-1:0]	      sel_b;
-  wire	[`OR1200_RFWBOP_WIDTH-1:0]	  rfwb_op;
+  wire    [31:0]        if_insn;
+  wire                  saving_if_insn;
+  wire    [31:0]        if_pc;
+  wire  [aw-1:0]        rf_addrw;
+  wire  [aw-1:0]        rf_addra;
+  wire  [aw-1:0]        rf_addrb;
+  wire                  rf_rda;
+  wire                  rf_rdb;
+  wire  [dw-1:0]        id_simm;
+  wire  [dw-1:2]        id_branch_addrtarget;
+  wire  [dw-1:2]        ex_branch_addrtarget;
+  wire  [`OR1200_ALUOP_WIDTH-1:0]     alu_op;
+  wire  [`OR1200_ALUOP2_WIDTH-1:0]    alu_op2;
+  wire  [`OR1200_COMPOP_WIDTH-1:0]    comp_op;
+  wire  [`OR1200_BRANCHOP_WIDTH-1:0]  pre_branch_op;
+  wire  [`OR1200_BRANCHOP_WIDTH-1:0]  branch_op;
+  wire  [`OR1200_LSUOP_WIDTH-1:0]     id_lsu_op;
+  wire                  genpc_freeze;
+  wire                  if_freeze;
+  wire                  id_freeze;
+  wire                  ex_freeze;
+  wire                  wb_freeze;
+  wire  [`OR1200_SEL_WIDTH-1:0]       sel_a;
+  wire  [`OR1200_SEL_WIDTH-1:0]       sel_b;
+  wire  [`OR1200_RFWBOP_WIDTH-1:0]    rfwb_op;
   wire  [`OR1200_FPUOP_WIDTH-1:0]     fpu_op;
-  wire	[dw-1:0]		  rf_dataw;
-  wire	[dw-1:0]		  rf_dataa;
-  wire	[dw-1:0]		  rf_datab;
-  wire	[dw-1:0]		  muxed_a;
-  wire	[dw-1:0]		  muxed_b;
-  wire	[dw-1:0]		  wb_forw;
-  wire				        wbforw_valid;
-  wire	[dw-1:0]		  operand_a;
-  wire	[dw-1:0]		  operand_b;
-  wire	[dw-1:0]		  alu_dataout;
-  wire	[dw-1:0]		  lsu_dataout;
-  wire	[dw-1:0]		  sprs_dataout;
-  wire	[dw-1:0]		  fpu_dataout;
-  wire     			      fpu_done;
-  wire	[31:0]			  ex_simm;
-  wire	[`OR1200_MULTICYCLE_WIDTH-1:0]	multicycle;
-  wire  [`OR1200_WAIT_ON_WIDTH-1:0]	wait_on;
-  wire	[`OR1200_EXCEPT_WIDTH-1:0]	except_type;
-  wire	[4:0]			  cust5_op;
-  wire	[5:0]			  cust5_limm;
-  wire				      if_flushpipe;
-  wire				      id_flushpipe;
-  wire				      ex_flushpipe;
-  wire				      wb_flushpipe;
-  wire				      extend_flush;
-  wire				      ex_branch_taken;
-  wire				      flag;
-  wire				      flagforw;
-  wire				      flag_we;
-  wire				      flagforw_alu;
-  wire				      flag_we_alu;
-  wire				      flagforw_fpu;
-  wire				      flag_we_fpu;
-  wire				      carry;
-  wire				      cyforw;
-  wire				      cy_we_alu;
-  wire				      ovforw;
-  wire				      ov_we_alu;
-  wire				      ovforw_mult_mac;
-  wire				      ov_we_mult_mac;
-  wire				      cy_we_rf;
-  wire				      lsu_stall;
-  wire				      epcr_we;
-  wire				      eear_we;
-  wire				      esr_we;
-  wire				      pc_we;
-  wire	[31:0]			epcr;
-  wire	[31:0]			eear;
-  wire	[`OR1200_SR_WIDTH-1:0]	  esr;
-  wire 	[`OR1200_FPCSR_WIDTH-1:0] fpcsr;
-  wire 				      fpcsr_we;
-  wire				      sr_we;
-  wire	[`OR1200_SR_WIDTH-1:0]	  to_sr;
-  wire	[`OR1200_SR_WIDTH-1:0]	  sr;
-  wire				      except_flushpipe;
-  wire				      except_start;
-  wire				      except_started;
-  wire    			    fpu_except_started;
-  wire	[31:0]			wb_insn;
-  wire				      sig_syscall;
-  wire				      sig_trap;
-  wire    			    sig_range;
-  wire				      sig_fp;
-  wire	[31:0]			spr_dat_cfgr;
-  wire	[31:0]			spr_dat_rf;
+  wire  [dw-1:0]        rf_dataw;
+  wire  [dw-1:0]        rf_dataa;
+  wire  [dw-1:0]        rf_datab;
+  wire  [dw-1:0]        muxed_a;
+  wire  [dw-1:0]        muxed_b;
+  wire  [dw-1:0]        wb_forw;
+  wire                  wbforw_valid;
+  wire  [dw-1:0]        operand_a;
+  wire  [dw-1:0]        operand_b;
+  wire  [dw-1:0]        alu_dataout;
+  wire  [dw-1:0]        lsu_dataout;
+  wire  [dw-1:0]        sprs_dataout;
+  wire  [dw-1:0]        fpu_dataout;
+  wire                  fpu_done;
+  wire  [31:0]          ex_simm;
+  wire  [`OR1200_MULTICYCLE_WIDTH-1:0]  multicycle;
+  wire  [`OR1200_WAIT_ON_WIDTH-1:0]     wait_on;
+  wire  [`OR1200_EXCEPT_WIDTH-1:0]      except_type;
+  wire  [4:0]           cust5_op;
+  wire  [5:0]           cust5_limm;
+  wire                  if_flushpipe;
+  wire                  id_flushpipe;
+  wire                  ex_flushpipe;
+  wire                  wb_flushpipe;
+  wire                  extend_flush;
+  wire                  ex_branch_taken;
+  wire                  flag;
+  wire                  flagforw;
+  wire                  flag_we;
+  wire                  flagforw_alu;
+  wire                  flag_we_alu;
+  wire                  flagforw_fpu;
+  wire                  flag_we_fpu;
+  wire                  carry;
+  wire                  cyforw;
+  wire                  cy_we_alu;
+  wire                  ovforw;
+  wire                  ov_we_alu;
+  wire                  ovforw_mult_mac;
+  wire                  ov_we_mult_mac;
+  wire                  cy_we_rf;
+  wire                  lsu_stall;
+  wire                  epcr_we;
+  wire                  eear_we;
+  wire                  esr_we;
+  wire                  pc_we;
+  wire  [31:0]          epcr;
+  wire  [31:0]          eear;
+  wire  [`OR1200_SR_WIDTH-1:0]    esr;
+  wire   [`OR1200_FPCSR_WIDTH-1:0] fpcsr;
+  wire              fpcsr_we;
+  wire              sr_we;
+  wire  [`OR1200_SR_WIDTH-1:0]    to_sr;
+  wire  [`OR1200_SR_WIDTH-1:0]    sr;
+  wire              except_flushpipe;
+  wire              except_start;
+  wire              except_started;
+  wire              fpu_except_started;
+  wire  [31:0]      wb_insn;
+  wire              sig_syscall;
+  wire              sig_trap;
+  wire              sig_range;
+  wire              sig_fp;
+  wire  [31:0]      spr_dat_cfgr;
+  wire  [31:0]      spr_dat_rf;
   wire  [31:0]      spr_dat_npc;
-  wire	[31:0]			spr_dat_ppc;
-  wire	[31:0]			spr_dat_mac;
-  wire [31:0] 			spr_dat_fpu;
-  wire     			    mtspr_done;
-  wire				      force_dslot_fetch;
-  wire				      no_more_dslot;
-  wire				      ex_void;
-  wire				      ex_spr_read;
-  wire				      ex_spr_write;
-  wire				      if_stall;
-  wire				      id_macrc_op;
-  wire				      ex_macrc_op;
-  wire	[`OR1200_MACOP_WIDTH-1:0] id_mac_op;
-  wire	[`OR1200_MACOP_WIDTH-1:0] mac_op;
-  wire	[31:0]			mult_mac_result;
-  wire				      mult_mac_stall;
-  wire	[13:0]			except_trig;
-  wire	[13:0]			except_stop;
-  wire				      genpc_refetch;
-  wire				      rfe;
-  wire				      lsu_unstall;
-  wire				      except_align;
-  wire				      except_dtlbmiss;
-  wire				      except_dmmufault;
-  wire				      except_illegal;
-  wire				      except_itlbmiss;
-  wire				      except_immufault;
-  wire				      except_ibuserr;
-  wire				      except_dbuserr;
-  wire				      abort_ex;
-  wire				      abort_mvspr;
+  wire  [31:0]      spr_dat_ppc;
+  wire  [31:0]      spr_dat_mac;
+  wire [31:0]       spr_dat_fpu;
+  wire              mtspr_done;
+  wire              force_dslot_fetch;
+  wire              no_more_dslot;
+  wire              ex_void;
+  wire              ex_spr_read;
+  wire              ex_spr_write;
+  wire              if_stall;
+  wire              id_macrc_op;
+  wire              ex_macrc_op;
+  wire  [`OR1200_MACOP_WIDTH-1:0] id_mac_op;
+  wire  [`OR1200_MACOP_WIDTH-1:0] mac_op;
+  wire  [31:0]      mult_mac_result;
+  wire              mult_mac_stall;
+  wire  [13:0]      except_trig;
+  wire  [13:0]      except_stop;
+  wire              genpc_refetch;
+  wire              rfe;
+  wire              lsu_unstall;
+  wire              except_align;
+  wire              except_dtlbmiss;
+  wire              except_dmmufault;
+  wire              except_illegal;
+  wire              except_itlbmiss;
+  wire              except_immufault;
+  wire              except_ibuserr;
+  wire              except_dbuserr;
+  wire              abort_ex;
+  wire              abort_mvspr;
 
   // Send exceptions to Debug Unit
   assign du_except_trig   = except_trig;
@@ -449,12 +449,12 @@ module or1200_cpu
     .rf_rda           (rf_rda),
     .rf_rdb           (rf_rdb),
     .alu_op           (alu_op),
-    .alu_op2          (alu_op2),			
+    .alu_op2          (alu_op2),
     .mac_op           (mac_op),
     .comp_op          (comp_op),
     .rf_addrw         (rf_addrw),
     .rfwb_op          (rfwb_op),
-    .fpu_op           (fpu_op),			
+    .fpu_op           (fpu_op),
     .pc_we            (pc_we),
     .wb_insn          (wb_insn),
     .id_simm          (id_simm),
@@ -469,7 +469,7 @@ module or1200_cpu
     .id_pc            (id_pc),
     .ex_pc            (ex_pc),
     .multicycle       (multicycle),
-    .wait_on          (wait_on),			
+    .wait_on          (wait_on),
     .wbforw_valid     (wbforw_valid),
     .sig_syscall      (sig_syscall),
     .sig_trap         (sig_trap),
@@ -541,7 +541,7 @@ module or1200_cpu
     .mult_mac_result(mult_mac_result),
     .macrc_op(ex_macrc_op),
     .alu_op(alu_op),
-    .alu_op2(alu_op2),		
+    .alu_op2(alu_op2),
     .comp_op(comp_op),
     .cust5_op(cust5_op),
     .cust5_limm(cust5_limm),
@@ -551,7 +551,7 @@ module or1200_cpu
     .cyforw(cyforw),
     .cy_we(cy_we_alu),
     .ovforw(ovforw),
-    .ov_we(ov_we_alu),		
+    .ov_we(ov_we_alu),
     .flag(flag),
     .carry(carry)
   );
@@ -576,7 +576,7 @@ module or1200_cpu
     .sig_fp(sig_fp),
     .except_started(fpu_except_started),
     .fpcsr_we(fpcsr_we),
-    .fpcsr(fpcsr),		
+    .fpcsr(fpcsr),
     .spr_cs(spr_cs[`OR1200_SPR_GROUP_FPU]),
     .spr_write(spr_we),
     .spr_addr(spr_addr),
@@ -691,7 +691,7 @@ module or1200_cpu
 
     .dcpu_adr_o(dcpu_adr_o),
     .dcpu_cycstb_o(dcpu_cycstb_o),
-    .dcpu_we_o(dcpu_we_o),
+    .dcpu_we_o (dcpu_we_o),
     .dcpu_sel_o(dcpu_sel_o),
     .dcpu_tag_o(dcpu_tag_o),
     .dcpu_dat_o(dcpu_dat_o),

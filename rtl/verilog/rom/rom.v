@@ -32,8 +32,10 @@
 //// from http://www.opencores.org/lgpl.shtml                     ////
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
+
 //`define B3_BURST
 `define NONBLOCK_ASSIGN <= #1
+
 module rom
   (
    wb_adr_i, wb_stb_i, wb_cyc_i, wb_cti_i, wb_bte_i,
@@ -45,24 +47,24 @@ module rom
   // ---------------------------------------------------------------------------
   parameter addr_width = 5;
 
-  input [(addr_width+2)-1:2]        wb_adr_i;
-  input 			            wb_stb_i;
-  input 			            wb_cyc_i;
-  input [2:0] 			      wb_cti_i;
-  input [1:0] 			      wb_bte_i;
-  output reg [31:0] 		  wb_dat_o;
-  output reg 			        wb_ack_o;
-  input 			            wb_clk;
-  input 			            wb_rst;
+  input [(addr_width+2)-1:2] wb_adr_i;
+  input                   wb_stb_i;
+  input                   wb_cyc_i;
+  input [2:0]             wb_cti_i;
+  input [1:0]             wb_bte_i;
+  output reg [31:0]       wb_dat_o;
+  output reg              wb_ack_o;
+  input                   wb_clk;
+  input                   wb_rst;
 
 `ifdef B3_BURST
-  reg [addr_width-1:0] 	  adr;
-  reg 				            wb_stb_i_r;
-  wire 			              new_access;
-  reg 				            new_access_r;
-  wire 			              burst;
-  reg 				            burst_r;
-  wire 			              new_burst;
+  reg [addr_width-1:0]    adr;
+  reg                     wb_stb_i_r;
+  wire                    new_access;
+  reg                     new_access_r;
+  wire                    burst;
+  reg                     burst_r;
+  wire                    new_burst;
 `endif
 
   always @ (posedge wb_clk or posedge wb_rst)
@@ -75,14 +77,14 @@ module rom
       case (wb_adr_i)
 `endif
       `include "bootrom.v"
-      /*	
-	    // Zero r0 and jump to 0x00000100
-	    0 : wb_dat_o <= 32'h18000000;
-	    1 : wb_dat_o <= 32'hA8200000;
-	    2 : wb_dat_o <= 32'hA8C00100;
-	    3 : wb_dat_o <= 32'h44003000;
-	    4 : wb_dat_o <= 32'h15000000;
-	    */
+      /*  
+      // Zero r0 and jump to 0x00000100
+      0 : wb_dat_o <= 32'h18000000;
+      1 : wb_dat_o <= 32'hA8200000;
+      2 : wb_dat_o <= 32'hA8C00100;
+      3 : wb_dat_o <= 32'h44003000;
+      4 : wb_dat_o <= 32'h15000000;
+      */
       default:
         wb_dat_o `NONBLOCK_ASSIGN 32'h00000000;
       endcase // case (wb_adr_i)
@@ -111,10 +113,10 @@ module rom
     begin
       if (wb_cti_i == 3'b010)
         case (wb_bte_i)
-	      2'b00: adr `NONBLOCK_ASSIGN adr + 1;
-	      2'b01: adr[1:0] `NONBLOCK_ASSIGN adr[1:0] + 1;
-	      2'b10: adr[2:0] `NONBLOCK_ASSIGN adr[2:0] + 1;
-	      2'b11: adr[3:0] `NONBLOCK_ASSIGN adr[3:0] + 1;
+        2'b00: adr `NONBLOCK_ASSIGN adr + 1;
+        2'b01: adr[1:0] `NONBLOCK_ASSIGN adr[1:0] + 1;
+        2'b10: adr[2:0] `NONBLOCK_ASSIGN adr[2:0] + 1;
+        2'b11: adr[3:0] `NONBLOCK_ASSIGN adr[3:0] + 1;
         endcase // case (wb_bte_i)
       else
         adr `NONBLOCK_ASSIGN wb_adr_i[(addr_width+2)-1:2];

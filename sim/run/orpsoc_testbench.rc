@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi3_L-2016.06-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 28 1163 186 316 65
+viewPort 0 23 1807 1057 246 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 52489.700000
-cursor 1830.000000
+zoom 1649.927876 1979.417780
+cursor 1750.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 51
+top 29
 ; marker line index
-markerPos 107
+markerPos 101
 
 ; event list
 ; addEvent event_name event_expression
@@ -45,22 +45,67 @@ COMPLEX_EVENT_END
 curSTATUS ByChange
 
 
-addGroup "G1" -e FALSE
+addGroup "orpsoc_top" -e FALSE
 activeDirFile "" "/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb"
-addSignal -h 15 /orpsoc_testbench/clk
-addSignal -h 15 -holdScope dc_en
+addSignal -h 15 /orpsoc_testbench/dut/clk_pad_i
+addSignal -h 15 -holdScope rst_n_pad_i
+addGroup "wbm_i_or12" -e FALSE
+addSignal -h 15 /orpsoc_testbench/dut/wbm_i_or12_cyc_o
+addSignal -h 15 -holdScope wbm_i_or12_stb_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_sel_o[3:0]
+addSignal -h 15 -holdScope wbm_i_or12_we_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_adr_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_dat_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_cti_o[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_bte_o[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_i_or12_dat_i[31:0]
+addSignal -h 15 -holdScope wbm_i_or12_ack_i
+addSignal -h 15 -holdScope wbm_i_or12_err_i
+addSignal -h 15 -holdScope wbm_i_or12_rty_i
+addGroup "wbm_d_or12" -e FALSE
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/wbm_d_or12_adr_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_d_or12_dat_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_d_or12_sel_o[3:0]
+addSignal -h 15 -holdScope wbm_d_or12_we_o
+addSignal -h 15 -holdScope wbm_d_or12_cyc_o
+addSignal -h 15 -holdScope wbm_d_or12_stb_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_d_or12_cti_o[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_d_or12_bte_o[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbm_d_or12_dat_i[31:0]
+addSignal -h 15 -holdScope wbm_d_or12_ack_i
+addSignal -h 15 -holdScope wbm_d_or12_err_i
+addSignal -h 15 -holdScope wbm_d_or12_rty_i
+addGroup "wbs_i_rom0" -e FALSE
+addSignal -h 15 /orpsoc_testbench/dut/rom0/wb_clk
+addSignal -h 15 -holdScope wb_rst
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/wbs_i_rom0_adr_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbs_i_rom0_dat_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbs_i_rom0_sel_i[3:0]
+addSignal -h 15 -holdScope wbs_i_rom0_we_i
+addSignal -h 15 -holdScope wbs_i_rom0_cyc_i
+addSignal -h 15 -holdScope wbs_i_rom0_stb_i
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbs_i_rom0_cti_i[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbs_i_rom0_bte_i[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wbs_i_rom0_dat_o[31:0]
+addSignal -h 15 -holdScope wbs_i_rom0_ack_o
+addSignal -h 15 -holdScope wbs_i_rom0_err_o
+addSignal -h 15 -holdScope wbs_i_rom0_rty_o
+addGroup "rom"
+addSignal -h 15 /orpsoc_testbench/dut/rom0/wb_rst
+addSignal -h 15 -holdScope wb_clk
+addSignal -h 15 -UNSIGNED -HEX -holdScope wb_adr_i[7:2]
+addSignal -h 15 -holdScope wb_stb_i
+addSignal -h 15 -holdScope wb_cyc_i
+addSignal -h 15 -UNSIGNED -HEX -holdScope wb_cti_i[2:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wb_bte_i[1:0]
+addSignal -h 15 -holdScope wb_ack_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope wb_dat_o[31:0]
+addGroup "G6"
+addGroup "or1200_cup0" -e FALSE
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/clk
+addSignal -h 15 -holdScope rst
 addSignal -h 15 -holdScope ic_en
-addSignal -h 15 -holdScope rst_n
-addSignal -h 15 -holdScope tck_pad_i
-addSignal -h 15 -holdScope tdi_pad_i
-addSignal -h 15 -holdScope tdo_pad_o
-addSignal -h 15 -holdScope tms_pad_i
-addSignal -h 15 -holdScope uart0_srx_pad_i
-addSignal -h 15 -holdScope uart0_stx_pad_o
-addGroup "G2" -e FALSE
-addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/icpu_dat_i[31:0]
-addGroup "G3" -e FALSE
-addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/icpu_adr_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_o[31:0]
 addSignal -h 15 -holdScope icpu_cycstb_o
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_sel_o[3:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_o[3:0]
@@ -71,90 +116,39 @@ addSignal -h 15 -holdScope icpu_err_i
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_i[3:0]
 addSignal -h 15 -holdScope immu_en
-addGroup "G4" -e FALSE
-addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_qmem_top/iaddr_qmem_hit
-addSignal -h 15 -holdScope daddr_qmem_hit
-addSignal -h 15 -UNSIGNED -HEX -holdScope state[2:0]
-addSignal -h 15 -holdScope qmem_dack
-addSignal -h 15 -holdScope qmem_iack
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_di[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_do[31:0]
-addSignal -h 15 -holdScope qmem_en
-addSignal -h 15 -holdScope qmem_we
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmem_addr[31:0]
-addSignal -h 15 -holdScope qmem_ack
-addGroup "G5"
-addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_immu_top/clk
-addSignal -h 15 -holdScope rst
-addSignal -h 15 -holdScope ic_en
-addSignal -h 15 -holdScope immu_en
+addGroup "G8"
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/dc_en
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_adr_o[31:0]
+addSignal -h 15 -holdScope dcpu_cycstb_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_sel_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_tag_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_dat_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_tag_i[3:0]
+addSignal -h 15 -holdScope dcpu_err_i
+addSignal -h 15 -holdScope dcpu_we_o
+addSignal -h 15 -holdScope dcpu_rty_i
+addSignal -h 15 -holdScope dcpu_ack_i
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_dat_i[31:0]
+addSignal -h 15 -holdScope sb_en
+addSignal -h 15 -holdScope dmmu_en
+addSignal -h 15 -holdScope dc_no_writethrough
+addGroup "G9"
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/boot_adr_sel_i
+addSignal -h 15 -holdScope sig_int
+addSignal -h 15 -holdScope sig_tick
 addSignal -h 15 -holdScope supv
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
-addSignal -h 15 -holdScope icpu_cycstb_i
-addSignal -h 15 -holdScope icpu_err_o
-addSignal -h 15 -holdScope icpu_rty_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_o[31:0]
-addSignal -h 15 -holdScope boot_adr_sel_i
-addSignal -h 15 -holdScope spr_cs
-addSignal -h 15 -holdScope spr_write
 addSignal -h 15 -UNSIGNED -HEX -holdScope spr_addr[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_i[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_o[31:0]
-addSignal -h 15 -holdScope qmemimmu_rty_i
-addSignal -h 15 -holdScope qmemimmu_err_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemimmu_tag_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemimmu_adr_o[31:0]
-addSignal -h 15 -holdScope qmemimmu_cycstb_o
-addSignal -h 15 -holdScope qmemimmu_ci_o
-addGroup "G6"
-addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_qmem_top/clk
-addSignal -h 15 -holdScope rst
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemimmu_adr_i[31:0]
-addSignal -h 15 -holdScope qmemimmu_cycstb_i
-addSignal -h 15 -holdScope qmemimmu_ci_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemicpu_sel_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemicpu_tag_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemicpu_dat_o[31:0]
-addSignal -h 15 -holdScope qmemicpu_ack_o
-addSignal -h 15 -holdScope qmemimmu_rty_o
-addSignal -h 15 -holdScope qmemimmu_err_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemimmu_tag_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope icqmem_adr_o[31:0]
-addSignal -h 15 -holdScope icqmem_cycstb_o
-addSignal -h 15 -holdScope icqmem_ci_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope icqmem_sel_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope icqmem_tag_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope icqmem_dat_i[31:0]
-addSignal -h 15 -holdScope icqmem_ack_i
-addSignal -h 15 -holdScope icqmem_rty_i
-addSignal -h 15 -holdScope icqmem_err_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope icqmem_tag_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdmmu_adr_i[31:0]
-addSignal -h 15 -holdScope qmemdmmu_ci_i
-addSignal -h 15 -holdScope qmemdmmu_cycstb_i
-addSignal -h 15 -holdScope qmemdcpu_we_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdcpu_sel_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdcpu_tag_i[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdcpu_dat_i[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdcpu_dat_o[31:0]
-addSignal -h 15 -holdScope qmemdcpu_ack_o
-addSignal -h 15 -holdScope qmemdcpu_rty_o
-addSignal -h 15 -holdScope qmemdmmu_err_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope qmemdmmu_tag_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_adr_o[31:0]
-addSignal -h 15 -holdScope dcqmem_cycstb_o
-addSignal -h 15 -holdScope dcqmem_ci_o
-addSignal -h 15 -holdScope dcqmem_we_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_sel_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_tag_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_dat_o[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_dat_i[31:0]
-addSignal -h 15 -holdScope dcqmem_ack_i
-addSignal -h 15 -holdScope dcqmem_rty_i
-addSignal -h 15 -holdScope dcqmem_err_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope dcqmem_tag_i[3:0]
-addGroup "G7"
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_cpu[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_pic[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_tt[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_pm[31:0]
+addSignal -h 15 -holdScope mtspr_dc_done
+addSignal -h 15 -holdScope spr_we
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_cs[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_du[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_immu[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope spr_dat_dmmu[31:0]
+addGroup "G10"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

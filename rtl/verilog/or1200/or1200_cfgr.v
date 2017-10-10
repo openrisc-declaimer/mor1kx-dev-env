@@ -51,33 +51,45 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
+// cfgr模块从OR1200的VR、UPR和配置寄存器读出配置值。
+// 由spr_addr地址总线上来的地址读出配置寄存器的值，这些值被传送到sprs模块中。
+// 这些寄存器的值使用`define语句定义在文件or1200_defines.v中，在硬件上相当于存在ROM中，
+// 它们在超级监管者模式下是仅读的。
 module or1200_cfgr
   (
-	 // RISC Internal Interface
-	 spr_addr, spr_dat_o
-	);
+   // RISC Internal Interface
+   // RISC内部接口
+   spr_addr, spr_dat_o
+  );
 
   //
   // RISC Internal Interface
   //
-  input	 [31:0]	  spr_addr;	// SPR Address
-  output [31:0] 	spr_dat_o;	// SPR Read Data
+  // SPR地址输入
+  input   [31:0]    spr_addr;   // SPR Address
+  // SPR读出的数据输出
+  output  [31:0]    spr_dat_o;  // SPR Read Data
 
   //
   // Internal wires & registers
   //
-  reg   [31:0] 		spr_dat_o;	// SPR Read Data
+  reg    [31:0]     spr_dat_o;  // SPR Read Data
 
 `ifdef OR1200_CFGR_IMPLEMENTED
 
   //
   // Implementation of VR, UPR and configuration registers
   //
+  // VR、UPR和配置寄存器的使用
+  // VR、UPR和配置寄存器的值使用`define定义在or1200_define.v文件中，
+  // 读出VR、UPR和配置寄存器的值输出到spr_dat_o线上。
   always @(spr_addr)
 `ifdef OR1200_SYS_FULL_DECODE
     if (~|spr_addr[31:4])
 `endif // OR1200_SYS_FULL_DECODE
-      case(spr_addr[3:0])		// synopsys parallel_case
+
+      // 寄存器地址
+      case(spr_addr[3:0])    // synopsys parallel_case
       `OR1200_SPRGRP_SYS_VR: begin
         spr_dat_o[`OR1200_VR_VER_BITS]   = `OR1200_VR_VER;
         spr_dat_o[`OR1200_VR_CPUID_BITS] = `OR1200_VR_CPUID;
@@ -142,17 +154,17 @@ module or1200_cfgr
         spr_dat_o[`OR1200_DCCFGR_RES1_BITS] = `OR1200_DCCFGR_RES1;
       end
       `OR1200_SPRGRP_SYS_ICCFGR: begin
-        spr_dat_o[`OR1200_ICCFGR_NCW_BITS] = `OR1200_ICCFGR_NCW;
-        spr_dat_o[`OR1200_ICCFGR_NCS_BITS] = `OR1200_ICCFGR_NCS;
-        spr_dat_o[`OR1200_ICCFGR_CBS_BITS] = `OR1200_ICCFGR_CBS;
-        spr_dat_o[`OR1200_ICCFGR_CWS_BITS] = `OR1200_ICCFGR_CWS;
-        spr_dat_o[`OR1200_ICCFGR_CCRI_BITS] = `OR1200_ICCFGR_CCRI;
+        spr_dat_o[`OR1200_ICCFGR_NCW_BITS]   = `OR1200_ICCFGR_NCW;
+        spr_dat_o[`OR1200_ICCFGR_NCS_BITS]   = `OR1200_ICCFGR_NCS;
+        spr_dat_o[`OR1200_ICCFGR_CBS_BITS]   = `OR1200_ICCFGR_CBS;
+        spr_dat_o[`OR1200_ICCFGR_CWS_BITS]   = `OR1200_ICCFGR_CWS;
+        spr_dat_o[`OR1200_ICCFGR_CCRI_BITS]  = `OR1200_ICCFGR_CCRI;
         spr_dat_o[`OR1200_ICCFGR_CBIRI_BITS] = `OR1200_ICCFGR_CBIRI;
         spr_dat_o[`OR1200_ICCFGR_CBPRI_BITS] = `OR1200_ICCFGR_CBPRI;
         spr_dat_o[`OR1200_ICCFGR_CBLRI_BITS] = `OR1200_ICCFGR_CBLRI;
         spr_dat_o[`OR1200_ICCFGR_CBFRI_BITS] = `OR1200_ICCFGR_CBFRI;
         spr_dat_o[`OR1200_ICCFGR_CBWBRI_BITS] = `OR1200_ICCFGR_CBWBRI;
-        spr_dat_o[`OR1200_ICCFGR_RES1_BITS] = `OR1200_ICCFGR_RES1;
+        spr_dat_o[`OR1200_ICCFGR_RES1_BITS]  = `OR1200_ICCFGR_RES1;
       end
       `OR1200_SPRGRP_SYS_DCFGR: begin
         spr_dat_o[`OR1200_DCFGR_NDP_BITS] = `OR1200_DCFGR_NDP;
@@ -187,6 +199,7 @@ module or1200_cfgr
   // When configuration registers are not implemented, only
   // implement VR and UPR
   //
+  // 当配置寄存器组不可用时，仅使用VR和UPR
   always @(spr_addr)
 `ifdef OR1200_SYS_FULL_DECODE
     if (spr_addr[31:4] == 28'h0)
