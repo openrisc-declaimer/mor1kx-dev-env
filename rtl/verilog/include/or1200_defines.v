@@ -228,7 +228,7 @@
 // To disable retry counters and *wb_rty_i all together,
 // undefine this macro.
 //
-//`define OR1200_WB_RETRY 7
+`define OR1200_WB_RETRY 7
 
 //
 // WISHBONE Consecutive Address Burst

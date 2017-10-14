@@ -52,6 +52,16 @@
 // synopsys translate_on
 `include "or1200_defines.v"
 
+// 在DCache与Wishbone总线接口单元WB_BIU之间插入了一个Store Buffer（SB）模块
+// SB的作用是通过缓冲存储操作，从而加快存储操作。其原理是这样的：当执行存储操作时，
+// 可能需要通过WB_BIU将要写的数据写入外部Memory，尤其是在通写法模式下，
+// 每次执行存储操作都要将数据写入外部Memory，这样会等待外部Memory完成存储操作，
+// 在此期间，CPU处于暂停状态，降低了CPU的效率，引入SB后，如果是存储操作，
+// 那么SB模块将本次操作保存起来，同时立即向DCache返回一个存储完成信号（dcsb_ack_o为1），
+// 使得CPU可以继续执行，然后SB模块会接着完成被其保存起来的存储操作。
+// 在SB内部有一个FIFO（先入先出队列）作为缓冲，如果是连续的多个存储操作，
+// 那么会将每个存储操作都存放在FIFO中，并向DCache返回存储完成信号，
+// 然后SB从FIFO中取出要保存的数据，完成存储操作。
 module or1200_sb
   (
    // RISC clock, reset
@@ -168,14 +178,14 @@ module or1200_sb
   // Store buffer FIFO instantiation
   //
   or1200_sb_fifo or1200_sb_fifo (
-    .clk_i(clk),
-    .rst_i(rst),
-    .dat_i(fifo_dat_i),
-    .wr_i(fifo_wr),
-    .rd_i(fifo_rd),
-    .dat_o(fifo_dat_o),
-    .full_o(fifo_full),
-    .empty_o(fifo_empty)
+    .clk_i    (clk        ),  // 输入的时钟信号
+    .rst_i    (rst        ),  // 输入的复位信号
+    .dat_i    (fifo_dat_i ),  // 要保存到FIFO中的数据
+    .wr_i     (fifo_wr    ),  // FIFO写操作
+    .rd_i     (fifo_rd    ),  // FIFO读操作
+    .dat_o    (fifo_dat_o ),  // 从FIFO中读出的数据
+    .full_o   (fifo_full  ),  // FIFO满标志位，为1表示FIFO满，反之FIFO不满 
+    .empty_o  (fifo_empty )   // FIFO空标志位，为1表示FIFO空，反之FIFO中有数据
   );
 
   //

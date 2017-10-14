@@ -83,10 +83,11 @@ module or1200_freeze
   //
   // I/O
   //
+  // INPUT
   input                   clk;
   input                   rst;
-  input  [`OR1200_MULTICYCLE_WIDTH-1:0]  multicycle;
-  input  [`OR1200_WAIT_ON_WIDTH-1:0]   wait_on;
+  input  [`OR1200_MULTICYCLE_WIDTH-1:0] multicycle;
+  input  [`OR1200_WAIT_ON_WIDTH-1:0]    wait_on;
   input                   flushpipe;
   input                   extend_flush;
   input                   lsu_stall;
@@ -96,16 +97,18 @@ module or1200_freeze
   input                   abort_ex;
   input                   du_stall;
   input                   mac_stall;
-  output                  genpc_freeze;
-  output                  if_freeze;
-  output                  id_freeze;
-  output                  ex_freeze;
-  output                  wb_freeze;
   input                   saving_if_insn;
   input                   fpu_done;
   input                   mtspr_done;
   input                   icpu_ack_i;
   input                   icpu_err_i;
+  
+  // OUTPUT
+  output                  genpc_freeze;
+  output                  if_freeze;
+  output                  id_freeze;
+  output                  ex_freeze;
+  output                  wb_freeze;
 
   //
   // Internal wires and regs

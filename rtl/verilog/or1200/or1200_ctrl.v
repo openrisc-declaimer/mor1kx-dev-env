@@ -197,7 +197,7 @@ module or1200_ctrl
   reg   [31:0]        ex_simm;
   reg                 sig_syscall;
   reg                 sig_trap;
-  reg                  except_illegal;
+  reg                 except_illegal;
   wire                id_void;
   wire                ex_void;
   wire                wb_void;
@@ -822,40 +822,40 @@ module or1200_ctrl
 
 `ifdef OR1200_MULT_IMPLEMENTED
 `ifdef OR1200_DIV_IMPLEMENTED
-`else
-      | (id_insn[4:0] == `OR1200_ALUOP_DIV)
-      | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
-`endif
-`else
-      | (id_insn[4:0] == `OR1200_ALUOP_DIV)
-      | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
-      | (id_insn[4:0] == `OR1200_ALUOP_MUL)
-`endif
+`else   // !OR1200_DIV_IMPLEMENTED
+                        | (id_insn[4:0] == `OR1200_ALUOP_DIV)
+                        | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
+`endif  // OR1200_DIV_IMPLEMENTED
+`else   // !OR1200_MULT_IMPLEMENTED
+                        | (id_insn[4:0] == `OR1200_ALUOP_DIV)
+                        | (id_insn[4:0] == `OR1200_ALUOP_DIVU)
+                        | (id_insn[4:0] == `OR1200_ALUOP_MUL)
+`endif  // OR1200_MULT_IMPLEMENTED
 
 `ifdef OR1200_IMPL_ADDC
 `else
-      | (id_insn[4:0] == `OR1200_ALUOP_ADDC)
+                        | (id_insn[4:0] == `OR1200_ALUOP_ADDC)
 `endif
 
 `ifdef OR1200_IMPL_ALU_FFL1
 `else
-      | (id_insn[4:0] == `OR1200_ALUOP_FFL1)
+                        | (id_insn[4:0] == `OR1200_ALUOP_FFL1)
 `endif
 
 `ifdef OR1200_IMPL_ALU_ROTATE
 `else
-      | ((id_insn[4:0] == `OR1200_ALUOP_SHROT) &
-         (id_insn[9:6] == `OR1200_SHROTOP_ROR))
+                        | ((id_insn[4:0] == `OR1200_ALUOP_SHROT) &
+                           (id_insn[9:6] == `OR1200_SHROTOP_ROR))
 `endif
 
 `ifdef OR1200_IMPL_SUB
 `else
-      | (id_insn[4:0] == `OR1200_ALUOP_SUB)
+                        | (id_insn[4:0] == `OR1200_ALUOP_SUB)
 `endif
 `ifdef OR1200_IMPL_ALU_EXT
 `else
-      | (id_insn[4:0] == `OR1200_ALUOP_EXTHB)
-      | (id_insn[4:0] == `OR1200_ALUOP_EXTW)
+                        | (id_insn[4:0] == `OR1200_ALUOP_EXTHB)
+                        | (id_insn[4:0] == `OR1200_ALUOP_EXTW)
 `endif
       ;
 

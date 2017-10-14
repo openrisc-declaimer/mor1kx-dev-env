@@ -1,0 +1,167 @@
+@verdi rc file Version 1.0
+[General]
+VerdiVersion = Verdi3_L-2016.06-1
+[KeyNote]
+Line1 = invoke directory: /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run
+Line2 = command line: -l orpsoc_testbench.verdi.log +notimingchecks +ieee +licqueue +sdf_no_warnings +ncesp +notchkmsg +nocopyright +libext+.udp+.v+.vmd +pathpulse +pulse_r/0 +pulse_e/100 +no_pulse_msg +ncaccess+rwc +ncstatus +nctimescale+1ns/1ns +ncoverride_times\
+cale+orpsoc_testbench +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/include +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../sw/bootsim +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run\
+/../../bench/verilog/include /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_bytebus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_dbus.v /home/jinf/30.declaimer/hardwa\
+re/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_ibus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cellram_ctrl/cellram_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cfi_ctrl/cfi_\
+ctrl_engine.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cfi_ctrl/cfi_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/clkgen/clkgen.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/..\
+/../rtl/verilog/dbg_if/dbg_cpu_registers.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_cpu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_crc32_d1.v /home/jinf/30.declaimer/ha\
+rdware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_if.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_register.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_wb.v /home/\
+jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_clockgen.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_crc.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/e\
+thmac/eth_fifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_maccontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_macstatus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-\
+env/sim/run/../../rtl/verilog/ethmac/ethmac.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_miim.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_outputcontrol.v /home/jinf/30.dec\
+laimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_random.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_receivecontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/eth\
+mac/eth_registers.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_register.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxaddrcheck.v /home/jinf/30.declaimer/hardware/mor1kx-d\
+ev-env/sim/run/../../rtl/verilog/ethmac/eth_rxcounters.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxethmac.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxstatem.v /home/j\
+inf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_shiftreg.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_spram_256x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/v\
+erilog/ethmac/eth_transmitcontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txcounters.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txethmac.v /home/jinf/30.declaimer/ha\
+rdware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txstatem.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_wishbone.v /home/jinf/30.d
+[TestBench]
+ConstrViewShow = 0
+InherViewShow = 0
+FSDBMsgShow = 0
+AnnotationShow = 0
+powerDumped = 0
+[hb]
+postSimFile = /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb
+syncTime = 1691
+viewport = 0 23 1567 1027 510 174 680 1805
+activeNode = "orpsoc_testbench.dut.or1200_top0.iwb_biu"
+activeScope = "orpsoc_testbench.dut.or1200_top0.iwb_biu"
+activeFile = "/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_wb_biu.v"
+interactiveMode = False
+viewType = Source
+simulatorMode = False
+sourceBeginLine = 514
+baMode = False
+srcLineNum = True
+syncSignal = False
+traceMode = Hierarchical
+showTraceInSchema = True
+paMode = False
+funcMode = False
+traceCrossHier = True
+DnDtraceCrossHierOnly = True
+traceIncTopPort = False
+leadingZero = False
+signalPane = False
+Scope1 = "orpsoc_testbench.dut.or1200_top0.iwb_biu"
+Scope2 = "orpsoc_testbench.dut.or1200_top0"
+Scope3 = "orpsoc_testbench.dut"
+Scope4 = "orpsoc_testbench"
+Scope5 = "cellram_ctrl"
+multipleSelection = 2 523 2 0 0 523 6 0 0
+sdfCheckUndef = FALSE
+simFlow = FALSE
+[hb.sourceTab.1]
+scope = orpsoc_testbench.dut.or1200_top0.iwb_biu
+File = /home/jinf/30.declaimer/hardware/mor1kx-dev-env/rtl/verilog/or1200/or1200_wb_biu.v
+Line = 515
+[imp.design1]
+dbEnum =  oh
+invokeDir = /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run
+design = DebussyLib
+hostCommand = hostCommand -l orpsoc_testbench.verdi.log +notimingchecks +ieee +licqueue +sdf_no_warnings +ncesp +notchkmsg +nocopyright +libext+.udp+.v+.vmd +pathpulse +pulse_r/0 +pulse_e/100 +no_pulse_msg +ncaccess+rwc +ncstatus +nctimescale+1ns/1ns +ncoverride_timesca\
+le+orpsoc_testbench +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/include +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../sw/bootsim +incdir+/home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/.\
+./../bench/verilog/include /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_bytebus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_dbus.v /home/jinf/30.declaimer/hardware\
+/mor1kx-dev-env/sim/run/../../rtl/verilog/arbiter/arbiter_ibus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cellram_ctrl/cellram_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cfi_ctrl/cfi_ct\
+rl_engine.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/cfi_ctrl/cfi_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/clkgen/clkgen.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../.\
+./rtl/verilog/dbg_if/dbg_cpu_registers.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_cpu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_crc32_d1.v /home/jinf/30.declaimer/hard\
+ware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_if.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_register.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/dbg_if/dbg_wb.v /home/ji\
+nf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_clockgen.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_crc.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/eth\
+mac/eth_fifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_maccontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_macstatus.v /home/jinf/30.declaimer/hardware/mor1kx-dev-en\
+v/sim/run/../../rtl/verilog/ethmac/ethmac.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_miim.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_outputcontrol.v /home/jinf/30.decla\
+imer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_random.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_receivecontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethma\
+c/eth_registers.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_register.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxaddrcheck.v /home/jinf/30.declaimer/hardware/mor1kx-dev\
+-env/sim/run/../../rtl/verilog/ethmac/eth_rxcounters.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxethmac.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_rxstatem.v /home/jin\
+f/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_shiftreg.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_spram_256x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/ver\
+ilog/ethmac/eth_transmitcontrol.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txcounters.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txethmac.v /home/jinf/30.declaimer/hard\
+ware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_txstatem.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/eth_wishbone.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ethmac/xilinx_dist\
+_ram_16x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/gpio/gpio.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/i2c_master_slave/i2c_master_bit_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-\
+env/sim/run/../../rtl/verilog/i2c_master_slave/i2c_master_byte_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/i2c_master_slave/i2c_master_slave.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/in\
+tgen/intgen.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/jtag_tap/jtag_tap.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_alu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/ru\
+n/../../rtl/verilog/or1200/or1200_amultp2_32x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_cfgr.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_cpu.v /home/jinf/30.dec\
+laimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_ctrl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dc_fsm.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/\
+or1200_dc_ram.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dc_tag.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dc_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-en\
+v/sim/run/../../rtl/verilog/or1200/or1200_dmmu_tlb.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dmmu_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dpram_256x32.v /\
+home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dpram_32x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_dpram.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../\
+../rtl/verilog/or1200/or1200_du.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_except.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_addsub.v /home/jinf/30.declaimer/\
+hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_arith.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_div.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/o\
+r1200_fpu_fcmp.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_intfloat_conv.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_mul.v /home/jinf/30.declaimer/hardware/\
+mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_post_norm_addsub.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_post_norm_div.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/veri\
+log/or1200/or1200_fpu_post_norm_intfloat_conv.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_post_norm_mul.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_pre_norm\
+_addsub.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_pre_norm_div.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu_pre_norm_mul.v /home/jinf/30.declaimer/hardware\
+/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_fpu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_freeze.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_genpc.v /\
+home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_gmultp2_32x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_ic_fsm.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/\
+../../rtl/verilog/or1200/or1200_ic_ram.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_ic_tag.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_ic_top.v /home/jinf/30.declaim\
+er/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_if.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_immu_tlb.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or12\
+00_immu_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_iwb_biu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_lsu.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/si\
+m/run/../../rtl/verilog/or1200/or1200_mem2reg.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_mult_mac.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_operandmuxes.v /home/\
+jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_pic.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_pm.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/o\
+r1200/or1200_qmem_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_reg2mem.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_rfram_generic.v /home/jinf/30.declaimer/hardwa\
+re/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_rf.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_sb_fifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_sb.v /h\
+ome/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_1024x32_bw.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_1024x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env\
+/sim/run/../../rtl/verilog/or1200/or1200_spram_1024x8.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_128x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_204\
+8x32_bw.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_2048x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_2048x8.v /home/jinf/30.declaimer/hardware/mor1kx\
+-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_256x21.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_32_bw.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_sp\
+ram_32x24.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_512x20.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_64x14.v /home/jinf/30.declaimer/hardware/mor1kx\
+-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_64x22.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spram_64x24.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_spr\
+am.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_sprs.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../\
+rtl/verilog/or1200/or1200_tpram_32x32.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_tt.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_wb_biu.v /home/jinf/30.declaimer/ha\
+rdware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_wbmux.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/or1200/or1200_xcv_ram32x8d.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/orpsoc_to\
+p/orpsoc_top.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ram_wb/ram_wb_b3.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/ram_wb/ram_wb.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/..\
+/../rtl/verilog/rom/rom.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/simple_spi/fifo4.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/simple_spi/simple_spi.v /home/jinf/30.declaimer/hardware/mor1kx\
+-dev-env/sim/run/../../rtl/verilog/smii/smii_if.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/smii/smii_sync.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/smii/smii.v /home/jinf/30.declaimer/hardw\
+are/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/raminfr.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart16550.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_debug_\
+if.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_receiver.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_regs.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run\
+/../../rtl/verilog/uart16550/uart_rfifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_sync_flops.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_tfifo.v /home/jinf/30.d\
+eclaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_transmitter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/uart16550/uart_wb.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/\
+usbhostslave/directControl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/dpMem_dc.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/endpMux.v /home/jinf/30.declaimer/hardware\
+/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/fifoMux.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/fifoRTL.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/getPack\
+et.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/HCTxPortArbiter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/hostcontroller.v /home/jinf/30.declaimer/hardware/mor1kx-de\
+v-env/sim/run/../../rtl/verilog/usbhostslave/hostSlaveMuxBI.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/hostSlaveMux.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/lineC\
+ontrolUpdate.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/processRxBit.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/processRxByte.v /home/jinf/30.declaimer/hardware/mor\
+1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/processTxByte.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/readUSBWireData.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostsla\
+ve/RxfifoBI.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/RxFifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/rxStatusMonitor.v /home/jinf/30.declaimer/hardware/mor1kx-d\
+ev-env/sim/run/../../rtl/verilog/usbhostslave/SCTxPortArbiter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/sendPacketArbiter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslav\
+e/sendPacketCheckPreamble.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/sendPacket.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/SIEReceiver.v /home/jinf/30.declaimer/har\
+dware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/SIETransmitter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/slavecontroller.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/\
+usbhostslave/slaveDirectControl.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/slaveGetPacket.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/slaveRxStatusMonitor.v /home/ji\
+nf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/slaveSendPacket.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/SOFController.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/\
+../../rtl/verilog/usbhostslave/SOFTransmit.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/speedCtrlMux.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/TxfifoBI.v /home/jinf/\
+30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/TxFifo.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/updateCRC16.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/veri\
+log/usbhostslave/updateCRC5.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/USBHostControlBI.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/usbHostControl.v /home/jinf/30.de\
+claimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/usbhostslave.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/usbhost.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog\
+/usbhostslave/usbSerialInterfaceEngine.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/USBSlaveControlBI.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/usbSlaveControl.v /ho\
+me/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/usbslave.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/USBTxWireArbiter.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run\
+/../../rtl/verilog/usbhostslave/wishBoneBI.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/usbhostslave/writeUSBWireData.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/wb_ram_b3/wb_ram_b3.v /home/jin\
+f/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../rtl/verilog/wb_switch_b3/wb_switch_b3.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/AT26DFxxx.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog\
+/cellram.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/eth_phy.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/mt48lc16m16a2.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench\
+/verilog/or1200_monitor.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/smii_phy.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/uart_decoder.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/\
+run/../../bench/verilog/uart_stim.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/wiredelay.v /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/../../bench/verilog/x28fxxxp30.v /home/jinf/30.declaimer/hardware/mor1kx-dev\
+-env/sim/run/../../bench/verilog/orpsoc_testbench.v
+[nMemoryManager]
+FsdbFile = /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.fsdb
+UserActionNum = 0
+nMemWindowNum = 0
+[wave.0]
+viewPort = 0 28 1567 665 187 119
+SessionFile = /home/jinf/30.declaimer/hardware/mor1kx-dev-env/sim/run/orpsoc_testbench.ses.wave.0
+displayGrid = FALSE
+hierarchicalName = FALSE
+snap = TRUE
+displayLeadingZeros = FALSE
+fixDelta = FALSE
+displayCursorMarker = FALSE
+autoUpdate = FALSE
+highlightGlitchs = FALSE
+waveformSync = FALSE
+displayErrors = TRUE
+displayMsgSymbols = TRUE
+showMsgDescriptions = TRUE
+autoFit = FALSE
+displayDeltaY = FALSE
+centerCursor = FALSE

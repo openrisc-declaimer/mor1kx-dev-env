@@ -455,7 +455,7 @@ module or1200_mult_mac
       mac_r[63:32] <=  spr_dat_i;
 `endif
 
-    // 乘法累加指令l.mac，算法如下： 
+    // 乘法累加指令l.mac，算法如下：
     // temp[31:0] <- rA[31:0] * rB[31:0]
     // MACHI[31:0]MACLO[31:0] <- MACHI[31:0]MACLO[31:0]+ temp[31:0]
     else if (mac_op_r3 == `OR1200_MACOP_MAC)

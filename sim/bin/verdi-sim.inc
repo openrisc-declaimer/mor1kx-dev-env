@@ -47,6 +47,7 @@
 VERDI_FSDB_NAME = $(VCS_SIM).fsdb
 VERDI_RC_NAME   = $(VCS_SIM).rc
 VERDI_LOG_NAME  = $(VCS_SIM).verdi.log
+VERDI_SES_NAME  = $(VCS_SIM).ses
 
 ######################################################################
 # VERDI debug macro define
@@ -55,6 +56,7 @@ VERDI_LOG_NAME  = $(VCS_SIM).verdi.log
 VERDI_DEFINE  = -l $(VERDI_LOG_NAME)
 VERDI_DEFINE += -ssf $(VERDI_FSDB_NAME)
 VERDI_DEFINE += -sswr $(VERDI_RC_NAME)
+VERDI_DEFINE += -ssr $(VERDI_SES_NAME)
 # setting debug param
 VERDI_DEFINE += +notimingchecks
 VERDI_DEFINE += +ieee
@@ -99,4 +101,6 @@ verdi-com:
 verdi-clean:
 	$(Q)rm -rf *.fsdb novas.rc novas.conf
 	$(Q)rm -rf verdiLog
+	$(Q)rm -rf $(VERDI_SES_NAME).png
+	$(Q)rm -rf $(VERDI_SES_NAME).wave.*
 	

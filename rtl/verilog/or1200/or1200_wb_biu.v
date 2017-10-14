@@ -83,18 +83,30 @@ module or1200_wb_biu
   // ---------------------------------------------------------------------------
   parameter dw = `OR1200_OPERAND_WIDTH;
   parameter aw = `OR1200_OPERAND_WIDTH;
+  // 目前只叠4突发和叠8突发
   parameter bl = 4; /* Can currently be either 4 or 8 - the two optional line sizes for the OR1200. */
 
   //
   // RISC clock, reset and clock control
   //
-  input                   clk;    // RISC clock
-  input                   rst;    // RISC reset
-  input [1:0]             clmode;    // 00 WB=RISC, 01 WB=RISC/2, 10 N/A, 11 WB=RISC/4
+  // 处理器外部Wishbone总线的时钟可以小于处理器的时钟，这样做的目的是降低系统功耗，
+  // 这三个信号的作用就是在Wishbone总线时钟与处理器时钟不一致时，协调WB_BIU模块对
+  // 处理器内部、外部的Wishbone总线信号，使其正常工作。
+  // 其中wb_rst_i、wb_clk_i是外部Wishbone总线的复位信号、时钟信号，
+  // clmode是时钟模式选择信号，长度是两位，可以设置如下：
+  //    2’b00：外部Wishbone总线时钟wb_clk_i等于处理器时钟clk
+  //    2’b01：外部Wishbone总线时钟wb_clk_i等于处理器时钟clk的一半
+  //    2’b10：未定义
+  //    2’b11：外部Wishbone总线时钟wb_clk_i等于处理器时钟clk的1/4
+  input                   clk;        // RISC clock
+  input                   rst;        // RISC reset
+  input [1:0]             clmode;     // 00 WB=RISC, 01 WB=RISC/2, 10 N/A, 11 WB=RISC/4
 
   //
   // WISHBONE interface
   //
+  // WB_BIU模块对处理器外部的接口名称都是wb_xxx_x的形式
+  // 链接到外部的Instruct Bus上
   input                   wb_clk_i;  // clock input
   input                   wb_rst_i;  // reset input
   input                   wb_ack_i;  // normal termination
@@ -104,7 +116,7 @@ module or1200_wb_biu
   output                  wb_cyc_o;  // cycle valid output
   output [aw-1:0]         wb_adr_o;  // address bus outputs
   output                  wb_stb_o;  // strobe output
-  output                  wb_we_o;  // indicates write transfer
+  output                  wb_we_o;   // indicates write transfer
   output [3:0]            wb_sel_o;  // byte select outputs
   output [dw-1:0]         wb_dat_o;  // output data bus
 `ifdef OR1200_WB_CAB
@@ -118,11 +130,13 @@ module or1200_wb_biu
   //
   // Internal RISC interface
   //
+  // WB_BIU模块对处理器内部的接口名称都是biu_xxx_x的形式
+  // 链接到CPU的内部的ICACHE上
   input [dw-1:0]          biu_dat_i;  // input data bus
   input [aw-1:0]          biu_adr_i;  // address bus
   input                   biu_cyc_i;  // WB cycle
   input                   biu_stb_i;  // WB strobe
-  input                   biu_we_i;  // WB write enable
+  input                   biu_we_i;   // WB write enable
   input                   biu_cab_i;  // CAB input
   input [3:0]             biu_sel_i;  // byte selects
   output [31:0]           biu_dat_o;  // output data bus
@@ -136,27 +150,46 @@ module or1200_wb_biu
   reg [aw-1:0]            wb_adr_o;  // address bus outputs
   reg                     wb_cyc_o;  // cycle output
   reg                     wb_stb_o;  // strobe output
-  reg                     wb_we_o;  // indicates write transfer
+  reg                     wb_we_o;   // indicates write transfer
   reg [3:0]               wb_sel_o;  // byte select outputs
 `ifdef OR1200_WB_CAB
   reg                     wb_cab_o;  // CAB output
 `endif
 `ifdef OR1200_WB_B3
+  // wb_cti_o是周期类型识别地址标签，wb_bte_o是突发类型扩展地址标签，
+  // 两者都是在Wishbone规范B3版中使用的信号，作用是实现Wishbone寄存反馈总线周期，
+  // 在处理器内部的Wishbone总线中没有这两个信号，所以WB_BIU模块还起一个不同Wishbone总线规范
+  // 之间转换的作用。目前Wishbone已经制定了B4版，如果要使得OR1200支持新版本，只需要
+  // 修改WB_BIU模块即可，提高了系统的移植能力。
+  // 
+  // CTI的定义：
+  // CTI=3'b000 : 传统总线周期
+  // CTI=3'b001 : 恒定地址突发总线周期
+  // CTI=3'b010 : 递增突发总线周期
+  // CTI=3'b011 : 预留总线周期
+  // CTI=3'b100 : 预留总线周期
+  // CTI=3'b101 : 预留总线周期
+  // CTI=3'b110 : 预留总线周期
+  // CTI=3'b111 : 突发结束
   reg [2:0]               wb_cti_o;  // cycle type identifier
   reg [1:0]               wb_bte_o;  // burst type extension
 `endif
 `ifdef OR1200_NO_DC
-  reg [dw-1:0]             wb_dat_o;  // output data bus
+  reg [dw-1:0]            wb_dat_o;  // output data bus
 `else
   assign wb_dat_o = biu_dat_i;    // No register on this - straight from DCRAM
 `endif
 
 `ifdef OR1200_WB_RETRY
+  // 当外部设备回复重试信号时（wb_rty_i为1），WB_BIU模块会再次与外部设备
+  // 开始Wishbone总线操作周期，只有当重试次数超过一个阈值（默认是64次）的时候，
+  // 才向处理器报告Wishbone总线操作错误，这样可以提高系统的容错能力。
   reg [`OR1200_WB_RETRY-1:0]     retry_cnt;  // Retry counter
 `else
-  wire         retry_cnt;
+  wire   retry_cnt;
   assign retry_cnt = 1'b0;
 `endif
+
 `ifdef OR1200_WB_B3
   reg [3:0]               burst_len;    // burst counter
 `endif
@@ -175,6 +208,7 @@ module or1200_wb_biu
   reg                     biu_rty_cnt;  // BIU rty toggle counter
   wire                    biu_rty;      // BIU rty indicator
 
+  // WB_BIU状态机描述
   reg [1:0]               wb_fsm_state_cur;     // WB FSM - surrent state
   reg [1:0]               wb_fsm_state_nxt;     // WB FSM - next state
   // NND这个状态机的定义，真的是匪夷所思啊。。。
@@ -185,7 +219,7 @@ module or1200_wb_biu
   //
   // WISHBONE I/F <-> Internal RISC I/F conversion
   //
-  //assign wb_ack = wb_ack_i;
+  // assign wb_ack = wb_ack_i;
   assign wb_ack = wb_ack_i & !wb_err_i & !wb_rty_i;
 
   //
@@ -208,8 +242,11 @@ module or1200_wb_biu
     else begin
       // burst counter
       if (wb_fsm_state_cur == WB_FSM_IDLE)
+        // 最大突发为叠16，故是[3:0]，一共4位就可以了，节省资源
         burst_len <=  bl[3:0] - 2;
+
       else if (wb_stb_o & wb_ack)
+        // 在突发传输过程中 
         burst_len <=  burst_len - 1;
     end
   end
@@ -217,6 +254,7 @@ module or1200_wb_biu
   //
   // WB FSM - combinatorial part
   //
+  // 主要用来计算wb_fsm_state_nxt的组合电路
   always @(wb_fsm_state_cur or burst_len or wb_err_i or wb_rty_i or wb_ack or
            wb_cti_o or wb_sel_o or wb_stb_o or wb_we_o or biu_cyc_i or
            biu_stb or biu_cab_i or biu_sel_i or biu_we_i)
@@ -230,24 +268,33 @@ module or1200_wb_biu
       wb_cyc_nxt = biu_cyc_i & biu_stb;
       wb_stb_nxt = biu_cyc_i & biu_stb;
       wb_cti_nxt = {!biu_cab_i, 1'b1, !biu_cab_i};
+      
       if (biu_cyc_i & biu_stb)
+        // 收到总线周期信号和总线选通信号后开始数据的传输
         wb_fsm_state_nxt = WB_FSM_TRANS;
+
       else
         wb_fsm_state_nxt = WB_FSM_IDLE;
     end
     
     // normal TRANSFER
     WB_FSM_TRANS : begin
-      wb_cyc_nxt = !wb_stb_o | !wb_err_i & !wb_rty_i & !(wb_ack & wb_cti_o == 3'b111);
-      wb_stb_nxt = !wb_stb_o | !wb_err_i & !wb_rty_i & !wb_ack | !wb_err_i & !wb_rty_i & wb_cti_o == 3'b010 ;
+      // CTI = 3'b111 : 突发结束
+      // 
+      wb_cyc_nxt    = !wb_stb_o | !wb_err_i & !wb_rty_i & !(wb_ack & wb_cti_o == 3'b111);
+      wb_stb_nxt    = !wb_stb_o | !wb_err_i & !wb_rty_i & !wb_ack | !wb_err_i & !wb_rty_i & wb_cti_o == 3'b010 ;
+      
+      // 
       wb_cti_nxt[2] = wb_stb_o & wb_ack & burst_len == 'h0 | wb_cti_o[2];
       wb_cti_nxt[1] = 1'b1  ;
       wb_cti_nxt[0] = wb_stb_o & wb_ack & burst_len == 'h0 | wb_cti_o[0];
 
       if ((!biu_cyc_i | !biu_stb | !biu_cab_i | biu_sel_i != wb_sel_o | biu_we_i != wb_we_o) & wb_cti_o == 3'b010)
         wb_fsm_state_nxt = WB_FSM_LAST;
+      
       else if ((wb_err_i | wb_rty_i | wb_ack & wb_cti_o==3'b111) & wb_stb_o)
         wb_fsm_state_nxt = WB_FSM_IDLE;
+      
       else
         wb_fsm_state_nxt = WB_FSM_TRANS;
     end
@@ -268,7 +315,7 @@ module or1200_wb_biu
     end
     
     // default state
-    default:begin
+    default : begin
       wb_cyc_nxt = 1'bx;
       wb_stb_nxt = 1'bx;
       wb_cti_nxt = 3'bxxx;
@@ -280,12 +327,17 @@ module or1200_wb_biu
   //
   // WB FSM - output signals
   //
+  // 状态机的输出信号
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
     if (wb_rst_i == `OR1200_RST_VALUE) begin
       wb_cyc_o  <=  1'b0;
       wb_stb_o  <=  1'b0;
+      // 在初始化的时候设置为突发终止
       wb_cti_o  <=  3'b111;
-      wb_bte_o  <=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
+      wb_bte_o  <=  (16==bl) ?
+                      2'b11: (bl==8) ? 
+                        2'b10 : (bl==4) ? 
+                          2'b01 : 2'b00;
 `ifdef OR1200_WB_CAB
       wb_cab_o  <=  1'b0;
 `endif
@@ -296,19 +348,27 @@ module or1200_wb_biu
       wb_dat_o  <=  {dw{1'b0}};
 `endif
     end
+    
     else begin
       wb_cyc_o  <=  wb_cyc_nxt;
 
       if (wb_ack & wb_cti_o == 3'b111)
-        wb_stb_o        <=  1'b0;
+        // 当前已经收到了传输完成应答且是总线突发终止，完成总线传输
+        wb_stb_o  <=  1'b0;
       else
-        wb_stb_o        <=  wb_stb_nxt;
+        wb_stb_o  <=  wb_stb_nxt;
         
 `ifndef OR1200_NO_BURSTS
         wb_cti_o  <=  wb_cti_nxt;
 `endif
-
-        wb_bte_o  <=  (bl==8) ? 2'b10 : (bl==4) ? 2'b01 : 2'b00;
+        // BTE = 2'b00 : 线性突发
+        // BTE = 2'b01 : 叠4突发
+        // BTE = 2'b10 : 叠8突发
+        // BTE = 2'b11 : 叠16突发
+        wb_bte_o  <=  (16==bl) ? 
+                        2'b11 : (bl==8) ? 
+                          2'b10 : (bl==4) ? 
+                            2'b01 : 2'b00;
 
 `ifdef OR1200_WB_CAB
         wb_cab_o  <=  biu_cab_i;
@@ -316,7 +376,7 @@ module or1200_wb_biu
 
       // we and sel - set at beginning of access
       if (wb_fsm_state_cur == WB_FSM_IDLE) begin
-        wb_we_o    <=  biu_we_i;
+        wb_we_o   <=  biu_we_i;
         wb_sel_o  <=  biu_sel_i;
       end
 
@@ -327,6 +387,8 @@ module or1200_wb_biu
       
       else if (wb_stb_o & wb_ack) begin
         
+        // 分析叠4突发和叠8突发的不同
+        // ？？？
         if (bl==4) begin
           wb_adr_o[3:2]  <=  wb_adr_o[3:2] + 1;
         end
@@ -335,6 +397,10 @@ module or1200_wb_biu
           wb_adr_o[4:2]  <=  wb_adr_o[4:2] + 1;
         end
 
+        if (16==bl) begin
+          wb_adr_o[5:2]  <=  wb_adr_o[5:2] + 1;
+        end
+        
       end
       
 `ifdef OR1200_NO_DC
@@ -382,27 +448,38 @@ module or1200_wb_biu
 
   end
 
+  // biu_stb_reg
   always @(posedge clk or `OR1200_RST_EVENT rst)
   begin
   
-    if (rst == `OR1200_RST_VALUE) begin
+    if (rst == `OR1200_RST_VALUE)
       biu_stb_reg  <=  1'b0;
-      biu_ack_cnt  <=  1'b0;
-      biu_err_cnt  <=  1'b0;
-      biu_rty_cnt  <=  1'b0;
-`ifdef OR1200_WB_RETRY
-      retry_cnt  <= {`OR1200_WB_RETRY{1'b0}};
-`endif
-    end
     
-    else begin
-      
+    else
       // BIU strobe
       if (biu_stb_i & !biu_cab_i & biu_ack_o)
         biu_stb_reg  <=  1'b0;
       
       else
         biu_stb_reg  <=  biu_stb_i;
+
+  end
+
+  assign biu_stb = biu_stb_i & biu_stb_reg;
+
+  always @(posedge clk or `OR1200_RST_EVENT rst)
+  begin
+  
+    if (rst == `OR1200_RST_VALUE) begin
+      biu_ack_cnt  <=  1'b0;
+      biu_err_cnt  <=  1'b0;
+      biu_rty_cnt  <=  1'b0;
+`ifdef OR1200_WB_RETRY
+      retry_cnt    <= {`OR1200_WB_RETRY{1'b0}};
+`endif
+    end
+    
+    else begin
       
       // BIU ack toggle counter
       if (wb_fsm_state_cur == WB_FSM_IDLE | !(|clmode))
@@ -427,15 +504,13 @@ module or1200_wb_biu
         
 `ifdef OR1200_WB_RETRY
       if (biu_ack_o | biu_err_o)
-        retry_cnt  <=  {`OR1200_WB_RETRY{1'b0}};
+        retry_cnt    <=  {`OR1200_WB_RETRY{1'b0}};
       
       else if (biu_rty)
-        retry_cnt  <=  retry_cnt + 1'b1;
+        retry_cnt    <=  retry_cnt + 1'b1;
 `endif
     end
   end
-
-  assign biu_stb = biu_stb_i & biu_stb_reg;
 
   //
   // Input BIU data bus
@@ -445,13 +520,24 @@ module or1200_wb_biu
   //
   // Input BIU termination signals
   //
-  assign  biu_rty    = (wb_fsm_state_cur == WB_FSM_TRANS) & wb_rty_i & wb_stb_o &
+  // RTY产生的条件：
+  // 1） 当前在传输的过程中
+  // 2） 收到了rty信号
+  // 3） 总线选通信号有效
+  // 4） 因为clmode=2'b00，故wb_ack_cnt=0,biu_ack_cnt=0; wb_ack_cnt ~^ biu_ack_cnt=1
+  //    若clmode!=2'b00的时候，
+  assign  biu_rty    = (wb_fsm_state_cur == WB_FSM_TRANS) & 
+                        wb_rty_i & wb_stb_o &
                        (wb_rty_cnt ~^ biu_rty_cnt);
-  assign  biu_ack_o  = (wb_fsm_state_cur == WB_FSM_TRANS) & wb_ack & wb_stb_o &
+  assign  biu_ack_o  = (wb_fsm_state_cur == WB_FSM_TRANS) & 
+                        wb_ack & wb_stb_o &
                        (wb_ack_cnt ~^ biu_ack_cnt);
-  assign  biu_err_o  = (wb_fsm_state_cur == WB_FSM_TRANS) & wb_err_i & wb_stb_o &
+  assign  biu_err_o  = (wb_fsm_state_cur == WB_FSM_TRANS) & 
+                        wb_err_i & wb_stb_o &
                        (wb_err_cnt ~^ biu_err_cnt)
 `ifdef OR1200_WB_RETRY
+                        // 感觉这里是有问题的，因为两边的位数是不一样的，这样retry_cnt不能呢个起作用了
+                        // ？？？
                        | biu_rty & retry_cnt[`OR1200_WB_RETRY-1];
 `else
    ;

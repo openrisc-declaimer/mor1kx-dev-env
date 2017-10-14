@@ -125,10 +125,17 @@ module rom
   always @(posedge wb_clk)
     if (wb_rst)
       wb_ack_o `NONBLOCK_ASSIGN 0;
+    
     else if (wb_ack_o & (!burst | (wb_cti_i == 3'b111)))
+      // 当不是burst操作的时候，或者在burst的时候遇见突发终止操作
+      // 当前的ACK被拉高后在下一个周期直接拉低。
       wb_ack_o `NONBLOCK_ASSIGN 0;
+    
     else if (wb_stb_i & ((!burst & !new_access & new_access_r) | (burst & burst_r)))
+      // 当前操作是burst操作而且没有完成的时候，依然拉高ACK信号
+      // 或者当前不是burst操作，但是是一个背靠背的命令，这个时候任然拉高ACK信号
       wb_ack_o `NONBLOCK_ASSIGN 1;
+    
     else
       wb_ack_o `NONBLOCK_ASSIGN 0;
 
