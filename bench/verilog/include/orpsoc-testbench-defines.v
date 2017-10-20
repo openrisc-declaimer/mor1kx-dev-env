@@ -43,7 +43,7 @@
 // Define to running time
 //
 `ifndef END_TIME
-`define END_TIME 500000
+`define END_TIME 5000
 `endif
 
 //

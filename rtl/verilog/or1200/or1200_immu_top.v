@@ -153,6 +153,9 @@ module or1200_immu_top
   wire                    page_cross;
   reg  [31:0]             icpu_adr_default;
   wire [31:0]             icpu_adr_boot;
+  // icpu_adr_select: 二选一的选择器
+  // 0 : 赋值icpu_adr_i信号中
+  // 1 : 赋值给boot的地址，注意：我们可以把boot的地址做的多样化
   reg                     icpu_adr_select;
   reg  [31:0]             icpu_adr_o;
   reg  [31:`OR1200_IMMU_PS]  icpu_vpn_r;
@@ -181,21 +184,24 @@ module or1200_immu_top
   //
 `ifdef OR1200_REGISTERED_OUTPUTS
   always @(`OR1200_RST_EVENT rst or posedge clk)
+    
     // default value
     if (rst == `OR1200_RST_VALUE) begin
       // select async. value due to reset state
       icpu_adr_default <=  `OR1200_BOOT_ADR;
       icpu_adr_select  <=  1'b1;
     end
+    
     // selected value (different from default) is written
     // into FF after reset state
-    else if (icpu_adr_select)
-    begin
+    else if (icpu_adr_select) begin
+      
       // dynamic value can only be assigned to FF out of reset!
       icpu_adr_default <=  icpu_adr_boot;
       // select FF value
       icpu_adr_select  <=  1'b0;
     end
+    
     else begin
       icpu_adr_default <=  icpu_adr_i;
     end
@@ -213,6 +219,7 @@ module or1200_immu_top
     else
       // FF value is selected 2nd clock after reset state
       icpu_adr_o = icpu_adr_default ;
+
 `else // ! OR1200_REGISTERED_OUTPUTS: must be defined/enabled
   Unsupported !!!
 `endif

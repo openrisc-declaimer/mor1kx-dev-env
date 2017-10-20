@@ -172,12 +172,15 @@ module or1200_if
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       saved <=  1'b0;
+    
     else if (if_flushpipe)
       // 从except来的刷新流水线信号
       saved <=  1'b0;
+    
     else if (save_insn)
       // 在icache有数据输入；且暂停if；且没有暂存指令时
       saved <=  1'b1;
+    
     else if (!if_freeze)
       // 运行时不需要暂存指令
       saved <=  1'b0;

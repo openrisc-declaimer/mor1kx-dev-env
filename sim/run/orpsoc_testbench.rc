@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi3_L-2016.06-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 28 1567 665 187 119
+viewPort 0 28 1567 552 187 119
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 4267.759419
-cursor 1691.000000
+zoom 1533.407849 2064.218661
+cursor 1710.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 255
+top 23
 ; marker line index
-markerPos 280
+markerPos 243
 
 ; event list
 ; addEvent event_name event_expression
@@ -64,7 +64,7 @@ addSignal -h 15 -holdScope icpu_err_i
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_i[3:0]
 addSignal -h 15 -holdScope immu_en
-addGroup "or1200_genpc" -e FALSE
+addGroup "or1200_genpc"
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/clk
 addSignal -h 15 -holdScope rst
 addSignal -h 15 -holdScope no_more_dslot
@@ -289,7 +289,7 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope muxin_e[31:0]
 addSignal -h 15 -holdScope muxreg_valid
 addSignal -h 15 -UNSIGNED -HEX -holdScope muxreg[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope muxout[31:0]
-addGroup "or1200_wb_biu"
+addGroup "or1200_wb_biu" -e FALSE
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/iwb_biu/clk
 addSignal -h 15 -holdScope rst
 addSignal -h 15 -UNSIGNED -HEX -holdScope clmode[1:0]
@@ -306,12 +306,14 @@ addSignal -h 15 -holdScope biu_ack_o
 addSignal -h 15 /BLANK
 addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/iwb_biu/wb_fsm_state_nxt[1:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope wb_fsm_state_cur[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope wb_cti_nxt[2:0]
 addSignal -h 15 -holdScope wb_ack
 addSignal -h 15 /BLANK
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/iwb_biu/wb_clk_i
 addSignal -h 15 -holdScope wb_rst_i
 addSignal -h 15 -holdScope wb_cyc_nxt
 addSignal -h 15 -holdScope wb_cyc_o
+addSignal -h 15 -holdScope wb_stb_nxt
 addSignal -h 15 -holdScope wb_stb_o
 addSignal -h 15 -holdScope wb_we_o
 addSignal -h 15 -UNSIGNED -HEX -holdScope wb_dat_i[31:0]
@@ -323,7 +325,6 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope wb_bte_o[1:0]
 addSignal -h 15 -holdScope wb_ack_i
 addSignal -h 15 -holdScope wb_err_i
 addSignal -h 15 -holdScope wb_rty_i
-addSignal -h 15 -holdScope biu_ack_o
 addGroup "G14"
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/iwb_biu/wb_ack_cnt
 addSignal -h 15 -holdScope biu_ack_cnt

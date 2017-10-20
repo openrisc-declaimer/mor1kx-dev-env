@@ -143,7 +143,7 @@ wire  [`OR1200_ICTAG_W-2:0]  tag;
 wire  [dw-1:0]        to_icram;
 wire  [dw-1:0]        from_icram;
 wire  [31:0]          saved_addr;
-wire  [3:0]            icram_we;
+wire  [3:0]           icram_we;
 wire                  ictag_we;
 wire  [31:0]          ic_addr;
 wire                  icfsm_biu_read;
@@ -198,6 +198,7 @@ assign icbiu_stb_o = (ic_en) ? icfsm_biu_read : icqmem_cycstb_i;
 assign icbiu_we_o = 1'b0;
 assign icbiu_sel_o = (ic_en & icfsm_biu_read) ? 4'b1111 : icqmem_sel_i;
 assign icbiu_cab_o = (ic_en) ? icfsm_burst : 1'b0;
+// 用的怎么这么的怪异啊？这样用的目的是什么？？？
 assign icqmem_rty_o = ~icqmem_ack_o & ~icqmem_err_o;
 assign icqmem_tag_o = icqmem_err_o ? `OR1200_ITAG_BE : icqmem_tag_i;
 
