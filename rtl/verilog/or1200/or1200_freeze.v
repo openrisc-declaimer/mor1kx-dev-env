@@ -71,13 +71,23 @@ module or1200_freeze
    clk, rst,
 
    // Internal i/f
-   // 内部接口
+   // INPUT
    multicycle, wait_on, flushpipe, extend_flush, lsu_stall, if_stall,
    lsu_unstall, du_stall, mac_stall,
    force_dslot_fetch, abort_ex,
-   genpc_freeze, if_freeze, id_freeze, ex_freeze, wb_freeze, saving_if_insn,
-   fpu_done, mtspr_done,
-   icpu_ack_i, icpu_err_i
+   icpu_ack_i, 
+   icpu_err_i,
+   
+   // OUTPUT
+   genpc_freeze,  // PC寄存器stall 
+   if_freeze,     // IF/ID寄存器stall 
+   id_freeze, 
+   ex_freeze, 
+   ma_freeze,
+   wb_freeze, 
+   saving_if_insn,
+   fpu_done, 
+   mtspr_done
   );
 
   //
@@ -108,6 +118,7 @@ module or1200_freeze
   output                  if_freeze;
   output                  id_freeze;
   output                  ex_freeze;
+  output                  ma_freeze;
   output                  wb_freeze;
 
   //
@@ -148,16 +159,25 @@ module or1200_freeze
   // MA暂停了 => EX 必须暂停
   // EX暂停了 => ID 必须暂停
   // ID暂停了 => IF 必须暂停
-  assign if_freeze = id_freeze | extend_flush; // 在id暂停信号或扩展刷新时发出暂停if信号。
+  
+  // 1） 当ID段发生了冻结操作的时候，则IF段也必须要产生冻结操作；
+  //    要不从IF来的数据就将会破坏ID段的信号；在id暂停信号或扩展刷新时发出暂停if信号。
+  // 2) extend_flush 异常刷新信号
+  assign if_freeze = id_freeze | extend_flush; 
 
-  // id暂停信号=(lsu停止 | (lsu没取消停止 & if停止) | 多周期暂停 | 强制延迟槽支取) | du停止 | mac停止
+  // id暂停信号=(lsu停止 | (lsu没有取停止 & if停止) | 多周期暂停 | 强制延迟槽支取) | du停止 | mac停止
+  // ID段产生冻结的原因有：
+  // 1） lsu_stall: 在LSU段，准备开始存储数据的时候
+  // 2) ~lsu_unstall & if_stall: 当LSU没有应答而且if_stall有效（是不是总线竞争？？）
   assign id_freeze = (lsu_stall | (~lsu_unstall & if_stall) | multicycle_freeze
                    | (|waiting_on) | force_dslot_fetch) | du_stall;
   
-  assign ex_freeze = wb_freeze;
-
+  assign ex_freeze = ma_freeze;
+  assign ma_freeze = wb_freeze;
+  // 在EX阶段发现一个异常abort_ex
+  // 问： 那MA和WB的指令是否要写完啊？
   assign wb_freeze = (lsu_stall | (~lsu_unstall & if_stall) | multicycle_freeze
-          | (|waiting_on)) | du_stall | abort_ex;
+                   | (|waiting_on)) | du_stall | abort_ex;
 
   //
   // registered flushpipe

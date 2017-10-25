@@ -151,8 +151,11 @@ module or1200_genpc
   assign icpu_adr_o = !no_more_dslot & // 没有延迟槽指令了
                       !except_start &  // 是否在异常的处理中
                       !spr_pc_we &     // 对SPR寄存器的读写中
+                      // 要求重新支取指令
                       (icpu_rty_i | genpc_refetch) ? // 复位时，icpu_rty_i有效
-                        icpu_adr_i :   // 从IMMU中过来的地址
+                        // 从IMMU中过来的地址
+                        icpu_adr_i :   
+                        // 
                         {pc[31:2], 1'b0, ex_branch_taken | spr_pc_we};
 
   //

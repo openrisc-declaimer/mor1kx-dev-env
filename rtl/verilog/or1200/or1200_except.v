@@ -71,7 +71,6 @@ module or1200_except
    clk, rst,
 
    // Internal i/f
-   // 内部接口
    sig_ibuserr, sig_dbuserr, sig_illegal, sig_align, sig_range, sig_dtlbmiss,
    sig_dmmufault, sig_int, sig_syscall, sig_trap, sig_itlbmiss, sig_immufault,
    sig_tick, ex_branch_taken, genpc_freeze, id_freeze, ex_freeze, wb_freeze,
@@ -108,12 +107,17 @@ module or1200_except
   input               id_freeze;
   input               ex_freeze;
   input               wb_freeze;
+  // 问if_stall和if_freeze的区别是什么？
+  // if_stall信号是因为为了从ICACHE/BUS上得到inst而暂停流水线的操作；
+  // 而if_freeze是冻结IF段，是范围更大的控制
   input               if_stall;
+  
   input   [31:0]      if_pc;
   output  [31:0]      id_pc;
   output  [31:0]      ex_pc;
   output  [31:0]      wb_pc;
   input   [31:0]      datain;
+  
   input   [`OR1200_DU_DSR_WIDTH-1:0]   du_dsr;
   input   [24:0]                       du_dmr1;
   input               du_hwbkpt;
@@ -227,7 +231,7 @@ module or1200_except
   // 这个信号表示异常中止Load指令与其它指令对RF的写。
   assign abort_ex = sig_dbuserr | sig_dmmufault | sig_dtlbmiss | sig_align |
                     sig_illegal | ((du_hwbkpt | trace_trap) & ex_pc_val
-                 & !sr_ted & !dsr_te);
+                    & !sr_ted & !dsr_te);
 
   // abort spr read/writes
   assign abort_mvspr  = sig_illegal | ((du_hwbkpt | trace_trap) & ex_pc_val
@@ -434,7 +438,8 @@ module or1200_except
       delayed2_ex_dslot <=  1'b0;
     end
 
-    else if (!ex_freeze & id_freeze) begin // EX级运行，ID级暂停
+    else if (!ex_freeze & id_freeze) begin 
+      // EX级运行，ID级暂停
       ex_dslot <=  1'b0;
       ex_pc <=  id_pc;
       ex_pc_val <=  id_pc_val ;
@@ -492,12 +497,13 @@ module or1200_except
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
     if (rst == `OR1200_RST_VALUE) begin // 复位时，置为空闲状态
+
       state <=  `OR1200_EXCEPTFSM_IDLE; //空闲状态
       // 异常的类型
-      except_type  <=  `OR1200_EXCEPT_NONE;
+      except_type  <=  `OR1200_EXCEPT_NONE; 
       extend_flush <=  1'b0;
-      epcr <=  32'b0;   // 输出到例外编程计数器寄存器(EPCR)的值，是PC的拷贝值。
-      eear <=  32'b0;   // 输出到例外有效地址寄存器(EEAR)的值，是EA的拷贝值。
+      epcr         <=  32'b0;   // 输出到例外编程计数器寄存器(EPCR)的值，是PC的拷贝值。
+      eear         <=  32'b0;   // 输出到例外有效地址寄存器(EEAR)的值，是EA的拷贝值。
 
       // 输出到例外超级监管寄存器(ESR)的值，是SR的拷贝值。
       esr <=  {2'h1, {`OR1200_SR_WIDTH-3{1'b0}}, 1'b1};
@@ -512,6 +518,7 @@ module or1200_except
       case (state)  // synopsys full_case parallel_case
 `endif
       `OR1200_EXCEPTFSM_IDLE: // 空闲状态
+      
         if (except_flushpipe) begin // 如果例外刷新流水线
           state <=  `OR1200_EXCEPTFSM_FLU1; // 状态1
           extend_flush <= 1'b1;
@@ -636,22 +643,25 @@ module or1200_except
 `endif
           default:
             except_type <=  `OR1200_EXCEPT_NONE;
-        endcase
-      end
+          endcase
+        end
 
-      else if (pc_we) begin // PC写使能
-        state <=  `OR1200_EXCEPTFSM_FLU1; // 进入状态1
-        extend_flush <=  1'b1;
-      end
+        else if (pc_we) begin // PC写使能
+          state <=  `OR1200_EXCEPTFSM_FLU1; // 进入状态1
+          extend_flush <=  1'b1;
+        end
 
-      else begin
-        if (epcr_we)
-          epcr <=  datain;
-        if (eear_we)
-          eear <=  datain;
-        if (esr_we)
-          esr <=  {datain[`OR1200_SR_WIDTH-1], 1'b1, datain[`OR1200_SR_WIDTH-3:0]};
-      end
+        else begin
+          if (epcr_we)
+            epcr <=  datain;
+            
+          if (eear_we)
+            eear <=  datain;
+            
+          if (esr_we)
+            esr <=  {datain[`OR1200_SR_WIDTH-1], 1'b1, datain[`OR1200_SR_WIDTH-3:0]};
+
+        end
 
       `OR1200_EXCEPTFSM_FLU1:  // 状态1
         if (icpu_ack_i | icpu_err_i | genpc_freeze)
@@ -665,32 +675,32 @@ module or1200_except
           extend_flush_last <=  1'b0;
           except_type <=  `OR1200_EXCEPT_NONE;
         end
-      else
+        else
 `endif
-      state <=  `OR1200_EXCEPTFSM_FLU3;
+        state <=  `OR1200_EXCEPTFSM_FLU3;
 
-    `OR1200_EXCEPTFSM_FLU3: begin // 状态3
-      state <=  `OR1200_EXCEPTFSM_FLU4;
-    end
+      `OR1200_EXCEPTFSM_FLU3: begin // 状态3
+        state <=  `OR1200_EXCEPTFSM_FLU4;
+      end
 
-    `OR1200_EXCEPTFSM_FLU4: begin // 状态4
-      state <=  `OR1200_EXCEPTFSM_FLU5;
-      extend_flush <=  1'b0;
-      extend_flush_last <=  1'b0; // damjan
-    end
+      `OR1200_EXCEPTFSM_FLU4: begin // 状态4
+        state             <=  `OR1200_EXCEPTFSM_FLU5;
+        extend_flush      <=  1'b0;
+        extend_flush_last <=  1'b0; // damjan
+      end
 
 `ifdef OR1200_CASE_DEFAULT
-    default: begin
+      default: begin
 `else
     `OR1200_EXCEPTFSM_FLU5: begin // 状态5
 `endif
-      if (!if_stall && !id_freeze) begin
-        state <=  `OR1200_EXCEPTFSM_IDLE; // 进入空闲状态
-        except_type <=  `OR1200_EXCEPT_NONE;
-        extend_flush_last <=  1'b0;
+        if (!if_stall && !id_freeze) begin
+          state             <=  `OR1200_EXCEPTFSM_IDLE; // 进入空闲状态
+          except_type       <=  `OR1200_EXCEPT_NONE;
+          extend_flush_last <=  1'b0;
+        end
       end
-    end
-    endcase
+      endcase
 
     end
   end

@@ -103,4 +103,6 @@ verdi-clean:
 	$(Q)rm -rf verdiLog
 	$(Q)rm -rf $(VERDI_SES_NAME).png
 	$(Q)rm -rf $(VERDI_SES_NAME).wave.*
+	$(Q)rm -rf $(VERDI_SES_NAME).config
+
 	

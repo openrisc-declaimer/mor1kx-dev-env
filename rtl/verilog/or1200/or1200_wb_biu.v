@@ -137,7 +137,7 @@ module or1200_wb_biu
   input                   biu_cyc_i;  // WB cycle
   input                   biu_stb_i;  // WB strobe
   input                   biu_we_i;   // WB write enable
-  input                   biu_cab_i;  // CAB input
+  input                   biu_cab_i;  // CAB input, icfsm_burst or dcfsm_burst
   input [3:0]             biu_sel_i;  // byte selects
   output [31:0]           biu_dat_o;  // output data bus
   output                  biu_ack_o;  // ack output
@@ -220,6 +220,7 @@ module or1200_wb_biu
   // WISHBONE I/F <-> Internal RISC I/F conversion
   //
   // assign wb_ack = wb_ack_i;
+  // wb_ack是成功的应答信号
   assign wb_ack = wb_ack_i & !wb_err_i & !wb_rty_i;
 
   //
@@ -265,8 +266,14 @@ module or1200_wb_biu
     
     // IDLE
     WB_FSM_IDLE : begin
+      // 检测到CYC和STB信号都有效时，在下个时钟周期开始进行数据的传递；
+      // 注意：这里时组合电路，实际上还没有开始采样那！
       wb_cyc_nxt = biu_cyc_i & biu_stb;
       wb_stb_nxt = biu_cyc_i & biu_stb;
+      // wb_cti_nxt = 3'b010 递增突发总线周期
+      // wb_cti_nxt = 3'b111 突发结束
+      // 因为我们没有使能ICACHE，故icbiu_cab_o=0；
+      // 所以，这里的CTI=3'b111
       wb_cti_nxt = {!biu_cab_i, 1'b1, !biu_cab_i};
       
       if (biu_cyc_i & biu_stb)
@@ -280,23 +287,27 @@ module or1200_wb_biu
     // normal TRANSFER
     WB_FSM_TRANS : begin
       // CTI = 3'b111 : 突发结束
-      // 
+      // 当wb_ack有效时，!wb_ack将无效cyc_next和stb_next信号；
       wb_cyc_nxt    = !wb_stb_o | !wb_err_i & !wb_rty_i & !(wb_ack & wb_cti_o == 3'b111);
       wb_stb_nxt    = !wb_stb_o | !wb_err_i & !wb_rty_i & !wb_ack | !wb_err_i & !wb_rty_i & wb_cti_o == 3'b010 ;
       
-      // 
+      // 注意：或的优先级最低（与的优先级总是要比或的高）
       wb_cti_nxt[2] = wb_stb_o & wb_ack & burst_len == 'h0 | wb_cti_o[2];
       wb_cti_nxt[1] = 1'b1  ;
       wb_cti_nxt[0] = wb_stb_o & wb_ack & burst_len == 'h0 | wb_cti_o[0];
 
       if ((!biu_cyc_i | !biu_stb | !biu_cab_i | biu_sel_i != wb_sel_o | biu_we_i != wb_we_o) & wb_cti_o == 3'b010)
+        // 最后的一次传输操作
         wb_fsm_state_nxt = WB_FSM_LAST;
       
       else if ((wb_err_i | wb_rty_i | wb_ack & wb_cti_o==3'b111) & wb_stb_o)
+        // 感觉这个里面的wb_ack非常的重要，如果当前是一个STB传输过程
+        // 若wb_ack应答了，就结束当前的传输了；
         wb_fsm_state_nxt = WB_FSM_IDLE;
       
       else
         wb_fsm_state_nxt = WB_FSM_TRANS;
+
     end
     
     // LAST transfer
@@ -308,6 +319,7 @@ module or1200_wb_biu
       wb_cti_nxt[0] = wb_ack & wb_stb_o | wb_cti_o[0];
       
       if ((wb_err_i | wb_rty_i | wb_ack & wb_cti_o == 3'b111) & wb_stb_o)
+        // 本次传输周期结束
         wb_fsm_state_nxt = WB_FSM_IDLE;
       
       else
@@ -329,15 +341,15 @@ module or1200_wb_biu
   //
   // 状态机的输出信号
   always @(posedge wb_clk_i or `OR1200_RST_EVENT wb_rst_i) begin
+  
     if (wb_rst_i == `OR1200_RST_VALUE) begin
       wb_cyc_o  <=  1'b0;
       wb_stb_o  <=  1'b0;
       // 在初始化的时候设置为突发终止
       wb_cti_o  <=  3'b111;
-      wb_bte_o  <=  (16==bl) ?
-                      2'b11: (bl==8) ? 
-                        2'b10 : (bl==4) ? 
-                          2'b01 : 2'b00;
+      wb_bte_o  <=  (16==bl) ? 2'b11: (bl==8) ? 
+                                      2'b10 : 
+                                      (bl==4) ? 2'b01 : 2'b00;
 `ifdef OR1200_WB_CAB
       wb_cab_o  <=  1'b0;
 `endif
@@ -355,6 +367,7 @@ module or1200_wb_biu
       if (wb_ack & wb_cti_o == 3'b111)
         // 当前已经收到了传输完成应答且是总线突发终止，完成总线传输
         wb_stb_o  <=  1'b0;
+        
       else
         wb_stb_o  <=  wb_stb_nxt;
         
@@ -381,16 +394,19 @@ module or1200_wb_biu
       end
 
       // adr - set at beginning of access and changed at every termination
+      // 这个是重点中的重点
       if (wb_fsm_state_cur == WB_FSM_IDLE) begin
         wb_adr_o  <=  biu_adr_i;
       end
       
       else if (wb_stb_o & wb_ack) begin
+        // 注意：这里已经有一次应答了，说明前一次的数据传输已经完成了，
+        //       对操作的地址进行加一操作；
         
         // 分析叠4突发和叠8突发的不同
-        // ？？？
+        // 这里比较精彩，一看就明白了
         if (bl==4) begin
-          wb_adr_o[3:2]  <=  wb_adr_o[3:2] + 1;
+          wb_adr_o[3:2]  <=  2'bx; //wb_adr_o[3:2] + 1;
         end
 
         if (bl==8) begin
@@ -526,6 +542,7 @@ module or1200_wb_biu
   // 3） 总线选通信号有效
   // 4） 因为clmode=2'b00，故wb_ack_cnt=0,biu_ack_cnt=0; wb_ack_cnt ~^ biu_ack_cnt=1
   //    若clmode!=2'b00的时候，
+  // biu_rty_o会采用计数的机制，故：这里使用biu_rty信号，当biu_rty的次数大于预定的值时，触发错误信号；
   assign  biu_rty    = (wb_fsm_state_cur == WB_FSM_TRANS) & 
                         wb_rty_i & wb_stb_o &
                        (wb_rty_cnt ~^ biu_rty_cnt);
@@ -536,8 +553,7 @@ module or1200_wb_biu
                         wb_err_i & wb_stb_o &
                        (wb_err_cnt ~^ biu_err_cnt)
 `ifdef OR1200_WB_RETRY
-                        // 感觉这里是有问题的，因为两边的位数是不一样的，这样retry_cnt不能呢个起作用了
-                        // ？？？
+                        // nice的代码，非常的精彩
                        | biu_rty & retry_cnt[`OR1200_WB_RETRY-1];
 `else
    ;

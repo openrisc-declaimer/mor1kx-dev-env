@@ -770,21 +770,22 @@
 // To avoid implementation of a certain exception,
 // simply comment out corresponding line
 //
+// 异常的类型
 `define OR1200_EXCEPT_UNUSED      `OR1200_EXCEPT_WIDTH'hf
-`define OR1200_EXCEPT_TRAP        `OR1200_EXCEPT_WIDTH'he
+`define OR1200_EXCEPT_TRAP        `OR1200_EXCEPT_WIDTH'he   // TRAP调用
 `define OR1200_EXCEPT_FLOAT       `OR1200_EXCEPT_WIDTH'hd
-`define OR1200_EXCEPT_SYSCALL     `OR1200_EXCEPT_WIDTH'hc
+`define OR1200_EXCEPT_SYSCALL     `OR1200_EXCEPT_WIDTH'hc   // SYSCALL调用
 `define OR1200_EXCEPT_RANGE       `OR1200_EXCEPT_WIDTH'hb
-`define OR1200_EXCEPT_ITLBMISS    `OR1200_EXCEPT_WIDTH'ha
-`define OR1200_EXCEPT_DTLBMISS    `OR1200_EXCEPT_WIDTH'h9
+`define OR1200_EXCEPT_ITLBMISS    `OR1200_EXCEPT_WIDTH'ha   // ITLB缺失
+`define OR1200_EXCEPT_DTLBMISS    `OR1200_EXCEPT_WIDTH'h9   // DTLB缺失
 `define OR1200_EXCEPT_INT         `OR1200_EXCEPT_WIDTH'h8
-`define OR1200_EXCEPT_ILLEGAL     `OR1200_EXCEPT_WIDTH'h7
-`define OR1200_EXCEPT_ALIGN       `OR1200_EXCEPT_WIDTH'h6
+`define OR1200_EXCEPT_ILLEGAL     `OR1200_EXCEPT_WIDTH'h7   // 无效指令
+`define OR1200_EXCEPT_ALIGN       `OR1200_EXCEPT_WIDTH'h6   // 没有对其
 `define OR1200_EXCEPT_TICK        `OR1200_EXCEPT_WIDTH'h5
 `define OR1200_EXCEPT_IPF         `OR1200_EXCEPT_WIDTH'h4
 `define OR1200_EXCEPT_DPF         `OR1200_EXCEPT_WIDTH'h3
-`define OR1200_EXCEPT_BUSERR      `OR1200_EXCEPT_WIDTH'h2
-`define OR1200_EXCEPT_RESET       `OR1200_EXCEPT_WIDTH'h1
+`define OR1200_EXCEPT_BUSERR      `OR1200_EXCEPT_WIDTH'h2   // 总线错误
+`define OR1200_EXCEPT_RESET       `OR1200_EXCEPT_WIDTH'h1   // 复位异常
 `define OR1200_EXCEPT_NONE        `OR1200_EXCEPT_WIDTH'h0
 
 
@@ -1220,28 +1221,28 @@
 //
 `define  OR1200_ITLBTR_CC_BITS    0
 `define  OR1200_ITLBTR_CI_BITS    1
-`define  OR1200_ITLBTR_WBC_BITS  2
-`define  OR1200_ITLBTR_WOM_BITS  3
-`define  OR1200_ITLBTR_A_BITS    4
-`define  OR1200_ITLBTR_D_BITS    5
-`define  OR1200_ITLBTR_SXE_BITS  6
-`define  OR1200_ITLBTR_UXE_BITS  7
-`define  OR1200_ITLBTR_RES_BITS  11:8
-`define  OR1200_ITLBTR_PPN_BITS  31:13
+`define  OR1200_ITLBTR_WBC_BITS   2
+`define  OR1200_ITLBTR_WOM_BITS   3
+`define  OR1200_ITLBTR_A_BITS     4
+`define  OR1200_ITLBTR_D_BITS     5
+`define  OR1200_ITLBTR_SXE_BITS   6
+`define  OR1200_ITLBTR_UXE_BITS   7
+`define  OR1200_ITLBTR_RES_BITS   11:8
+`define  OR1200_ITLBTR_PPN_BITS   31:13
 
 //
 // ITLB configuration
 //
-`define  OR1200_IMMU_PS          13                    // 13 for 8KB page size
-`define  OR1200_ITLB_INDXW        6                      // 6  for 64 entry ITLB  7 for 128 entries
-`define  OR1200_ITLB_INDXL        `OR1200_IMMU_PS        // 13      13
-`define  OR1200_ITLB_INDXH        `OR1200_IMMU_PS+`OR1200_ITLB_INDXW-1  // 18        19
-`define  OR1200_ITLB_INDX        `OR1200_ITLB_INDXH:`OR1200_ITLB_INDXL  // 18:13    19:13
-`define  OR1200_ITLB_TAGW        32-`OR1200_ITLB_INDXW-`OR1200_IMMU_PS  // 13        12
-`define  OR1200_ITLB_TAGL        `OR1200_ITLB_INDXH+1  // 19        20
-`define  OR1200_ITLB_TAG          31:`OR1200_ITLB_TAGL  // 31:19    31:20
-`define  OR1200_ITLBMRW          `OR1200_ITLB_TAGW+1    // +1 because of V bit
-`define  OR1200_ITLBTRW          32-`OR1200_IMMU_PS+3  // +3 because of protection bits and CI
+`define  OR1200_IMMU_PS           13                      // 13 for 8KB page size
+`define  OR1200_ITLB_INDXW        6                       // 6  for 64 entry ITLB  7 for 128 entries
+`define  OR1200_ITLB_INDXL        `OR1200_IMMU_PS         // 13      13
+`define  OR1200_ITLB_INDXH        `OR1200_IMMU_PS+`OR1200_ITLB_INDXW-1    // 18        19
+`define  OR1200_ITLB_INDX         `OR1200_ITLB_INDXH:`OR1200_ITLB_INDXL   // 18:13     19:13
+`define  OR1200_ITLB_TAGW         32-`OR1200_ITLB_INDXW-`OR1200_IMMU_PS   // 13        12
+`define  OR1200_ITLB_TAGL         `OR1200_ITLB_INDXH+1    // 19          20
+`define  OR1200_ITLB_TAG          31:`OR1200_ITLB_TAGL    // 31:19    31:20
+`define  OR1200_ITLBMRW           `OR1200_ITLB_TAGW+1     // +1 because of V bit
+`define  OR1200_ITLBTRW           32-`OR1200_IMMU_PS+3    // +3 because of protection bits and CI
 
 //
 // Cache inhibit while IMMU is not enabled/implemented

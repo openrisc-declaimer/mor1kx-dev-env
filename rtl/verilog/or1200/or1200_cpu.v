@@ -102,17 +102,18 @@ module or1200_cpu
   input                 rst;
 
   // Insn (IC) interface
+  // 输出给IC模块的地址，先到IMMU->QMEM->IC->WB_BIU->WB_BUS
   output                ic_en;
-  output  [31:0]        icpu_adr_o;
+  output  [31:0]        icpu_adr_o; 
   output                icpu_cycstb_o;
-  output   [3:0]        icpu_sel_o;
-  output   [3:0]        icpu_tag_o;
+  output  [3:0]         icpu_sel_o;
+  output  [3:0]         icpu_tag_o;
   input   [31:0]        icpu_dat_i;
   input                 icpu_ack_i;
   input                 icpu_rty_i;
   input                 icpu_err_i;
-  input   [31:0]        icpu_adr_i;
-  input    [3:0]        icpu_tag_i;
+  input   [31:0]        icpu_adr_i; // Link to IMMU, 应该是虚拟地址转化成物理地址的返回值
+  input   [3:0]         icpu_tag_i;
 
   // Insn (IMMU) interface
   output                immu_en;
@@ -132,12 +133,12 @@ module or1200_cpu
   output  [`OR1200_BRANCHOP_WIDTH-1:0]  branch_op;
 
   input                 du_stall;
-  input  [dw-1:0]       du_addr;
-  input  [dw-1:0]       du_dat_du;
+  input   [dw-1:0]      du_addr;
+  input   [dw-1:0]      du_dat_du;
   input                 du_read;
   input                 du_write;
-  input  [`OR1200_DU_DSR_WIDTH-1:0]  du_dsr;
-  input  [24:0]         du_dmr1;
+  input   [`OR1200_DU_DSR_WIDTH-1:0]  du_dsr;
+  input   [24:0]        du_dmr1;
   input                 du_hwbkpt;
   input                 du_hwbkpt_ls_r;
   output  [13:0]        du_except_trig;
@@ -212,6 +213,7 @@ module or1200_cpu
   wire                  if_freeze;
   wire                  id_freeze;
   wire                  ex_freeze;
+  wire                  ma_freeze;
   wire                  wb_freeze;
   wire  [`OR1200_SEL_WIDTH-1:0]       sel_a;
   wire  [`OR1200_SEL_WIDTH-1:0]       sel_b;
@@ -371,19 +373,19 @@ module or1200_cpu
 
   // Instantiation of instruction fetch block
   or1200_genpc or1200_genpc(
-    .clk              (clk),
-    .rst              (rst),
-    .icpu_adr_o       (icpu_adr_o),
+    .clk              (clk          ),
+    .rst              (rst          ),
+    .icpu_adr_o       (icpu_adr_o   ),
     .icpu_cycstb_o    (icpu_cycstb_o),
-    .icpu_sel_o       (icpu_sel_o),
-    .icpu_tag_o       (icpu_tag_o),
-    .icpu_rty_i       (icpu_rty_i),
-    .icpu_adr_i       (icpu_adr_i),
+    .icpu_sel_o       (icpu_sel_o   ),
+    .icpu_tag_o       (icpu_tag_o   ),
+    .icpu_rty_i       (icpu_rty_i   ),
+    .icpu_adr_i       (icpu_adr_i   ),
 
     .pre_branch_op    (pre_branch_op),
-    .branch_op        (branch_op),
-    .except_type      (except_type),
-    .except_start     (except_start),
+    .branch_op        (branch_op    ),
+    .except_type      (except_type  ),
+    .except_start     (except_start ),
     .except_prefix    (sr[`OR1200_SR_EPH]),
     .id_branch_addrtarget(id_branch_addrtarget),
     .ex_branch_addrtarget(ex_branch_addrtarget),
@@ -430,6 +432,7 @@ module or1200_cpu
     .rst              (rst),
     .id_freeze        (id_freeze),
     .ex_freeze        (ex_freeze),
+    .ma_freeze        (ma_freeze),
     .wb_freeze        (wb_freeze),
     .if_flushpipe     (if_flushpipe),
     .id_flushpipe     (id_flushpipe),
@@ -736,13 +739,15 @@ module or1200_cpu
     .du_stall(du_stall),
     .mac_stall(mult_mac_stall),
     .saving_if_insn(saving_if_insn),
+    .icpu_ack_i(icpu_ack_i),
+    .icpu_err_i(icpu_err_i),
+    
     .genpc_freeze(genpc_freeze),
     .if_freeze(if_freeze),
     .id_freeze(id_freeze),
     .ex_freeze(ex_freeze),
-    .wb_freeze(wb_freeze),
-    .icpu_ack_i(icpu_ack_i),
-    .icpu_err_i(icpu_err_i)
+    .ma_freeze(ma_freeze),
+    .wb_freeze(wb_freeze)
   );
 
   // Instantiation of exception block

@@ -80,9 +80,9 @@ module or1200_ctrl
 
    // Internal i/f
    // 内部接口
-   except_flushpipe, extend_flush, if_flushpipe, id_flushpipe, ex_flushpipe,
-   wb_flushpipe,
-   id_freeze, ex_freeze, wb_freeze, if_insn, id_insn, ex_insn, abort_mvspr,
+   except_flushpipe, extend_flush, if_flushpipe, id_flushpipe, ex_flushpipe, wb_flushpipe,
+   
+   id_freeze, ex_freeze, ma_freeze, wb_freeze, if_insn, id_insn, ex_insn, abort_mvspr,
    id_branch_op, ex_branch_op, ex_branch_taken, pc_we,
    rf_addra, rf_addrb, rf_rda, rf_rdb, alu_op, alu_op2, mac_op,
    comp_op, rf_addrw, rfwb_op, fpu_op,
@@ -103,6 +103,7 @@ module or1200_ctrl
   
   input               id_freeze;
   input               ex_freeze /* verilator public */;
+  input               ma_freeze /* verilator public */;
   input               wb_freeze /* verilator public */;
   
   output              if_flushpipe; // IF段的刷新命令
@@ -180,9 +181,13 @@ module or1200_ctrl
   wire [`OR1200_MACOP_WIDTH-1:0]      mac_op;
   wire                                ex_macrc_op;
 `endif
+
+  /* ??? 为什么没有MEM的段的信号？？？ */
   reg  [31:0]        id_insn /* verilator public */;
   reg  [31:0]        ex_insn /* verilator public */;
+  reg  [31:0]        ma_insn /* verilator public */;
   reg  [31:0]        wb_insn /* verilator public */;
+  
   reg  [`OR1200_REGFILE_ADDR_WIDTH-1:0]   rf_addrw;
   reg  [`OR1200_REGFILE_ADDR_WIDTH-1:0]   wb_rfaddrw;
   reg  [`OR1200_RFWBOP_WIDTH-1:0]         rfwb_op;
@@ -296,6 +301,11 @@ module or1200_ctrl
     else
 
     if (!ex_freeze) begin
+      // 不应该啊？？？
+      // 知道为什么没有加上ex_flush_piple信号吗？哈哈
+      // 因为这个信号不会影响reg和mem的操作，reg和mem的操作
+      // 只和xx_insn信号有关，xx_insn信号在流水线被冻结或者收到刷新信号的时候
+      // 必须要被插入气泡, 而simm等信号可以进行传播而减少代码的复杂度；
       ex_simm <=  id_simm;
     end
   end
@@ -307,14 +317,13 @@ module or1200_ctrl
   always @(id_insn) begin
     case (id_insn[31:26])     // synopsys parallel_case
 
-    // l.addi
-    `OR1200_OR32_ADDI:
+    // l.addi, l.addic, l.xori, 
+    // l.sfxxi (SFXX with immediate)
+    `OR1200_OR32_ADDI, `OR1200_OR32_ADDIC, 
+    `OR1200_OR32_XORI,
+    `OR1200_OR32_SFXXI :
       id_simm = {{16{id_insn[15]}}, id_insn[15:0]};
-
-    // l.addic
-    `OR1200_OR32_ADDIC:
-      id_simm = {{16{id_insn[15]}}, id_insn[15:0]};
-
+      
     // l.lxx (load instructions)
     `OR1200_OR32_LWZ, `OR1200_OR32_LBZ, `OR1200_OR32_LBS,
     `OR1200_OR32_LHZ, `OR1200_OR32_LHS:
@@ -340,14 +349,6 @@ module or1200_ctrl
     `OR1200_OR32_SW, `OR1200_OR32_SH, `OR1200_OR32_SB:
       id_simm = {{16{id_insn[25]}}, id_insn[25:21], id_insn[10:0]};
 
-    // l.xori
-    `OR1200_OR32_XORI:
-      id_simm = {{16{id_insn[15]}}, id_insn[15:0]};
-
-    // l.sfxxi (SFXX with immediate)
-    `OR1200_OR32_SFXXI:
-      id_simm = {{16{id_insn[15]}}, id_insn[15:0]};
-
     // Instructions with no or zero extended immediate
     default:
       id_simm = {{16'b0}, id_insn[15:0]};
@@ -369,6 +370,7 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       ex_branch_addrtarget <=  0;
+    
     else if (!ex_freeze)
       ex_branch_addrtarget <=  id_branch_addrtarget;
   end
@@ -605,10 +607,14 @@ module or1200_ctrl
       id_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
     
     else if (id_flushpipe)
-      // 刷新流水线时，赋给id段空操作指令。
+      // 同样的道理，刷新流水线的时候，给与当前段空操作；
+      // 故： 赋给id段空操作指令。
       id_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};        // NOP -> id_insn[16] must be 1
     
     else if (!id_freeze) begin
+      // 问，如果IF段被冻结的时候怎么办？
+      // 这里是否应该加上如下的判断：
+      //  if( if_freeze & !id_freeze ) id_insn <= NOP
       // 如果id级没有暂停时，从if得到输入指令if_insn
       id_insn <=  if_insn;
 `ifdef OR1200_VERBOSE
@@ -626,9 +632,14 @@ module or1200_ctrl
   // 在ex级没有暂停时，ex_insn得到id输入指令
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
+      // 初始化的时候给与空操作
       ex_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
     
     else if (!ex_freeze & id_freeze | ex_flushpipe)
+      // 1) 如果ID段被冻结，但是EX段没有被冻结。这种情况就是典型的滑行操作;
+      //    这种情况的一个例子就是数据相关性的时候，新的指令需要EX段的计算结果的时候
+      //    前一个阶段,EX段的数据滑入MEM段，当前插入空操作
+      // 2) 当前的EX段被刷新；刷新就相当于大清扫操作，回到NOP状态；
       // ex_insn[16] must be 1
       ex_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};  // NOP -> ex_insn[16] must be 1
     
@@ -651,13 +662,28 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
     if (rst == `OR1200_RST_VALUE)
+      ma_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
+      
+    else if (!ma_freeze) begin
+      ma_insn <=  ex_insn;
+    end
+
+  end
+  
+  //
+  // Instruction latch in wb_insn
+  //
+  // 在wb级没有暂停时，从ex_insn得到指令
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
+
+    if (rst == `OR1200_RST_VALUE)
       wb_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
       
     // wb_insn should not be changed by exceptions due to correct
     // recording of display_arch_state in the or1200_monitor!
     // wb_insn changed by exception is not used elsewhere!
     else if (!wb_freeze) begin
-      wb_insn <=  ex_insn;
+      wb_insn <=  ma_insn;
     end
 
   end
@@ -675,28 +701,22 @@ module or1200_ctrl
       // 指令[31:26]位为操作码
       case (if_insn[31:26])    // synopsys parallel_case
 
-      // j.jalr
-      `OR1200_OR32_JALR:
-        sel_imm <=  1'b0;
-
-      // l.jr
-      `OR1200_OR32_JR:
-        sel_imm <=  1'b0;
-
+      // j.jalr, l.jr
       // l.rfe
-      `OR1200_OR32_RFE:
-        sel_imm <=  1'b0;
-
-      // l.mfspr
-      `OR1200_OR32_MFSPR:
-        sel_imm <=  1'b0;
-
-      // l.mtspr
-      `OR1200_OR32_MTSPR:
-        sel_imm <=  1'b0;
-
+      // l.mfspr, l.mtspr
       // l.sys, l.brk and all three sync insns
-      `OR1200_OR32_XSYNC:
+      // l.sw, l.sb, l.sh
+      // ALU instructions except the one with immediate, 除了带一个立即数的ALU指令
+      // SFXX instructions
+      // l.nop
+      `OR1200_OR32_JALR, `OR1200_OR32_JR,
+      `OR1200_OR32_RFE,
+      `OR1200_OR32_MFSPR, `OR1200_OR32_MTSPR,
+      `OR1200_OR32_XSYNC,
+      `OR1200_OR32_SW, `OR1200_OR32_SB, `OR1200_OR32_SH,
+      `OR1200_OR32_ALU, 
+      `OR1200_OR32_SFXX,
+      `OR1200_OR32_NOP :
         sel_imm <=  1'b0;
 
       // l.mac/l.msb
@@ -704,27 +724,6 @@ module or1200_ctrl
       `OR1200_OR32_MACMSB:
         sel_imm <=  1'b0;
 `endif
-
-      // l.sw
-      `OR1200_OR32_SW:
-        sel_imm <=  1'b0;
-
-      // l.sb
-      `OR1200_OR32_SB:
-        sel_imm <=  1'b0;
-
-      // l.sh
-      `OR1200_OR32_SH:
-        sel_imm <=  1'b0;
-
-      // ALU instructions except the one with immediate
-      // 除了带一个立即数的ALU指令
-      `OR1200_OR32_ALU:
-        sel_imm <=  1'b0;
-
-      // SFXX instructions
-      `OR1200_OR32_SFXX:
-        sel_imm <=  1'b0;
 
 `ifdef OR1200_IMPL_ALU_CUST5
       // l.cust5 instructions
@@ -736,9 +735,6 @@ module or1200_ctrl
       `OR1200_OR32_FLOAT:
         sel_imm <=  1'b0;
 `endif
-      // l.nop
-      `OR1200_OR32_NOP:
-        sel_imm <=  1'b0;
 
       // All instructions with immediates
       default: begin
@@ -954,10 +950,13 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       alu_op2 <=  0;
+      
     else if (!ex_freeze & id_freeze | ex_flushpipe)
-            alu_op2 <= 0;
-      else if (!ex_freeze) begin
+      alu_op2 <= 0;
+    
+    else if (!ex_freeze) begin
       alu_op2 <=  id_insn[`OR1200_ALUOP2_POS];
+      
     end
   end
 
@@ -1149,7 +1148,8 @@ module or1200_ctrl
   //
   // Decode of id_branch_op
   //
-  // 跳转分支指令解码到 id_branch_op
+  // id_branch_op : 跳转指令的分类
+  // 
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
     if (rst == `OR1200_RST_VALUE)
@@ -1159,6 +1159,7 @@ module or1200_ctrl
       id_branch_op <=  `OR1200_BRANCHOP_NOP;
 
     else if (!id_freeze) begin
+      // 当前的流水线没有冻结的时候，我们才更新指令的解码操作
 
       case (if_insn[31:26])    // synopsys parallel_case
 
@@ -1210,9 +1211,15 @@ module or1200_ctrl
       ex_branch_op <=  `OR1200_BRANCHOP_NOP;
 
     else if (!ex_freeze & id_freeze | ex_flushpipe)
+      // 1） 如果当前的ID段被冻结，则ID段不能向EX段传递指令，但是EX段没有被冻结，会进行滑行？
+      //    怎么办，就像火车车厢尾巴被钉住了，但是车头依然再向前滑行，这个时候就需要在车尾和车头之间
+      //    插入适当的空车厢来维护列车的连续性；嗯，对，就是这个原理，我们就需要给EX段插入一个气泡，哈哈哈~~~
+      // 2） 或者当前的段要被刷新的时候，例如跳转失败等情况的时候，我们就要刷新当前流水线段中的数据；
+      //    故： 当前的EX段被刷新的时候，插入一个气泡操作；
       ex_branch_op <=  `OR1200_BRANCHOP_NOP;
 
     else if (!ex_freeze)
+      // 除此之外的情况，指令正常的滑行
       ex_branch_op <=  id_branch_op;
 
   //

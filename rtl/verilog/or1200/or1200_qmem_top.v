@@ -317,11 +317,11 @@ module or1200_qmem_top
   assign qmem_en = iaddr_qmem_hit & qmemimmu_cycstb_i |
                    daddr_qmem_hit & qmemdmmu_cycstb_i;
   // 注意写操作只能在数据总线上出现
-  assign qmem_we = qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i;
+  assign qmem_we   = qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i;
 `ifdef OR1200_QMEM_BSEL
-  assign qmem_sel = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdcpu_sel_i : qmemicpu_sel_i;
+  assign qmem_sel  = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdcpu_sel_i : qmemicpu_sel_i;
 `endif
-  assign qmem_di = qmemdcpu_dat_i;
+  assign qmem_di   = qmemdcpu_dat_i;
   // 实际上是优先级的判断，如果有数据总线和指令总线同时的请求，数据总线优先操作
   assign qmem_addr = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdmmu_adr_i : qmemimmu_adr_i;
 
