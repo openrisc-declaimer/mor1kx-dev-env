@@ -92,13 +92,14 @@ module or1200_genpc
   // External i/f to IC
   //
   // 外部到IC的接口
-  output [31:0]       icpu_adr_o;
+  output [31:0]       icpu_adr_o; // 输出到IMMU
   output              icpu_cycstb_o;
   output  [3:0]       icpu_sel_o;
   output  [3:0]       icpu_tag_o;
   input               icpu_rty_i;
-  input  [31:0]       icpu_adr_i; // addr input信号包含初始化，
-                                  // 或者就是当前的addr地址，但是在IMMU模块中打上一拍了；
+  // addr input信号包含初始化，
+  // 或者就是当前的addr地址，但是在IMMU模块中打上一拍了；  
+  input  [31:0]       icpu_adr_i;  // 从mmu中返回的物理地址
 
   //
   // Internal i/f
@@ -153,9 +154,13 @@ module or1200_genpc
                       !spr_pc_we &     // 对SPR寄存器的读写中
                       // 要求重新支取指令
                       (icpu_rty_i | genpc_refetch) ? // 复位时，icpu_rty_i有效
-                        // 从IMMU中过来的地址
+                        // 在正常的语序情况下，我们是使用从IMMU中过来的地址；
                         icpu_adr_i :   
-                        // 
+                        // 在特殊的情况下，分析如下：
+                        // 1： 当前是一个跳转指令
+                        // 2： 当开始异常处理的时候，
+                        // 3： 当前由SPR寄存器来修改PC指针
+                        // 4： 目前没有从MMU中返回地址？？？？  
                         {pc[31:2], 1'b0, ex_branch_taken | spr_pc_we};
 
   //
@@ -173,27 +178,42 @@ module or1200_genpc
   // genpc_freeze_r
   //
   // 重支取原指令的信号处理
-  always @(posedge clk or `OR1200_RST_EVENT rst)
+  // 实际上就是给genpc_refetch打上了一拍；
+  // 问问，这样的写法是否好？？？？
+  // 为什么和：
+  //     genpc_refetch_r <= genpc_refetch;
+  // 这样的写法不太一样？有什么好处吗？还是就是作者的喜好？
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       genpc_refetch_r <=  1'b0;
 
-    else if (genpc_refetch)
+    else if ( genpc_refetch )
       // 重支取
       genpc_refetch_r <=  1'b1;
 
     else
       genpc_refetch_r <=  1'b0;
-
+  end
+  
   //
   // Async calculation of new PC value. This value is used for addressing the
   // IC.
   //
   // 新PC值的异步计算，这个值用作指令的地址。
   // 根据分支指令计算PC地址。
-  always @(pcreg or ex_branch_addrtarget or flag or branch_op or except_type
-                 or except_start or operand_b or epcr or spr_pc_we or spr_dat_i or except_prefix)
-  begin
+  always @( pcreg or 
+            ex_branch_addrtarget or flag or branch_op or 
+            except_type or except_start or 
+            operand_b or epcr or 
+            spr_pc_we or spr_dat_i or 
+            except_prefix 
+          ) begin
+  
     casez ({spr_pc_we, except_start, branch_op}) // synopsys parallel_case
+    // 以下的情况中，PC 是特殊的值：
+    // 当是SPR寄存器修改PC
+    // 开始异常处理的时候
+    // 或者目前处于跳转指令的时候
     {2'b00, `OR1200_BRANCHOP_NOP}: begin // 分支操作指令为NOP
       // 在非跳转的情况下，PC=PC+4
       pc = {pcreg + 30'd1, 2'b0};
@@ -217,6 +237,7 @@ module or1200_genpc
       $display("%t: BRANCHOP_JR: pc <= operand_b %h", $time, operand_b);
       // synopsys translate_on
 `endif
+      
       // JR，跳转到寄存器指定的地址
       pc = operand_b; // 直接跳转到通用寄存器的值上
       ex_branch_taken = 1'b1;
@@ -230,6 +251,7 @@ module or1200_genpc
         $display("%t: BRANCHOP_BF: pc <= ex_branch_addrtarget %h", $time, ex_branch_addrtarget);
         // synopsys translate_on
 `endif
+        
         pc = {ex_branch_addrtarget, 2'b00}; // 分支指令地址+分支偏移地址
         ex_branch_taken = 1'b1;
       end
@@ -240,6 +262,7 @@ module or1200_genpc
         $display("%t: BRANCHOP_BF: not taken", $time);
         // synopsys translate_on
 `endif
+        // flag不成立，故沿着原来的PC走
         pc = {pcreg + 30'd1, 2'b0}; // 备份pd+4
         ex_branch_taken = 1'b0;
       end
@@ -252,7 +275,8 @@ module or1200_genpc
         $display("%t: BRANCHOP_BNF: not taken", $time);
         // synopsys translate_on
 `endif
-        //备份pd+4
+        
+        // flag不成立，故沿着原来的PC走；备份pd+4
         pc = {pcreg + 30'd1, 2'b0};
         ex_branch_taken = 1'b0;
       end
@@ -269,19 +293,22 @@ module or1200_genpc
       end
 
     {2'b00, `OR1200_BRANCHOP_RFE}: begin
-      // 指令l.rfe表示从例外返回，它优先于例外部分恢复处理器状态，它没有延迟槽。即：PC < - EPCR；SR < - ESR
+      // 指令l.rfe表示从例外返回，它优先于例外部分恢复处理器状态，它没有延迟槽。
+      // 即： PC < - EPCR；
+      //    SR < - ESR；
 `ifdef OR1200_VERBOSE
       // synopsys translate_off
       $display("%t: BRANCHOP_RFE: pc <= epcr %h", $time, epcr);
       // synopsys translate_on
 `endif
+      
       // epcr寄存器中读出pc地址
       pc = epcr;
       ex_branch_taken = 1'b1;
     end
 
     {2'b01, 3'b???}: begin
-      // 从内存中读入pc值，跳转到例外的地址处执行（中断、异常处理）
+      // 从内存中读入PC值，跳转到例外的地址处执行（中断、异常处理）
 `ifdef OR1200_VERBOSE
       // synopsys translate_off
       $display("Starting exception: %h.", except_type);
@@ -310,12 +337,13 @@ module or1200_genpc
     endcase
   end
 
-  //
+  // pcreg_default
   // PC register
   //
   // 获得pcreg寄存器
   // pcreg寄存器是pc寄存器的备份寄存器，当发生例外时，将pc寄存器的值存储起来，以便例外返回时恢复PC寄存器值。
-  always @(posedge clk or `OR1200_RST_EVENT rst)
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
+    
     // default value
     if (rst == `OR1200_RST_VALUE) begin
       //复位时，从内存中读入pc值
@@ -331,30 +359,45 @@ module or1200_genpc
     else if (pcreg_select) begin
       // dynamic value can only be assigned to FF out of reset!
       pcreg_default <=  pcreg_boot[31:2];
+      // pcreg_select 就被赋值一次，只有在复位上电时执行一次的；
       pcreg_select  <=  1'b0;    // select FF value
     end
 
-    else if (spr_pc_we) begin
+    else if ( spr_pc_we )
       // 当sprs模块有spr_pc_we（即sprs输出PC写使能信号）时，从sprs数据线上得到数据。
       pcreg_default <=  spr_dat_i[31:2];
-    end
 
-    else if (no_more_dslot | except_start | !genpc_freeze & !icpu_rty_i & !genpc_refetch) begin
+    else if (no_more_dslot | except_start | !genpc_freeze & !icpu_rty_i & !genpc_refetch)
       // 在ctrl模块没有数据槽或例外开始等情况下，将pc寄存器的值存储到pcreg备份寄存器中。
+      // 在上述的条件下，PC不会选择这些值的
       pcreg_default <=  pc[31:2];
-    end
 
+  end
+  
   // select async. value for pcreg after reset - PC jumps to the address selected
   // after boot.
   assign  pcreg_boot = `OR1200_BOOT_ADR; // changed JB
+  ///////////////////////////////////////////////
+  //
+  //  pcreg_boot      ---
+  //     ------------>| |
+  //  pcreg_default   | |------->pcreg
+  //     ------------>| |
+  //                  ---
+  //                   ^
+  //                   |------- pcreg_select
+  //
+  ///////////////////////////////////////////////
+  always @(pcreg_boot or pcreg_default or pcreg_select) begin
 
-  always @(pcreg_boot or pcreg_default or pcreg_select)
     if (pcreg_select)
       // async. value is selected due to reset state
       pcreg = pcreg_boot[31:2];
 
     else
       // FF value is selected 2nd clock after reset state
-      pcreg = pcreg_default ;
-
+      pcreg = pcreg_default;
+      
+  end
+  
 endmodule

@@ -54,7 +54,7 @@ VCS_DEFINE  = +define+VPD
 # enable verdi fsdb dump at testbench module.
 VCS_DEFINE  = +define+FSDB -line -debug_access+all
 # setting simulate run time
-VCS_DEFINE += +define+END_TIME=5000000
+# VCS_DEFINE += +define+END_TIME=5000000
 
 ######################################################################
 # all include files search path

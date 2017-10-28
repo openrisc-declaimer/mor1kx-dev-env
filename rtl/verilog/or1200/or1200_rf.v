@@ -94,9 +94,9 @@ module or1200_rf
   output                  cy_we_o;
   input                   supv;
   input                   wb_freeze;
-  input  [aw-1:0]         addrw;
-  input  [dw-1:0]         dataw;
-  input                   we;
+  input  [aw-1:0]         addrw;    // 将要写入的地址
+  input  [dw-1:0]         dataw;    // 将要写入的数据
+  input                   we;       // 写寄存器信号
   input                   flushpipe;
 
   //
@@ -200,155 +200,7 @@ module or1200_rf
   //
   // RF write data is either from SPRS or normal from CPU datapath
   //
-  // RF写数据来自SPRS或正常来自CPU数据路径
-  assign rf_dataw = (spr_valid & spr_write) ? spr_dat_i : dataw;
-
-  //
-  // RF write enable is either from SPRS or normal from CPU control
-  //
-  // RF写使能来自SPRS或正常来自CPU控制
-  always @(`OR1200_RST_EVENT rst or posedge clk)
-    if (rst == `OR1200_RST_VALUE)
-      rf_we_allow <=  1'b1;
-
-    else if (~wb_freeze)
-      rf_we_allow <=  ~flushpipe;
-
-  // rf写使能信号=(SPR有效且写使能) | (数据输入写使能且WB级非停止) & rf允许写 & (超级监管模式 | rf写地址不为0)
-  assign rf_we = ((spr_valid & spr_write) | (we & ~wb_freeze)) & rf_we_allow;
-
-  assign cy_we_o = cy_we_i && ~wb_freeze && rf_we_allow;
-
-  //
-  // CS RF A asserted when instruction reads operand A and ID stage
-  // is not stalled
-  //
-  // 当指令读操作数A并且ID阶段还没停止时，读A双端口RAM的A端口使能信号被声明。
-  assign rf_ena = (rda & ~id_freeze) | (spr_valid & !spr_write) | spr_cs_fe;
-
-  //
-  // CS RF B asserted when instruction reads operand B and ID stage
-  // is not stalled
-  //
-  // 当指令读操作数B并且ID阶段还没停止时，读B双端口RAM的A端口使能信号被声明。
-  assign rf_enb = rdb & ~id_freeze;
-
-`ifdef OR1200_RFRAM_TWOPORT
-  // 实例化2个双端口RAM，即实例rf_a和rf_b。
-  // 这2个实例的A端口用来读出数据(对应操作数A和B)，
-  // B端口用来写入数据(2个B端口写入同样的数据)。也就是说2个双端口RAM，同时保存同样的数据。
-
-  //
-  // Instantiation of register file two-port RAM A
-  //
-  // 寄存器文件双端口RAM A的实例化
-  or1200_tpram_32x32 rf_a(
-    // Port A
-    // 从 Port A读出操作数A
-    .clk_a(clk),
-    .rst_a(rst),
-    .ce_a(rf_ena),
-    .we_a(1'b0),
-    .oe_a(1'b1),
-    .addr_a(rf_addra),
-    .di_a(32'h0000_0000),
-    .do_a(from_rfa),
-
-    // Port B
-    // 从Port B写入数据。
-    .clk_b(clk),
-    .rst_b(rst),
-    .ce_b(rf_we),
-    .we_b(rf_we),
-    .oe_b(1'b0),
-    .addr_b(rf_addrw),
-    .di_b(rf_dataw),
-    .do_b()
-  );
-
-  //
-  // Instantiation of register file two-port RAM B
-  //
-  // 寄存器文件双端口RAM B的实例化
-  or1200_tpram_32x32 rf_b(
-    // Port A
-    // 从Port A读出操作数B
-    .clk_a(clk),
-    .rst_a(rst),
-    .ce_a(rf_enb),
-    .we_a(1'b0),
-    .oe_a(1'b1),
-    .addr_a(addrb),
-    .di_a(32'h0000_0000),
-    .do_a(from_rfb),
-
-    // Port B
-    // 从 Port B写入数据
-    .clk_b(clk),
-    .rst_b(rst),
-    .ce_b(rf_we),
-    .we_b(rf_we),
-    .oe_b(1'b0),
-    .addr_b(rf_addrw),
-    .di_b(rf_dataw),
-    .do_b()
-  );
-
-`else // !OR1200_RFRAM_TWOPORT
-
-`ifdef OR1200_RFRAM_DUALPORT
-  // 双端口RAM的实例化
-  //
-  // Instantiation of register file two-port RAM A
-  //
-     or1200_dpram #
-       (
-        .aw(5),
-        .dw(32)
-        )
-     rf_a
-       (
-        // Port A
-        .clk_a(clk),
-        .ce_a(rf_ena),
-        .addr_a(rf_addra),
-        .do_a(from_rfa),
-
-        // Port B
-        .clk_b(clk),
-        .ce_b(rf_we),
-        .we_b(rf_we),
-        .addr_b(rf_addrw),
-        .di_b(rf_dataw)
-        );
-
-     //
-     // Instantiation of register file two-port RAM B
-     //
-     or1200_dpram #
-       (
-        .aw(5),
-        .dw(32)
-        )
-     rf_b
-       (
-        // Port A
-        .clk_a(clk),
-        .ce_a(rf_enb),
-        .addr_a(addrb),
-        .do_a(from_rfb),
-
-        // Port B
-        .clk_b(clk),
-        .ce_b(rf_we),
-        .we_b(rf_we),
-        .addr_b(rf_addrw),
-        .di_b(rf_dataw)
-        );
-
-`else // !OR1200_RFRAM_DUALPORT
-
-`ifdef OR1200_RFRAM_GENERIC
+?`ifdef OR1200_RFRAM_GENERIC
   // 通用基于触发器的寄存器实例化
   //
   // Instantiation of generic (flip-flop based) register file

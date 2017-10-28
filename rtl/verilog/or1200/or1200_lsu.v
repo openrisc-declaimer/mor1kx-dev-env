@@ -79,7 +79,7 @@ module or1200_lsu
    id_addrbase, ex_addrbase, id_addrofs, ex_addrofs, id_lsu_op,
    lsu_datain, lsu_dataout, lsu_stall, lsu_unstall,
    du_stall, except_align, except_dtlbmiss, except_dmmufault, except_dbuserr,
-   id_freeze, ex_freeze, flushpipe,
+   id_freeze, ex_freeze, flushpipe, ma_flushpipe,
 
    // External i/f to DC
    // 到dcache的外部接口
@@ -123,7 +123,7 @@ module or1200_lsu
   input                   id_freeze;
   input                   ex_freeze;
   input                   flushpipe;
-
+  input                   ma_flushpipe;
   //
   // External i/f to DC
   //

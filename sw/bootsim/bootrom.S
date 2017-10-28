@@ -8,10 +8,106 @@
 ///                                                               ////
 //////////////////////////////////////////////////////////////////////
 
+#define TEST_SEG_0
+
 #include <or1k-asm.h>
 #include "spr-defs.h"
 #include "board.h"
 
+#ifdef TEST_SEG_0
+	// ---------------------------------------------------------------------------
+	// Base Arithmetic Instruction
+	// ---------------------------------------------------------------------------
+	// R0 = 0
+	// R1 = 3
+	// R2 = 4
+	// R3 = 1
+	// R5 = R1 + R2   : FINISH
+	// R6 = R5 + R3   : WB 
+	// R7 = R5 + R1   : MA
+	// R8 = R5 + R2   : EX
+	// NOP
+	// NOP
+	// NOP
+	// NOP
+	// NOP
+	// R5 = R1 + R2   : FINISH
+	// R6 = R3 + R5   : WB 
+	// R7 = R1 + R5   : MA
+	// R8 = R2 + R5   : EX
+	// NOP
+	// NOP
+	// NOP
+	// NOP
+	// NOP
+	// ---------------------------------------------------------------------------
+
+	// R0 = 0
+	l.movhi r0,0
+	l.ori r0,r0,0
+	
+	// R1 = 3
+	l.movhi r1,0
+	l.ori r1,r0,3
+	
+	// R2 = 4
+	l.movhi r2,0
+	l.ori r2,r0,4
+	
+	// R3 = 1
+	l.movhi r3,0
+	l.ori r3,r0,1
+	
+	// R5 = R1 + R2   : FINISH
+	l.add r5,r1,r2
+	
+	// R6 = R5 + R3   : WB 
+	l.add r6,r5,r3
+	
+	// R7 = R5 + R1   : MA
+	l.add r7,r5,r1
+	
+	// R8 = R5 + R2   : EX
+	l.add r8,r5,r2
+	
+	// 排空流水线
+	l.nop
+	l.nop
+	l.nop
+	l.nop
+	l.nop
+	
+	// R5 = R1 + R2   : FINISH
+	l.add r5,r1,r2
+	
+	// R6 = R3 + R5   : WB 
+	l.add r6,r3,r5
+	
+	// R7 = R1 + R5   : MA
+	l.add r7,r1,r5
+	
+	// R8 = R2 + R5   : EX	
+	l.add r8,r2,r5
+
+	// 排空流水线
+	l.nop
+	l.nop
+	l.nop
+	l.nop
+	l.nop
+	
+#endif /* TEST_SEG_0 */
+
+
+#ifdef TEST_SEG_1
+#endif /* TEST_SEG_1 */
+
+#ifdef TEST_SEG_2
+#endif /* TEST_SEG_2 */
+
+#ifdef TEST_SEG_SPR
+	// ---------------------------------------------------------------------------
+	// Base SPR Register Operator
 	// ---------------------------------------------------------------------------
 	l.movhi r0,0
 	l.ori r0,r0,0
@@ -52,4 +148,5 @@
 	l.mfspr r21, r0, SPR_ESR_BASE
 	l.mfspr r22, r0, SPR_ESR_LAST
 	l.mfspr r23, r0, SPR_GPR_BASE
+#endif /* TEST_SEG_SPR */
 

@@ -101,7 +101,7 @@ module or1200_operandmuxes
   reg                            saved_a;
   reg                            saved_b;
 
-  //
+  //  
   // Operand A register
   //
   // 控制在操作数A寄存器operand_a上的数据。

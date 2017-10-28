@@ -65,7 +65,7 @@ module or1200_cpu
 
    // Debug unit
    id_void, id_insn, ex_void,
-   ex_insn, ex_freeze, wb_insn, wb_freeze, id_pc, ex_pc, wb_pc, branch_op,
+   ex_insn, ex_freeze, wb_insn, wb_freeze, id_pc, ex_pc, ma_pc, wb_pc, branch_op,
    spr_dat_npc, rf_dataw, ex_flushpipe,
    du_stall, du_addr, du_dat_du, du_read, du_write, du_except_stop,
    du_except_trig, du_dsr, du_dmr1, du_hwbkpt, du_hwbkpt_ls_r, du_dat_cpu,
@@ -128,6 +128,7 @@ module or1200_cpu
   output                wb_freeze;
   output  [31:0]        id_pc;
   output  [31:0]        ex_pc;
+  output  [31:0]        ma_pc;
   output  [31:0]        wb_pc;
   output                ex_flushpipe;
   output  [`OR1200_BRANCHOP_WIDTH-1:0]  branch_op;
@@ -242,6 +243,7 @@ module or1200_cpu
   wire                  if_flushpipe;
   wire                  id_flushpipe;
   wire                  ex_flushpipe;
+  wire                  ma_flushpipe;
   wire                  wb_flushpipe;
   wire                  extend_flush;
   wire                  ex_branch_taken;
@@ -437,6 +439,7 @@ module or1200_cpu
     .if_flushpipe     (if_flushpipe),
     .id_flushpipe     (id_flushpipe),
     .ex_flushpipe     (ex_flushpipe),
+    .ma_flushpipe     (ma_flushpipe),
     .wb_flushpipe     (wb_flushpipe),
     .extend_flush     (extend_flush),
     .except_flushpipe (except_flushpipe),
@@ -691,6 +694,7 @@ module or1200_cpu
     .id_freeze(id_freeze),
     .ex_freeze(ex_freeze),
     .flushpipe(ex_flushpipe),
+    .ma_flushpipe(ma_flushpipe),
 
     .dcpu_adr_o(dcpu_adr_o),
     .dcpu_cycstb_o(dcpu_cycstb_o),
@@ -777,11 +781,13 @@ module or1200_cpu
     .genpc_freeze(genpc_freeze),
     .id_freeze(id_freeze),
     .ex_freeze(ex_freeze),
+    .ma_freeze(ma_freeze),
     .wb_freeze(wb_freeze),
     .if_stall(if_stall),
     .if_pc(if_pc),
     .id_pc(id_pc),
     .ex_pc(ex_pc),
+    .ma_pc(ma_pc),
     .wb_pc(wb_pc),
     .id_flushpipe(id_flushpipe),
     .ex_flushpipe(ex_flushpipe),

@@ -117,14 +117,20 @@ module or1200_if
   reg  [2:0]              err_saved;
   reg                     saved;
 
+  // 保存当前指令的条件
+  // 1: 从外面读入数据了，ACK应答
+  // 2: if_freeze被冻结中
+  // 3：先前没有被保存过
   assign save_insn = (icpu_ack_i | icpu_err_i) & 
-                     if_freeze & 
+                      if_freeze & 
                      !saved;
   assign saving_if_insn = !if_flushpipe & save_insn;
 
   //
   // IF bypass
   //
+  // ?????????
+  // cache的行支取，一次会取4个字，16个字节吗？
   assign if_bypass = icpu_adr_i[0] ? 1'b0 : if_bypass_reg | if_flushpipe;
 
   always @(posedge clk or `OR1200_RST_EVENT rst)
@@ -141,10 +147,8 @@ module or1200_if
   // 输出指令到ctrl模块，指令l.rfe表示从例外返回。指令来源于空指令、暂时存储的指令和icache中的数据。
   // 当icache出错或没有延迟槽或从例外返回时，输出空操作指令。
   // icpu_ack_i表示icache应答已送回指令，icpu_dat_i是icache送回的指令数据
-  assign if_insn = no_more_dslot | rfe | if_bypass ?
-                      {`OR1200_OR32_NOP, 26'h041_0000} :
-                        saved ?
-                          insn_saved :
+  assign if_insn = no_more_dslot | rfe | if_bypass ? {`OR1200_OR32_NOP, 26'h041_0000} :
+                        saved ? insn_saved :
                             icpu_ack_i ?
                               icpu_dat_i : // 当icpu_ack_i有效的时候，从icache返回Instruct code.
                               {`OR1200_OR32_NOP, 26'h061_0000};
@@ -159,13 +163,16 @@ module or1200_if
   assign genpc_refetch = saved & icpu_ack_i;
 
   // OR1200_ITAG_TE表示TLB失靶例外，输出TLB失靶例外信号
-  assign except_itlbmiss  = no_more_dslot ? 1'b0 : saved ? err_saved[0] : icpu_err_i & (icpu_tag_i == `OR1200_ITAG_TE);
+  assign except_itlbmiss  = no_more_dslot ? 1'b0 : saved ? err_saved[0] : 
+                                                           icpu_err_i & (icpu_tag_i == `OR1200_ITAG_TE);
 
   // OR1200_ITAG_PE表示页错误例外，输出页错误例外信号
-  assign except_immufault = no_more_dslot ? 1'b0 : saved ? err_saved[1] : icpu_err_i & (icpu_tag_i == `OR1200_ITAG_PE);
+  assign except_immufault = no_more_dslot ? 1'b0 : saved ? err_saved[1] : 
+                                                           icpu_err_i & (icpu_tag_i == `OR1200_ITAG_PE);
 
   // OR1200_ITAG_BE表示总线错误例外，输出总线错误例外信号
-  assign except_ibuserr   = no_more_dslot ? 1'b0 : saved ? err_saved[2] : icpu_err_i & (icpu_tag_i == `OR1200_ITAG_BE);
+  assign except_ibuserr   = no_more_dslot ? 1'b0 : saved ? err_saved[2] : 
+                                                           icpu_err_i & (icpu_tag_i == `OR1200_ITAG_BE);
 
   //
   // Flag for saved insn/address
@@ -222,15 +229,19 @@ module or1200_if
   // Store fetched instruction's error tags
   //
   always @(posedge clk or `OR1200_RST_EVENT rst)
+  
     if (rst == `OR1200_RST_VALUE)
       err_saved <=  3'b000;
+    
     else if (if_flushpipe)
       err_saved <=  3'b000;
+    
     else if (save_insn) begin
       err_saved[0] <=  icpu_err_i & (icpu_tag_i == `OR1200_ITAG_TE);
       err_saved[1] <=  icpu_err_i & (icpu_tag_i == `OR1200_ITAG_PE);
       err_saved[2] <=  icpu_err_i & (icpu_tag_i == `OR1200_ITAG_BE);
     end
+    
     else if (!if_freeze)
       err_saved <=  3'b000;
 

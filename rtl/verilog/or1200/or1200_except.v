@@ -73,8 +73,12 @@ module or1200_except
    // Internal i/f
    sig_ibuserr, sig_dbuserr, sig_illegal, sig_align, sig_range, sig_dtlbmiss,
    sig_dmmufault, sig_int, sig_syscall, sig_trap, sig_itlbmiss, sig_immufault,
-   sig_tick, ex_branch_taken, genpc_freeze, id_freeze, ex_freeze, wb_freeze,
-   if_stall,  if_pc, id_pc, ex_pc, wb_pc, id_flushpipe, ex_flushpipe,
+   sig_tick, ex_branch_taken, genpc_freeze, id_freeze, ex_freeze, ma_freeze, wb_freeze,
+   if_stall,  
+   
+   if_pc, id_pc, ex_pc, ma_pc, wb_pc, 
+   
+   id_flushpipe, ex_flushpipe,
    extend_flush, except_flushpipe, except_type, except_start, except_started,
    except_stop, except_trig, ex_void, abort_mvspr, branch_op, spr_dat_ppc,
    spr_dat_npc, datain, du_dsr, epcr_we, eear_we, esr_we, pc_we, epcr, eear,
@@ -106,6 +110,7 @@ module or1200_except
   input               genpc_freeze;
   input               id_freeze;
   input               ex_freeze;
+  input               ma_freeze;
   input               wb_freeze;
   // 问if_stall和if_freeze的区别是什么？
   // if_stall信号是因为为了从ICACHE/BUS上得到inst而暂停流水线的操作；
@@ -115,6 +120,7 @@ module or1200_except
   input   [31:0]      if_pc;
   output  [31:0]      id_pc;
   output  [31:0]      ex_pc;
+  output  [31:0]      ma_pc;
   output  [31:0]      wb_pc;
   input   [31:0]      datain;
   
@@ -136,7 +142,7 @@ module or1200_except
   
   input               id_flushpipe;
   input               ex_flushpipe;
-  output              except_flushpipe;
+  output              except_flushpipe; // 发现异常，开始刷新流水线操作
   output              extend_flush;
   
   output  [`OR1200_EXCEPT_WIDTH-1:0]   except_type;
@@ -163,6 +169,8 @@ module or1200_except
   reg                 id_pc_val;
   reg  [31:0]         ex_pc /* verilator public */;
   reg                 ex_pc_val;
+  reg  [31:0]         ma_pc /* verilator public */;
+  reg                 ma_pc_val;
   reg  [31:0]         wb_pc /* verilator public */;
   reg  [31:0]         dl_pc;
   reg  [31:0]         epcr;
@@ -229,6 +237,7 @@ module or1200_except
   // Abort write into RF by load & other instructions
   // EX级异常中止=数据总线错误 | 数据MMU错误 | 数据TLB失靶 | 对齐错误 | 不合法指令
   // 这个信号表示异常中止Load指令与其它指令对RF的写。
+  // 在异常处理真正开始之前，except模块除了要保护现场之外，有些正在执行的指令需要做一些特殊处理，比如load/store指令，mtspr/mfspr指令等：
   assign abort_ex = sig_dbuserr | sig_dmmufault | sig_dtlbmiss | sig_align |
                     sig_illegal | ((du_hwbkpt | trace_trap) & ex_pc_val
                     & !sr_ted & !dsr_te);
@@ -249,20 +258,20 @@ module or1200_except
   // 这个次序定义了例外检测优先级。
   // DSR寄存器(调试停止寄存器)定义了哪个例外引起核心停止例外例程的执行，并切换控制到开发接口。
   assign except_trig = {  //触发例外，这时对应DSR寄存器的位必须为0
-                          ex_exceptflags[1] & ~du_dsr[`OR1200_DU_DSR_IME],
-                          ex_exceptflags[0] & ~du_dsr[`OR1200_DU_DSR_IPFE],
-                          ex_exceptflags[2] & ~du_dsr[`OR1200_DU_DSR_BUSEE],
-                          sig_illegal       & ~du_dsr[`OR1200_DU_DSR_IIE],
-                          sig_align         & ~du_dsr[`OR1200_DU_DSR_AE],
-                          sig_dtlbmiss      & ~du_dsr[`OR1200_DU_DSR_DME],
-                          sig_trap          & ~du_dsr[`OR1200_DU_DSR_TE],
-                          sig_syscall       & ~du_dsr[`OR1200_DU_DSR_SCE] & ~ex_freeze,
-                          sig_dmmufault     & ~du_dsr[`OR1200_DU_DSR_DPFE],
-                          sig_dbuserr       & ~du_dsr[`OR1200_DU_DSR_BUSEE],
-                          range_pending     & ~du_dsr[`OR1200_DU_DSR_RE],
-                          fp_pending        & ~du_dsr[`OR1200_DU_DSR_FPE],
-                          int_pending       & ~du_dsr[`OR1200_DU_DSR_IE],
-                          tick_pending      & ~du_dsr[`OR1200_DU_DSR_TTE]
+                /* 13 */  ex_exceptflags[1] & ~du_dsr[`OR1200_DU_DSR_IME],
+                /* 12 */  ex_exceptflags[0] & ~du_dsr[`OR1200_DU_DSR_IPFE],
+                /* 11 */  ex_exceptflags[2] & ~du_dsr[`OR1200_DU_DSR_BUSEE],
+                /* 10 */  sig_illegal       & ~du_dsr[`OR1200_DU_DSR_IIE],
+                 /* 9 */  sig_align         & ~du_dsr[`OR1200_DU_DSR_AE],
+                 /* 8 */  sig_dtlbmiss      & ~du_dsr[`OR1200_DU_DSR_DME],
+                 /* 7 */  sig_trap          & ~du_dsr[`OR1200_DU_DSR_TE],
+                 /* 6 */  sig_syscall       & ~du_dsr[`OR1200_DU_DSR_SCE] & ~ex_freeze,
+                 /* 5 */  sig_dmmufault     & ~du_dsr[`OR1200_DU_DSR_DPFE],
+                 /* 4 */  sig_dbuserr       & ~du_dsr[`OR1200_DU_DSR_BUSEE],
+                 /* 3 */  range_pending     & ~du_dsr[`OR1200_DU_DSR_RE],
+                 /* 2 */  fp_pending        & ~du_dsr[`OR1200_DU_DSR_FPE],
+                 /* 1 */  int_pending       & ~du_dsr[`OR1200_DU_DSR_IE],
+                 /* 0 */  tick_pending      & ~du_dsr[`OR1200_DU_DSR_TTE] 
             };
 
   wire trace_cond  = !ex_freeze && !ex_void && (1'b0
@@ -357,17 +366,24 @@ module or1200_except
   // PC and Exception flags pipelines
   //
   // PC和例外标识的流水线，得到id级的例外标识id_exceptflags
+  // 此外，由于异常的处理是在流水线的最后一个阶段,WB阶段才被处理，所以就需要刷新流水线，
+  // 这样，就需要处理在之前已经进入流水线的指令，例如，要判断异常处理入口的指令是否在延迟槽内，如何暂停和刷新流水线等
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
+    
     if (rst == `OR1200_RST_VALUE) begin
       id_pc <=  32'd0;
       id_pc_val <=  1'b0 ;
       id_exceptflags <=  3'b000;
     end
+    
     else if (id_flushpipe) begin
+      // 被刷新掉了
       id_pc_val <=  1'b0 ;
       id_exceptflags <=  3'b000;
     end
+    
     else if (!id_freeze) begin
+      // 如果ID段没有被冻结，则传递倒ID段
       id_pc <=  if_pc;
       id_pc_val <=  1'b1 ;
       id_exceptflags <=  { sig_ibuserr, sig_itlbmiss, sig_immufault };
@@ -384,6 +400,7 @@ module or1200_except
   //
   // delayed_iee ( Interrupt Exception Enabled)
   // 当SR[IEE]被指令l.rfe恢复时，它不应该马上使能中断。代替的方法是：一旦流水线再次准备好时，delayed_iee与SR[IEE]一起使能中断。
+  // 在异常发生后，我们还要更新位于sprs模块里面的SR寄存器
   always @(`OR1200_RST_EVENT rst or posedge clk)
     if (rst == `OR1200_RST_VALUE)
       delayed_iee <=  3'b000;
@@ -419,40 +436,45 @@ module or1200_except
   // PC and Exception flags pipelines
   //
   // PC和例外标识的流水线，得到ex级例外标识ex_exceptflags
+  // 在开始执行异常处理程序之前，要进行现场保护
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
     if (rst == `OR1200_RST_VALUE) begin //复位时
-      ex_dslot <=  1'b0;
-      ex_pc <=  32'd0;
-      ex_pc_val <=  1'b0 ;
-      ex_exceptflags <=  3'b000;
+      ex_dslot          <=  1'b0;
+      ex_pc             <=  32'd0;
+      ex_pc_val         <=  1'b0 ;
+      ex_exceptflags    <=  3'b000;
       delayed1_ex_dslot <=  1'b0;
       delayed2_ex_dslot <=  1'b0;
     end
 
-    else if (ex_flushpipe) begin //刷新流水线
-      ex_dslot <=  1'b0;
-      ex_pc_val <=  1'b0 ;
-      ex_exceptflags <=  3'b000;
+    else if (ex_flushpipe) begin 
+      // EX段刷新流水线
+      ex_dslot          <=  1'b0;
+      ex_pc_val         <=  1'b0 ;
+      ex_exceptflags    <=  3'b000;
       delayed1_ex_dslot <=  1'b0;
       delayed2_ex_dslot <=  1'b0;
     end
 
     else if (!ex_freeze & id_freeze) begin 
       // EX级运行，ID级暂停
-      ex_dslot <=  1'b0;
-      ex_pc <=  id_pc;
-      ex_pc_val <=  id_pc_val ;
-      ex_exceptflags <=  3'b000;
+      ex_dslot          <=  1'b0;
+      ex_pc             <=  id_pc;
+      ex_pc_val         <=  id_pc_val;
+      ex_exceptflags    <=  3'b000;
       delayed1_ex_dslot <=  ex_dslot;
       delayed2_ex_dslot <=  delayed1_ex_dslot;
     end
 
-    else if (!ex_freeze) begin // EX级运行，ID级运行
-      ex_dslot <=  ex_branch_taken;
-      ex_pc <=  id_pc;
-      ex_pc_val <=  id_pc_val ;
-      ex_exceptflags <=  id_exceptflags;
+    else if (!ex_freeze) begin 
+      // EX级运行，ID级运行
+      
+      // 之前在EX段的是一个ex_branch_taken指令，后面跟着的是一个延时槽指令；
+      ex_dslot          <=  ex_branch_taken;
+      ex_pc             <=  id_pc;
+      ex_pc_val         <=  id_pc_val ;
+      ex_exceptflags    <=  id_exceptflags;
       delayed1_ex_dslot <=  ex_dslot;
       delayed2_ex_dslot <=  delayed1_ex_dslot;
     end
@@ -462,6 +484,7 @@ module or1200_except
   // PC and Exception flags pipelines
   //
   // PC和例外标识的流水线，得到wb_pc
+  // 由于异常有很多类型，但流水线只有一条，所以第二小步就是将不同类型的地址信号赋给最终要执行的PC
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE) begin
       wb_pc <=  32'd0;
@@ -471,6 +494,15 @@ module or1200_except
       wb_pc <=  ex_pc;
       dl_pc <=  wb_pc;
     end
+  end
+  
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
+    if (rst == `OR1200_RST_VALUE)
+      ma_pc <=  32'd0;
+
+    else if (!ma_freeze)
+      ma_pc <=  ex_pc;
+
   end
 
   //
@@ -482,6 +514,9 @@ module or1200_except
   // 我们已启动例外处理的运行：
   //  1. 声明了3个时钟周期。
   //  2. 不执行任何不在流水线且不是例外处理的指令。
+  /////////////////////////////////////////////////
+  // 1） 发现当前有一个异常信号被检测到
+  // 2) 同时，当前的异常处理程序没有处理其他的异常
   assign except_flushpipe = |except_trig & ~|state;
 
   //
@@ -512,6 +547,7 @@ module or1200_except
     end
 
     else begin
+    
 `ifdef OR1200_CASE_DEFAULT
       case (state)  // synopsys parallel_case
 `else
@@ -519,9 +555,11 @@ module or1200_except
 `endif
       `OR1200_EXCEPTFSM_IDLE: // 空闲状态
       
-        if (except_flushpipe) begin // 如果例外刷新流水线
-          state <=  `OR1200_EXCEPTFSM_FLU1; // 状态1
-          extend_flush <= 1'b1;
+        if ( except_flushpipe ) begin // 如果例外刷新流水线
+        
+          state         <=  `OR1200_EXCEPTFSM_FLU1; // 状态1
+          extend_flush  <= 1'b1;
+          
           esr <=  sr_we ? to_sr : sr; // 拷贝SR寄存器到ESR寄存器
 
           // 根据不同的例外，设置例外类型、epcr和eear。
@@ -529,126 +567,156 @@ module or1200_except
 
 `ifdef OR1200_EXCEPT_ITLBMISS
           14'b1?_????_????_????: begin
+            // ITLB缺失
             except_type <=  `OR1200_EXCEPT_ITLBMISS;
-            eear <=  ex_dslot ?
-                      ex_pc : ex_pc;
-                        epcr <=  ex_dslot ?
-                          wb_pc : ex_pc;
+            // 看看这里的延时槽的处理方式：
+            // 因为异常信号是在EX段被处理的，这里就要被分为延时槽指令和非延时槽指令，两种方式：
+            // 1) add xx,xx,xx  <=  EX <== 发生异常的指令
+            //    这样的非延时槽的方式，那么发生异常的指令的PC值就是当前EX段的PC值；
+            // 2) J XXXX   <== WB : 感觉很怪异啊，MA段跑到那里去了？？？？
+            //    add xx,xx,xx  <=  EX <== 发生异常的指令
+            //    发送异常的指令为EX段的add xx,xx,xx；但是add指令为跳转指令后面的延时槽指令；
+            //    这个时候我们在恢复流水线的时候，就不能直接从add指令来恢复了，我们必须要从前一条的
+            //    跳转指令来恢复，就是要从J指令来恢复；根据怪异的OR1200的流水线，就是wb_pc了；
+            // 问： eear和epcr之间有什么区别？
+            eear        <=  ex_dslot ? ex_pc : ex_pc;
+            epcr        <=  ex_dslot ? wb_pc : ex_pc;
           end
 `endif
 
 `ifdef OR1200_EXCEPT_IPF
-        14'b01_????_????_????: begin
-        except_type <=  `OR1200_EXCEPT_IPF; // 例外类型
-        eear <=  ex_dslot ?
-                ex_pc : delayed1_ex_dslot ?
-                id_pc : delayed2_ex_dslot ?
-                id_pc : id_pc;
-        epcr <=  ex_dslot ?   // 将程序计数器地址存入EPCR寄存器
-                wb_pc : delayed1_ex_dslot ?
-                id_pc : delayed2_ex_dslot ?
-                id_pc : id_pc;
-        end
+          14'b01_????_????_????: begin 
+            // 指令MMU页缺失
+            except_type <=  `OR1200_EXCEPT_IPF; // 例外类型
+            eear <=  ex_dslot ?
+                     ex_pc : delayed1_ex_dslot ?
+                     id_pc : delayed2_ex_dslot ?
+                     id_pc : id_pc;
+            
+            epcr <=  ex_dslot ?   // 将程序计数器地址存入EPCR寄存器
+                     wb_pc : delayed1_ex_dslot ?
+                     id_pc : delayed2_ex_dslot ?
+                     id_pc : id_pc;
+          end
 `endif
 
 `ifdef OR1200_EXCEPT_BUSERR
-          14'b00_1???_????_????: begin  // Insn. Bus Error
-          except_type <=  `OR1200_EXCEPT_BUSERR;
-          eear <=  ex_dslot ? wb_pc : ex_pc;
-          epcr <=  ex_dslot ? wb_pc : ex_pc;
+          14'b00_1???_????_????: begin  
+            // Insn. Bus Error
+            // 在指令BUS出现错误的时候，发起了流水线的FLUSH操作后继续重新得到数据
+            // 但是怎样去解决BUS上的错误啊？？？这个是不是一个死循环了？
+            except_type <=  `OR1200_EXCEPT_BUSERR;
+            eear        <=  ex_dslot ? wb_pc : ex_pc;
+            epcr        <=  ex_dslot ? wb_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_ILLEGAL
           14'b00_01??_????_????: begin
+            // 无效指令
             except_type <=  `OR1200_EXCEPT_ILLEGAL;
-            eear <=  ex_pc;
-            epcr <=  ex_dslot ? wb_pc : ex_pc;
+            eear        <=  ex_pc;
+            epcr        <=  ex_dslot ? wb_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_ALIGN
           14'b00_001?_????_????: begin
+            // 没有对齐
             except_type <=  `OR1200_EXCEPT_ALIGN;
-            eear <=  lsu_addr;
-            epcr <=  ex_dslot ? wb_pc : ex_pc;
+            eear        <=  lsu_addr;
+            epcr        <=  ex_dslot ? wb_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_DTLBMISS
           14'b00_0001_????_????: begin
+            // DTLB缺失
             except_type <=  `OR1200_EXCEPT_DTLBMISS;
-            eear <=  lsu_addr;
-            epcr <=  ex_dslot ? wb_pc : delayed1_ex_dslot ? dl_pc : ex_pc;
+            eear        <=  lsu_addr;
+            epcr        <=  ex_dslot ? wb_pc : delayed1_ex_dslot ? dl_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_TRAP
           14'b00_0000_1???_????: begin
-             except_type <=  `OR1200_EXCEPT_TRAP;
-             epcr <=  ex_dslot ?
-               wb_pc : delayed1_ex_dslot ?
-               id_pc : ex_pc;
+            // TRAP调用
+            except_type <=  `OR1200_EXCEPT_TRAP;
+            epcr        <=  ex_dslot ?
+                            wb_pc : delayed1_ex_dslot ?
+                            id_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_SYSCALL
           14'b00_0000_01??_????: begin
-             except_type <=  `OR1200_EXCEPT_SYSCALL;
-             epcr <=  ex_dslot ?
-               wb_pc : delayed1_ex_dslot ?
-               id_pc : delayed2_ex_dslot ?
-               id_pc : id_pc;
+            // SYSCALL调用
+            except_type <=  `OR1200_EXCEPT_SYSCALL;
+            epcr        <=  ex_dslot ?
+                            wb_pc : delayed1_ex_dslot ?
+                            id_pc : delayed2_ex_dslot ?
+                            id_pc : id_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_DPF
           14'b00_0000_001?_????: begin
-             except_type <=  `OR1200_EXCEPT_DPF;
-             eear <=  lsu_addr;
-             epcr <=  ex_dslot ?
-               wb_pc : delayed1_ex_dslot ?
-               dl_pc : ex_pc;
+            // 数据MMU页缺失
+            except_type <=  `OR1200_EXCEPT_DPF;
+            eear        <=  lsu_addr;
+            epcr        <=  ex_dslot ?
+                            wb_pc : delayed1_ex_dslot ?
+                            dl_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_BUSERR
-          14'b00_0000_0001_????: begin  // Data Bus Error
-             except_type <=  `OR1200_EXCEPT_BUSERR;
-             eear <=  lsu_addr;
-             epcr <=  ex_dslot ?
-               wb_pc : delayed1_ex_dslot ?
-               dl_pc : ex_pc;
+          14'b00_0000_0001_????: begin  
+            // Data Bus Error
+            except_type <=  `OR1200_EXCEPT_BUSERR;
+            eear        <=  lsu_addr;
+            epcr        <=  ex_dslot ?
+                            wb_pc : delayed1_ex_dslot ?
+                            dl_pc : ex_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_RANGE
           14'b00_0000_0000_1???: begin
-             except_type <=  `OR1200_EXCEPT_RANGE;
-             epcr <=  ex_dslot ?
-               wb_pc : delayed1_ex_dslot ?
-               id_pc : delayed2_ex_dslot ?
-               id_pc : id_pc;
+            // 超出了范围
+            except_type <=  `OR1200_EXCEPT_RANGE;
+            epcr <=  ex_dslot ?
+                     wb_pc : delayed1_ex_dslot ?
+                     id_pc : delayed2_ex_dslot ?
+                     id_pc : id_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_FLOAT
           14'b00_0000_0000_01??: begin
-             except_type <=  `OR1200_EXCEPT_FLOAT;
-             epcr <=  id_pc;
+            // 超出浮点范围
+            except_type <=  `OR1200_EXCEPT_FLOAT;
+            epcr <=  id_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_INT  // 硬件中断
           14'b00_0000_0000_001?: begin
-             except_type <=  `OR1200_EXCEPT_INT;
-             epcr <=  id_pc;
+            // 超出整数的范围
+            except_type <=  `OR1200_EXCEPT_INT;
+            epcr <=  id_pc;
           end
 `endif
 `ifdef OR1200_EXCEPT_TICK
           14'b00_0000_0000_0001: begin
-             except_type <=  `OR1200_EXCEPT_TICK;
-             epcr <=  id_pc;
+            // TICK中断
+            except_type <=  `OR1200_EXCEPT_TICK;
+            epcr        <=  id_pc;
           end
 `endif
           default:
+            // 未知异常
             except_type <=  `OR1200_EXCEPT_NONE;
+
           endcase
+        
         end
 
-        else if (pc_we) begin // PC写使能
-          state <=  `OR1200_EXCEPTFSM_FLU1; // 进入状态1
-          extend_flush <=  1'b1;
+        else if (pc_we) begin 
+          // PC写使能，使用l.mtspr重写NPC指令
+          state         <=  `OR1200_EXCEPTFSM_FLU1; // 进入状态1
+          extend_flush  <=  1'b1;
+          
         end
 
         else begin
@@ -670,10 +738,10 @@ module or1200_except
       `OR1200_EXCEPTFSM_FLU2:  // 状态2
 `ifdef OR1200_EXCEPT_TRAP // 陷阱例外
         if (except_type == `OR1200_EXCEPT_TRAP) begin
-          state <=  `OR1200_EXCEPTFSM_IDLE; // 进入空闲状态
-          extend_flush <=  1'b0;
+          state             <=  `OR1200_EXCEPTFSM_IDLE; // 进入空闲状态
+          extend_flush      <=  1'b0;
           extend_flush_last <=  1'b0;
-          except_type <=  `OR1200_EXCEPT_NONE;
+          except_type       <=  `OR1200_EXCEPT_NONE;
         end
         else
 `endif
@@ -700,8 +768,9 @@ module or1200_except
           extend_flush_last <=  1'b0;
         end
       end
+      
       endcase
-
+      
     end
   end
 

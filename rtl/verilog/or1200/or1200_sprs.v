@@ -125,18 +125,25 @@ module or1200_sprs
   output                            sr_we;        // Write enable SR
   output [`OR1200_SR_WIDTH-1:0]     to_sr;        // Data to SR
   output [`OR1200_SR_WIDTH-1:0]     sr /* verilator public */;// SR
+  // 来自cfgr的spr_dat_cfgr信号线
   input [31:0]                      spr_dat_cfgr;  // Data from CFGR
+  // 来自通用寄存器堆（rf）的spr_dat_rf信号线
   input [31:0]                      spr_dat_rf;    // Data from RF
+  // 指示下一条指令的PC值的spr_dat_npc信号线（next PC）
   input [31:0]                      spr_dat_npc;  // Data from NPC
+  // 指示上一条指令的PC值的spr_dat_ppc信号线（previous PC）
   input [31:0]                      spr_dat_ppc;  // Data from PPC
+  // 来自MAC模块的spr_dat_mac信号线
   input [31:0]                      spr_dat_mac;  // Data from MAC
   input                             boot_adr_sel_i;
 
   input [`OR1200_FPCSR_WIDTH-1:0]   fpcsr;        // FPCSR
   output                            fpcsr_we;     // Write enable FPCSR
+  // 来自fpu模块的spr_data_fpu信号线
   input [31:0]                      spr_dat_fpu;  // Data from FPU
 
   // To/from other RISC units
+  // 来自PIC模块的spr_dat_pic信号线
   input [31:0]                      spr_dat_pic;  // Data from PIC
   input [31:0]                      spr_dat_tt;   // Data from TT
   input [31:0]                      spr_dat_pm;   // Data from PM

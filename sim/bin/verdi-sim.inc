@@ -94,7 +94,7 @@ verdi-debug:
 
 # start compile
 verdi-com: 
-	make vcs-com END_TIME=5000000 VCD=1 MGC_NO_VOPT=1 OR1200=1 OR1200_MONITOR_EXEC_STATE=1 TEST_NAME_STRING=orpsoc_testbench
+	make vcs-com VCD=1 MGC_NO_VOPT=1 OR1200=1 OR1200_MONITOR_EXEC_STATE=1 TEST_NAME_STRING=orpsoc_testbench
 	make vcs-sim
 
 # Start clean

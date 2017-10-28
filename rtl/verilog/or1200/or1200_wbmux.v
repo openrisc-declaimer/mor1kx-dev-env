@@ -129,12 +129,16 @@ module or1200_wbmux
   //
   // 4选1回写复用器，根据rfwb_op[3-1:0]从4路输入中选择1路到输出muxout
   always @(muxin_a or muxin_b or muxin_c or muxin_d or muxin_e or rfwb_op) begin
-`ifdef OR1200_ADDITIONAL_SYNOPSYS_DIRECTIVES
+
+ `ifdef OR1200_ADDITIONAL_SYNOPSYS_DIRECTIVES
     casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case infer_mux
 `else
     casez(rfwb_op[`OR1200_RFWBOP_WIDTH-1:1]) // synopsys parallel_case
 `endif
-    `OR1200_RFWBOP_ALU: muxout = muxin_a;
+
+    `OR1200_RFWBOP_ALU: 
+      muxout = muxin_a;
+    
     `OR1200_RFWBOP_LSU: begin
       muxout = muxin_b;
 `ifdef OR1200_VERBOSE
@@ -143,6 +147,7 @@ module or1200_wbmux
       // synopsys translate_on
 `endif
     end
+    
     `OR1200_RFWBOP_SPRS: begin
       muxout = muxin_c;
 `ifdef OR1200_VERBOSE
@@ -171,6 +176,7 @@ module or1200_wbmux
 `endif
     end
 `endif
+    
     default : begin
       muxout = 0;
     end

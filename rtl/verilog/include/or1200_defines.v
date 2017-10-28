@@ -757,7 +757,7 @@
 //
 `define OR1200_EXCEPT_EPH0_P      20'h00000
 `define OR1200_EXCEPT_EPH1_P      20'hF0000
-`define OR1200_EXCEPT_V           8'h00
+`define OR1200_EXCEPT_V            8'h00
 
 //
 // N part width
@@ -771,19 +771,19 @@
 // simply comment out corresponding line
 //
 // 异常的类型
-`define OR1200_EXCEPT_UNUSED      `OR1200_EXCEPT_WIDTH'hf
+`define OR1200_EXCEPT_UNUSED      `OR1200_EXCEPT_WIDTH'hf   // 未知异常
 `define OR1200_EXCEPT_TRAP        `OR1200_EXCEPT_WIDTH'he   // TRAP调用
-`define OR1200_EXCEPT_FLOAT       `OR1200_EXCEPT_WIDTH'hd
+`define OR1200_EXCEPT_FLOAT       `OR1200_EXCEPT_WIDTH'hd   // 超出浮点数的范围
 `define OR1200_EXCEPT_SYSCALL     `OR1200_EXCEPT_WIDTH'hc   // SYSCALL调用
-`define OR1200_EXCEPT_RANGE       `OR1200_EXCEPT_WIDTH'hb
+`define OR1200_EXCEPT_RANGE       `OR1200_EXCEPT_WIDTH'hb   // 超出了范围
 `define OR1200_EXCEPT_ITLBMISS    `OR1200_EXCEPT_WIDTH'ha   // ITLB缺失
 `define OR1200_EXCEPT_DTLBMISS    `OR1200_EXCEPT_WIDTH'h9   // DTLB缺失
-`define OR1200_EXCEPT_INT         `OR1200_EXCEPT_WIDTH'h8
+`define OR1200_EXCEPT_INT         `OR1200_EXCEPT_WIDTH'h8   // 超出整数的范围
 `define OR1200_EXCEPT_ILLEGAL     `OR1200_EXCEPT_WIDTH'h7   // 无效指令
-`define OR1200_EXCEPT_ALIGN       `OR1200_EXCEPT_WIDTH'h6   // 没有对其
-`define OR1200_EXCEPT_TICK        `OR1200_EXCEPT_WIDTH'h5
-`define OR1200_EXCEPT_IPF         `OR1200_EXCEPT_WIDTH'h4
-`define OR1200_EXCEPT_DPF         `OR1200_EXCEPT_WIDTH'h3
+`define OR1200_EXCEPT_ALIGN       `OR1200_EXCEPT_WIDTH'h6   // 没有对齐
+`define OR1200_EXCEPT_TICK        `OR1200_EXCEPT_WIDTH'h5   // TICK中断
+`define OR1200_EXCEPT_IPF         `OR1200_EXCEPT_WIDTH'h4   // 指令MMU页缺失
+`define OR1200_EXCEPT_DPF         `OR1200_EXCEPT_WIDTH'h3   // 数据MMU页缺失
 `define OR1200_EXCEPT_BUSERR      `OR1200_EXCEPT_WIDTH'h2   // 总线错误
 `define OR1200_EXCEPT_RESET       `OR1200_EXCEPT_WIDTH'h1   // 复位异常
 `define OR1200_EXCEPT_NONE        `OR1200_EXCEPT_WIDTH'h0
@@ -1272,45 +1272,45 @@
 //
 // IC configurations
 //
-`ifdef OR1200_IC_1W_512B
-`define OR1200_ICSIZE       9                       // 512
-`define OR1200_ICINDX       `OR1200_ICSIZE-2        // 7
-`define OR1200_ICINDXH      `OR1200_ICSIZE-1        // 8
-`define OR1200_ICTAGL       `OR1200_ICINDXH+1       // 9
-`define OR1200_ICTAG        `OR1200_ICSIZE-`OR1200_ICLS // 5
-`define OR1200_ICTAG_W      24
+`ifdef OR1200_IC_1W_512B  
+`define OR1200_ICSIZE         9                       // 512
+`define OR1200_ICINDX         `OR1200_ICSIZE-2        // 7
+`define OR1200_ICINDXH        `OR1200_ICSIZE-1        // 8
+`define OR1200_ICTAGL         `OR1200_ICINDXH+1       // 9
+`define OR1200_ICTAG          `OR1200_ICSIZE-`OR1200_ICLS // 5
+`define OR1200_ICTAG_W        24
 `endif
 `ifdef OR1200_IC_1W_4KB
 `define  OR1200_ICSIZE        12      // 4096
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 10
-`define  OR1200_ICINDXH      `OR1200_ICSIZE-1  // 11
+`define  OR1200_ICINDXH       `OR1200_ICSIZE-1  // 11
 `define  OR1200_ICTAGL        `OR1200_ICINDXH+1  // 12
-`define  OR1200_ICTAG        `OR1200_ICSIZE-`OR1200_ICLS  // 8
-`define  OR1200_ICTAG_W      21
+`define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 8
+`define  OR1200_ICTAG_W       21
 `endif
 `ifdef OR1200_IC_1W_8KB
 `define  OR1200_ICSIZE        13      // 8192
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 11
-`define  OR1200_ICINDXH      `OR1200_ICSIZE-1  // 12
+`define  OR1200_ICINDXH       `OR1200_ICSIZE-1  // 12
 `define  OR1200_ICTAGL        `OR1200_ICINDXH+1  // 13
-`define  OR1200_ICTAG        `OR1200_ICSIZE-`OR1200_ICLS  // 9
-`define  OR1200_ICTAG_W      20
+`define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 9
+`define  OR1200_ICTAG_W       20
 `endif
 `ifdef OR1200_IC_1W_16KB
 `define  OR1200_ICSIZE        14      // 16384
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 12
-`define  OR1200_ICINDXH      `OR1200_ICSIZE-1  // 13
+`define  OR1200_ICINDXH       `OR1200_ICSIZE-1  // 13
 `define  OR1200_ICTAGL        `OR1200_ICINDXH+1  // 14
-`define  OR1200_ICTAG        `OR1200_ICSIZE-`OR1200_ICLS  // 10
-`define  OR1200_ICTAG_W      19
+`define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 10
+`define  OR1200_ICTAG_W       19
 `endif
 `ifdef OR1200_IC_1W_32KB
-`define OR1200_ICSIZE        15      // 32768
-`define OR1200_ICINDX        `OR1200_ICSIZE-2  // 13
-`define OR1200_ICINDXH      `OR1200_ICSIZE-1  // 14
-`define OR1200_ICTAGL        `OR1200_ICINDXH+1  // 14
-`define  OR1200_ICTAG        `OR1200_ICSIZE-`OR1200_ICLS  // 10
-`define  OR1200_ICTAG_W      18
+`define OR1200_ICSIZE         15      // 32768
+`define OR1200_ICINDX         `OR1200_ICSIZE-2  // 13
+`define OR1200_ICINDXH        `OR1200_ICSIZE-1  // 14
+`define OR1200_ICTAGL         `OR1200_ICINDXH+1  // 14
+`define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 10
+`define  OR1200_ICTAG_W       18
 `endif
 
 /////////////////////////////////////////////////

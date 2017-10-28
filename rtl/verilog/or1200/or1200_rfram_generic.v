@@ -201,9 +201,9 @@ reg	[dw-1:0]		do_b;
 // Write port
 //
 always @(posedge clk or `OR1200_RST_EVENT rst)
-	if (rst == `OR1200_RST_VALUE) begin
+	if (rst == `OR1200_RST_VALUE)
 		mem <=  {512'h0, 512'h0};
-	end
+
 	else if (ce_w & we_w)
 		case (addr_w)	// synopsys parallel_case
 			5'd01: mem[32*1+31:32*1] <=  di_w;
@@ -247,9 +247,9 @@ always @(posedge clk or `OR1200_RST_EVENT rst)
 // Read port A
 //
 always @(posedge clk or `OR1200_RST_EVENT rst)
-	if (rst == `OR1200_RST_VALUE) begin
+	if (rst == `OR1200_RST_VALUE)
 		intaddr_a <=  5'h00;
-	end
+
 	else if (ce_a)
 		intaddr_a <=  addr_a;
 
@@ -296,9 +296,9 @@ always @(mem or intaddr_a)
 // Read port B
 //
 always @(posedge clk or `OR1200_RST_EVENT rst)
-	if (rst == `OR1200_RST_VALUE) begin
+	if (rst == `OR1200_RST_VALUE)
 		intaddr_b <=  5'h00;
-	end
+    
 	else if (ce_b)
 		intaddr_b <=  addr_b;
 

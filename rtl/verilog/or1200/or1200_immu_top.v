@@ -218,6 +218,8 @@ module or1200_immu_top
       icpu_adr_o = icpu_adr_boot;
     else
       // FF value is selected 2nd clock after reset state
+      //此时icpu_adr_default中存放的是  
+      //if_insn下一条指令的地址 
       icpu_adr_o = icpu_adr_default ;
 
 `else // ! OR1200_REGISTERED_OUTPUTS: must be defined/enabled

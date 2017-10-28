@@ -80,12 +80,17 @@ module or1200_ctrl
 
    // Internal i/f
    // 内部接口
-   except_flushpipe, extend_flush, if_flushpipe, id_flushpipe, ex_flushpipe, wb_flushpipe,
+   except_flushpipe, extend_flush, if_flushpipe, id_flushpipe, ex_flushpipe, ma_flushpipe, wb_flushpipe,
    
    id_freeze, ex_freeze, ma_freeze, wb_freeze, if_insn, id_insn, ex_insn, abort_mvspr,
    id_branch_op, ex_branch_op, ex_branch_taken, pc_we,
    rf_addra, rf_addrb, rf_rda, rf_rdb, alu_op, alu_op2, mac_op,
-   comp_op, rf_addrw, rfwb_op, fpu_op,
+   comp_op, 
+   
+   // Register read and write signal
+   rf_addrw, rfwb_op, 
+   
+   fpu_op,
    wb_insn, id_simm, ex_simm, id_branch_addrtarget, ex_branch_addrtarget, sel_a,
    sel_b, id_lsu_op,
    cust5_op, cust5_limm, id_pc, ex_pc, du_hwbkpt,
@@ -109,6 +114,7 @@ module or1200_ctrl
   output              if_flushpipe; // IF段的刷新命令
   output              id_flushpipe; // ID段的刷新命令
   output              ex_flushpipe; // EX段的刷新命令
+  output              ma_flushpipe; // MA段的刷新命令
   output              wb_flushpipe; // WB段的刷新命令
   input               extend_flush;
   input               except_flushpipe;
@@ -120,16 +126,16 @@ module or1200_ctrl
   
   output  [`OR1200_BRANCHOP_WIDTH-1:0]      ex_branch_op;
   output  [`OR1200_BRANCHOP_WIDTH-1:0]      id_branch_op;
-  input               ex_branch_taken;
+  input                                     ex_branch_taken;
   output  [`OR1200_REGFILE_ADDR_WIDTH-1:0]  rf_addrw;
   output  [`OR1200_REGFILE_ADDR_WIDTH-1:0]  rf_addra;
   output  [`OR1200_REGFILE_ADDR_WIDTH-1:0]  rf_addrb;
-  output              rf_rda;
-  output              rf_rdb;
+  output                                    rf_rda;
+  output                                    rf_rdb;
   output  [`OR1200_ALUOP_WIDTH-1:0]         alu_op;
-  output [`OR1200_ALUOP2_WIDTH-1:0]         alu_op2;
+  output  [`OR1200_ALUOP2_WIDTH-1:0]        alu_op2;
   output  [`OR1200_MACOP_WIDTH-1:0]         mac_op;
-  output [`OR1200_RFWBOP_WIDTH-1:0]         rfwb_op;
+  output  [`OR1200_RFWBOP_WIDTH-1:0]        rfwb_op;
   output  [`OR1200_FPUOP_WIDTH-1:0]         fpu_op;
   input                                     pc_we;
   output  [31:0]                            wb_insn;
@@ -206,6 +212,7 @@ module or1200_ctrl
   wire                id_void;
   wire                ex_void;
   wire                wb_void;
+  // 感觉这两个信号没有什么用啊？？？
   reg                 ex_delayslot_dsi;
   reg                 ex_delayslot_nop;
   reg                 spr_read;
@@ -229,10 +236,12 @@ module or1200_ctrl
   // load/store instructions
   // 延迟槽控制信号
   // 当跳转/分支被load/store指令处理时，强迫延迟槽指令的支取。
+  // NOTE : dslot = delay slot, 就是延时槽的意思
   assign force_dslot_fetch = 1'b0;
   // RFE表示从例外返回指令，ex_branch_taken表示if已取走分支指令信号，得到没有更多的延迟槽信号
   assign no_more_dslot = (|ex_branch_op & !id_void & ex_branch_taken) |
-                         (ex_branch_op == `OR1200_BRANCHOP_RFE); // 注意： RFE指令没有延迟槽
+                         // 在EX段是一个RFE的指令，RFE指令是没有延迟槽
+                         (ex_branch_op == `OR1200_BRANCHOP_RFE); 
 
   // 对NOP指令的解析
   // id空指令，id_insn[31:26]为指令编码，id_insn[20:16]为源寄存器编号，id_insn[16]表示非r0寄存器
@@ -275,9 +284,17 @@ module or1200_ctrl
     end
 
     else if (!ex_freeze) begin
+      // 当前的EX级是一个跳转指令，ID段是一个VIOD指令；
+      // 则就是一个典型的指令序列：
+      //    J xxxxxx;
+      //    l.nop;
       ex_delayslot_nop <=  id_void && ex_branch_taken &&
                                      (ex_branch_op != `OR1200_BRANCHOP_NOP) &&
                                      (ex_branch_op != `OR1200_BRANCHOP_RFE);
+      // 当前的EX级是一个跳转指令，ID段是不是一个VIOD指令；
+      // 则就是一个典型的指令序列：
+      //    J xxxxxx;
+      //    l.add xxx;
       ex_delayslot_dsi <=  !id_void && ex_branch_taken &&
                                       (ex_branch_op != `OR1200_BRANCHOP_NOP) &&
                                       (ex_branch_op != `OR1200_BRANCHOP_RFE);
@@ -287,9 +304,18 @@ module or1200_ctrl
   //
   // Flush pipeline
   //
+  //////////////////////////////////////////////////////////////////////// 
+  //
+  // except_flushpipe : 异常flush流水线操作
+  // pc_we : 使用l.mtspr指令来重写NPC的时候也将重新刷新流水线
+  // extend_flush : 当前的FLUSH操作，要经过4个状态才会被恢复；
+  //                感觉extend_flush就是要将流水线清空的信号，在经过了
+  //                4个周期的延时后，流水线将被完全的清空，从而可以继续下面指令的操作。
+  //
   assign if_flushpipe = except_flushpipe | pc_we | extend_flush;
   assign id_flushpipe = except_flushpipe | pc_we | extend_flush;
   assign ex_flushpipe = except_flushpipe | pc_we | extend_flush;
+  assign ma_flushpipe = except_flushpipe | pc_we | extend_flush;
   assign wb_flushpipe = except_flushpipe | pc_we | extend_flush;
 
   //
@@ -515,10 +541,11 @@ module or1200_ctrl
   //
   // Encode wait_on signal
   // 流水线等待的周期数
-  always @(id_insn)
-  begin
+  always @(id_insn) begin
+  
     // 指令中[31:26]位是指令编码
     case (id_insn[31:26])    // synopsys parallel_case
+    
     `OR1200_OR32_ALU:
       wait_on =  ( 1'b0
 `ifdef OR1200_DIV_IMPLEMENTED
@@ -545,16 +572,16 @@ module or1200_ctrl
     `OR1200_OR32_MACRC:
       wait_on = id_insn[16] ? `OR1200_WAIT_ON_MULTMAC : `OR1200_WAIT_ON_NOTHING;
 `endif
+
 `ifdef OR1200_FPU_IMPLEMENTED
-    `OR1200_OR32_FLOAT:
-    begin
+    `OR1200_OR32_FLOAT: begin
       wait_on = id_insn[`OR1200_FPUOP_DOUBLE_BIT] ? 0 : `OR1200_WAIT_ON_FPU;
     end
 `endif
+
 `ifndef OR1200_DC_WRITEHROUGH
     // l.mtspr
-    `OR1200_OR32_MTSPR:
-    begin
+    `OR1200_OR32_MTSPR: begin
         wait_on = `OR1200_WAIT_ON_MTSPR;
     end
 `endif
@@ -562,6 +589,7 @@ module or1200_ctrl
     default: begin
       wait_on = `OR1200_WAIT_ON_NOTHING;
     end
+
     endcase // case (id_insn[31:26])
   end // always @ (id_insn)
 
@@ -664,9 +692,8 @@ module or1200_ctrl
     if (rst == `OR1200_RST_VALUE)
       ma_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
       
-    else if (!ma_freeze) begin
+    else if (!ma_freeze)
       ma_insn <=  ex_insn;
-    end
 
   end
   
@@ -682,9 +709,8 @@ module or1200_ctrl
     // wb_insn should not be changed by exceptions due to correct
     // recording of display_arch_state in the or1200_monitor!
     // wb_insn changed by exception is not used elsewhere!
-    else if (!wb_freeze) begin
+    else if (!wb_freeze)
       wb_insn <=  ma_insn;
-    end
 
   end
 
@@ -1047,10 +1073,23 @@ module or1200_ctrl
       rfwb_op <=  `OR1200_RFWBOP_NOP;
 
     else  if (!ex_freeze & id_freeze | ex_flushpipe)
+      // 典型的流水线的操作方式：
+      //    a) ID段的流水线被冻结，将不会向EX段传递任何的信号
+      //    b) 但是EX段没有被冻结。这个时候，我们将在EX段插入气泡来填充流水线；
+      //       这种情况就是典型的滑行操作
+      //    c) 或者控制器发起了FLUSH流水线的操作，这个时候所有的段都是气泡；
       rfwb_op <=  `OR1200_RFWBOP_NOP;
 
     else  if (!ex_freeze) begin
-
+      // 排除了ID段被冻结的操作，这个时候，ID段将向EX段自动的传递信号。
+      //////////////////////////////////////////////////////////////////////////////
+      // 但是：
+      //                  |       |
+      //      id_insn --> | ID/EX | --> rfwb_op -->| Reg Files |
+      //                  |       |
+      //
+      //
+      //////////////////////////////////////////////////////////////////////////////
       // 指令[31:26]位为操作码
       case (id_insn[31:26])    // synopsys parallel_case
 
