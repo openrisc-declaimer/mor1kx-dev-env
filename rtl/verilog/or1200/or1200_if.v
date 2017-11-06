@@ -117,13 +117,21 @@ module or1200_if
   reg  [2:0]              err_saved;
   reg                     saved;
 
-  // 保存当前指令的条件
-  // 1: 从外面读入数据了，ACK应答
-  // 2: if_freeze被冻结中
-  // 3：先前没有被保存过
-  assign save_insn = (icpu_ack_i | icpu_err_i) & 
-                      if_freeze & 
+  // save_insn保存当前指令
+  //
+  // 1: 发起了读数据的操作，然后IF等待数据的到来，终于经过千辛万苦的运作
+  //    数据从外部MEM中被读出，这时外部MEM拉高了ACK信号
+  // 2: 但是不幸的是，因为某些原因，我们需要将IF段给冻结住，有效if_freeze信号；
+  //    这时，如果因为WB总线的操作，如果数据不被及时的保存，就将丢失数据；
+  // 3: 而且我们判断当前的这个数据没有被保存过。
+  //
+  // 故在这种情况下，当前的数据我们进行保存处理；
+  //
+  // !!!!!!!!!!!!!!!
+  assign save_insn = (icpu_ack_i | icpu_err_i) &
+                      if_freeze &
                      !saved;
+
   assign saving_if_insn = !if_flushpipe & save_insn;
 
   //
@@ -148,10 +156,10 @@ module or1200_if
   // 当icache出错或没有延迟槽或从例外返回时，输出空操作指令。
   // icpu_ack_i表示icache应答已送回指令，icpu_dat_i是icache送回的指令数据
   assign if_insn = no_more_dslot | rfe | if_bypass ? {`OR1200_OR32_NOP, 26'h041_0000} :
-                        saved ? insn_saved :
-                            icpu_ack_i ?
-                              icpu_dat_i : // 当icpu_ack_i有效的时候，从icache返回Instruct code.
-                              {`OR1200_OR32_NOP, 26'h061_0000};
+                                   saved ? insn_saved :
+                              icpu_ack_i ? icpu_dat_i : // 当icpu_ack_i有效的时候，从icache返回Instruct code.
+                                            // 1461_0000
+                                           {`OR1200_OR32_NOP, 26'h061_0000};
 
   // 输出程序计数器地址PC到except模块，指令地址来自暂时存储的地址或icache地址。
   assign if_pc = saved ? addr_saved : {icpu_adr_i[31:2], 2'h0};
@@ -160,6 +168,7 @@ module or1200_if
   assign if_stall = !icpu_err_i & !icpu_ack_i & !saved;
 
   // 输出重支取信号到genpc模块
+  // genpc_refetch指令为
   assign genpc_refetch = saved & icpu_ack_i;
 
   // OR1200_ITAG_TE表示TLB失靶例外，输出TLB失靶例外信号
@@ -202,13 +211,17 @@ module or1200_if
     if (rst == `OR1200_RST_VALUE)
       // 空操作指令
       insn_saved <=  {`OR1200_OR32_NOP, 26'h041_0000};
+    
     else if (if_flushpipe)
       // 刷新流水线
       insn_saved <=  {`OR1200_OR32_NOP, 26'h041_0000};
+    
     else if (save_insn)
       insn_saved <=  icpu_err_i ? {`OR1200_OR32_NOP, 26'h041_0000} : icpu_dat_i;
+    
     else if (!if_freeze)
       // 指令支取没有暂停
+      // 1461_0000
       insn_saved <=  {`OR1200_OR32_NOP, 26'h041_0000};
 
   //
@@ -218,10 +231,13 @@ module or1200_if
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       addr_saved <=  32'h00000000;
+    
     else if (if_flushpipe)
       addr_saved <=  32'h00000000;
+    
     else if (save_insn)
       addr_saved <=  {icpu_adr_i[31:2], 2'b00};
+    
     else if (!if_freeze)
       addr_saved <=  {icpu_adr_i[31:2], 2'b00};
 

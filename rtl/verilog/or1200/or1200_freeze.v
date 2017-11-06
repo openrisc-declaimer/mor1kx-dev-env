@@ -98,7 +98,7 @@ module or1200_freeze
   input                   rst;
   input  [`OR1200_MULTICYCLE_WIDTH-1:0] multicycle;
   input  [`OR1200_WAIT_ON_WIDTH-1:0]    wait_on;
-  input                   flushpipe;
+  input                   flushpipe; // <== wb_flushpipe
   input                   extend_flush;
   input                   lsu_stall;
   input                   if_stall;
@@ -152,7 +152,9 @@ module or1200_freeze
   // 这时，当id_freeze (和if_freeze)声明时，仅ex_freeze（和wb_freeze)能被取消声明。
   // 这样，NOP能从ID级声明到EX级。 
 
-  // 流水线暂停
+  // 流水线暂停:
+  // 因为我们可以使用暂存IF段的指令操作（saving_if_insn），所以我可以延迟FREEZE信号；
+  // 奇葩，du被暂停了，不去得到PC？？？ 什么玩意啊？？？
   assign genpc_freeze = (du_stall & !saving_if_insn) | flushpipe_r; // 在du停止或刷新流水线时发出暂停genpc信号。
   
   // WB暂停了 => MA 必须暂停
@@ -172,10 +174,11 @@ module or1200_freeze
   assign id_freeze = (lsu_stall | (~lsu_unstall & if_stall) | multicycle_freeze
                    | (|waiting_on) | force_dslot_fetch) | du_stall;
   
-  assign ex_freeze = ma_freeze;
+  assign ex_freeze = wb_freeze;
   assign ma_freeze = wb_freeze;
   // 在EX阶段发现一个异常abort_ex
   // 问： 那MA和WB的指令是否要写完啊？
+  // x) 若在EX段有多周期指令，则当waiting_on有效时就需要冻结整个流水线的；
   assign wb_freeze = (lsu_stall | (~lsu_unstall & if_stall) | multicycle_freeze
                    | (|waiting_on)) | du_stall | abort_ex;
 

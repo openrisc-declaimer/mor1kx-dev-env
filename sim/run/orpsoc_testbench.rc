@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi3_L-2016.06-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 28 1567 552 187 119
+viewPort 0 28 1604 414 187 233
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 1533.407849 2064.218661
-cursor 1710.000000
+zoom 2593.054173 2729.544866
+cursor 2670.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 23
+top 21
 ; marker line index
-markerPos 243
+markerPos 322
 
 ; event list
 ; addEvent event_name event_expression
@@ -65,28 +65,30 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_i[3:0]
 addSignal -h 15 -holdScope immu_en
 addGroup "or1200_genpc"
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/icpu_adr_i[31:0]
+addSignal -h 15 /BLANK
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/clk
 addSignal -h 15 -holdScope rst
-addSignal -h 15 -holdScope no_more_dslot
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/icpu_cycstb_o
+addSignal -c ID_YELLOW5 -ls solid -lw 2 -h 15 -UNSIGNED -HEX -holdScope icpu_adr_o[31:0]
+addSignal -h 15 -holdScope icpu_rty_i
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/no_more_dslot
 addSignal -h 15 -holdScope except_start
 addSignal -h 15 -holdScope spr_pc_we
 addSignal -h 15 -holdScope genpc_refetch
-addSignal -h 15 -holdScope icpu_rty_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope pc[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg[31:2]
-addSignal -h 15 -holdScope pcreg_select
-addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg_boot[31:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg_default[31:2]
-addSignal -h 15 -holdScope icpu_rty_i
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_adr_i[31:0]
-addSignal -h 15 /BLANK
-addSignal -c ID_YELLOW5 -ls solid -lw 2 -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/icpu_adr_o[31:0]
-addSignal -h 15 -holdScope icpu_cycstb_o
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_sel_o[3:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope icpu_tag_o[3:0]
 addSignal -h 15 -holdScope ex_branch_taken
+addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg_default[31:2]
+addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg_boot[31:0]
+addSignal -h 15 -holdScope pcreg_select
+addSignal -h 15 -UNSIGNED -HEX -holdScope pcreg[31:2]
+addSignal -h 15 -UNSIGNED -HEX -holdScope pc[31:0]
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_ic_top/icqmem_ack_o
+addSignal -h 15 -holdScope icbiu_ack_i
 addGroup "or1200_if" -e FALSE
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_genpc/icpu_adr_o[31:0]
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_if/clk
 addSignal -h 15 -holdScope rst
 addSignal -h 15 -holdScope if_freeze
@@ -107,6 +109,13 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope if_pc[31:0]
 addSignal -h 15 -holdScope except_itlbmiss
 addSignal -h 15 -holdScope except_immufault
 addSignal -h 15 -holdScope except_ibuserr
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_if/saved
+addSignal -h 15 -holdScope save_insn
+addSignal -h 15 -holdScope if_freeze
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/rom0/wb_clk
+addSignal -h 15 -holdScope wb_rst
 addGroup "or1200_ctrl" -e FALSE
 addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_ctrl/clk
 addSignal -h 15 -holdScope rst
@@ -325,10 +334,41 @@ addSignal -h 15 -UNSIGNED -HEX -holdScope wb_bte_o[1:0]
 addSignal -h 15 -holdScope wb_ack_i
 addSignal -h 15 -holdScope wb_err_i
 addSignal -h 15 -holdScope wb_rty_i
+addGroup "or1200_lsu"
+addSignal -h 15 -UNSIGNED -HEX /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_lsu/id_addrbase[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ex_addrbase[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope id_addrofs[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ex_addrofs[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope id_lsu_op[3:0]
+addSignal -h 15 -holdScope lsu_unstall
+addSignal -h 15 -holdScope lsu_stall
+addSignal -h 15 -UNSIGNED -HEX -holdScope lsu_dataout[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope lsu_datain[31:0]
+addSignal -h 15 -holdScope du_stall
+addSignal -h 15 -holdScope except_align
+addSignal -h 15 -holdScope except_dtlbmiss
+addSignal -h 15 -holdScope except_dmmufault
+addSignal -h 15 -holdScope except_dbuserr
+addSignal -h 15 -holdScope ma_flushpipe
+addSignal -h 15 -holdScope flushpipe
+addSignal -h 15 -holdScope ex_freeze
+addSignal -h 15 -holdScope id_freeze
+addSignal -h 15 /BLANK
+addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/or1200_cpu/or1200_lsu/clk
+addSignal -h 15 -holdScope rst
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_adr_o[31:0]
+addSignal -h 15 -holdScope dcpu_cycstb_o
+addSignal -h 15 -holdScope dcpu_we_o
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_sel_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_tag_o[3:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_dat_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_tag_i[3:0]
+addSignal -h 15 -holdScope dcpu_err_i
+addSignal -h 15 -holdScope dcpu_rty_i
+addSignal -h 15 -holdScope dcpu_ack_i
+addSignal -h 15 -UNSIGNED -HEX -holdScope dcpu_dat_i[31:0]
+addGroup "G13"
 addGroup "G14"
-addSignal -h 15 /orpsoc_testbench/dut/or1200_top0/iwb_biu/wb_ack_cnt
-addSignal -h 15 -holdScope biu_ack_cnt
-addGroup "G12"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

@@ -54,10 +54,10 @@
 `include "or1200_defines.v"
 
 //
-// lsu模块提供了CPU核心到dcache的接口，它将来自dcache的数据装载到通用寄存器中或
-// 将通用寄存器的数据存储到dcache中，同时，还根据装载/存储过程中出现的错误产生例外信号，
+// LSU模块提供了CPU核心到dcache的接口，它将来自dcache的数据装载到通用寄存器中或
+// 将通用寄存器的数据存储到dcache中。同时，还根据【装载/存储】过程中出现的错误产生例外信号，
 // 如：产生对齐例外信号except_dtlbmiss、数据MMU错误例外信号except_dmmufault、
-// 数据总线错误例外信号except_dbuserr、dcache周期稳定信号dcpu_cycstb_o。
+// 数据总线错误例外信号except_dbuserr和dcache周期稳定信号dcpu_cycstb_o。
 // 它还产生dcache标签输出信号dcpu_tag_o，表示dcache是否正常运行。
 //
 // lsu模块还计算dcache地址得到地址输出信号dcpu_adr_o，区分装载与存储指令，在Store指令时，
@@ -143,7 +143,6 @@ module or1200_lsu
   // Internal wires/regs
   //
   reg    [3:0]                        dcpu_sel_o;
-
   reg    [`OR1200_LSUOP_WIDTH-1:0]    ex_lsu_op;
   wire   [`OR1200_LSUEA_PRECALC:0]    id_precalc_sum;
   reg    [`OR1200_LSUEA_PRECALC:0]    dcpu_adr_r;
@@ -167,12 +166,15 @@ module or1200_lsu
   //
   // Precalculate part of load/store EA in ID stage
   //
+  // 这个设计也是没有谁了，在ID段就加入了加法器；
+  // 这样就必然会影响流水线的频率；
   assign id_precalc_sum = id_addrbase[`OR1200_LSUEA_PRECALC-1:0] +
                           id_addrofs[`OR1200_LSUEA_PRECALC-1:0];
 
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       dcpu_adr_r <=  {`OR1200_LSUEA_PRECALC+1{1'b0}};
+    
     else if (!ex_freeze)
       dcpu_adr_r <=  id_precalc_sum;
   end
@@ -184,8 +186,10 @@ module or1200_lsu
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       except_align <=  1'b0;
+    
     else if (!ex_freeze & id_freeze | flushpipe)
       except_align <=  1'b0;
+    
     else if (!ex_freeze)
       except_align <=  ((id_lsu_op == `OR1200_LSUOP_SH)  |
                         (id_lsu_op == `OR1200_LSUOP_LHZ) |
@@ -200,7 +204,12 @@ module or1200_lsu
   //
   // 内部接口指定
   // lsu_stall表示lsu停止下来接收数据的信号，输出给freeze模块
-  assign lsu_stall = dcpu_rty_i & dcpu_cycstb_o; // dcache数据准备好 & 总线周期开始
+  // 这里又用到了dcpu_rty_i信号了，这个总线也是绝了，不用想到时在DC里面使用：
+  //      dcpu_rty_o = !dcpu_ack_o & !dcpu_err_o;
+  // 实际的是：
+  //      dcpu_rty_o = ~dcpu_ack_o;
+  //
+  assign lsu_stall   = dcpu_rty_i & dcpu_cycstb_o; // dcache数据准备好 & 总线周期开始
   assign lsu_unstall = dcpu_ack_i; // dcache应答信号
 
   // 数据TLB失靶例信号=dcache错误 & dcache标签为TLB失靶。
@@ -217,14 +226,15 @@ module or1200_lsu
   //
   // 计算dcache地址
   assign dcpu_adr_o[31:`OR1200_LSUEA_PRECALC] =
-                                       ex_addrbase[31:`OR1200_LSUEA_PRECALC] +
-                                       (ex_addrofs[31:`OR1200_LSUEA_PRECALC] +
-                                        // carry from precalc, pad to 30-bits
-                                       {{(32-`OR1200_LSUEA_PRECALC)-1{1'b0}},
-                                        dcpu_adr_r[`OR1200_LSUEA_PRECALC]});
+                        ex_addrbase[31:`OR1200_LSUEA_PRECALC] +
+                        (ex_addrofs[31:`OR1200_LSUEA_PRECALC] +
+                        // carry from precalc, pad to 30-bits
+                        {{(32-`OR1200_LSUEA_PRECALC)-1{1'b0}}, dcpu_adr_r[`OR1200_LSUEA_PRECALC]});
+
   assign dcpu_adr_o[`OR1200_LSUEA_PRECALC-1:0] = dcpu_adr_r[`OR1200_LSUEA_PRECALC-1:0];
 
   // 如果du停止或从停止中恢复或对齐例外，则dcache周期稳定信号为0(即不稳定)。否则，在lsu有操作指令时，dcache周期稳定信号为1(即为稳定)。
+  // 当LSU的指令一进入到EX段，自动的将整个的流水线锁定，等待LSU指令的完成；
   assign dcpu_cycstb_o = du_stall | lsu_unstall | except_align ? 1'b0 : |ex_lsu_op;
 
   // 在ctrl中解码Load/Store指令再重编码后，lsu_op[3]为1的指令是Store指令。

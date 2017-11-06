@@ -193,11 +193,11 @@ assign icbiu_dat_o = 32'h00000000;
 //
 // Bypases of the IC when IC is disabled
 //
-assign icbiu_cyc_o = (ic_en) ? icfsm_biu_read : icqmem_cycstb_i;
-assign icbiu_stb_o = (ic_en) ? icfsm_biu_read : icqmem_cycstb_i;
-assign icbiu_we_o = 1'b0;
-assign icbiu_sel_o = (ic_en & icfsm_biu_read) ? 4'b1111 : icqmem_sel_i;
-assign icbiu_cab_o = (ic_en) ? icfsm_burst : 1'b0;
+assign icbiu_cyc_o  = (ic_en) ? icfsm_biu_read : icqmem_cycstb_i;
+assign icbiu_stb_o  = (ic_en) ? icfsm_biu_read : icqmem_cycstb_i;
+assign icbiu_we_o   = 1'b0;
+assign icbiu_sel_o  = (ic_en & icfsm_biu_read) ? 4'b1111 : icqmem_sel_i;
+assign icbiu_cab_o  = (ic_en) ? icfsm_burst : 1'b0;
 // 用的怎么这么的怪异啊？这样用的目的是什么？？？
 assign icqmem_rty_o = ~icqmem_ack_o & ~icqmem_err_o;
 assign icqmem_tag_o = icqmem_err_o ? `OR1200_ITAG_BE : icqmem_tag_i;

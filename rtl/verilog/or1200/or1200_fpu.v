@@ -49,89 +49,87 @@
 `include "or1200_defines.v"
 
 module or1200_fpu(
-		  // Clock and reset
-		  clk, rst,
-
-		  // FPU interface
-		  ex_freeze, a, b, fpu_op, result, done,
-
-		  // Flag controls
-		  flagforw, flag_we,
-
-		  // Exception signal
-		  sig_fp, except_started,
-
-		  // FPCSR system register
-		  fpcsr_we, fpcsr,
-		  
-		  // SPR interface -- currently unused
-		  spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o
-		  );
-
-   parameter width = `OR1200_OPERAND_WIDTH;
-
-   //
-   // I/O
-   //
-
-   //
    // Clock and reset
-   //
-   input				clk;
-   input				rst;
-
-   //
+   clk, rst,
+   
    // FPU interface
-   //
-   input				ex_freeze;
-   input [width-1:0] 			a;
-   input [width-1:0] 			b;
-   input [`OR1200_FPUOP_WIDTH-1:0] 	fpu_op;
-   output [width-1:0] 			result;
-   output 				done;
+   ex_freeze, a, b, fpu_op, result, done,
    
-   //
-   // Flag signals
-   //
-   output 				flagforw;
-   output 				flag_we;
-
-   //
-   // FPCSR interface
-   //  
-   input 				fpcsr_we;   
-   output [`OR1200_FPCSR_WIDTH-1:0] 	fpcsr;   
-
-   //
+   // Flag controls
+   flagforw, flag_we,
+   
    // Exception signal
-   //   
-   output 				sig_fp;
-   input 				except_started;
+   sig_fp, except_started,
    
+   // FPCSR system register
+   fpcsr_we, fpcsr,
    
-   //
-   // SPR interface
-   //
-   input				spr_cs;
-   input				spr_write;
-   input [31:0] 			spr_addr;
-   input [31:0] 			spr_dat_i;
-   output [31:0] 			spr_dat_o;
+   // SPR interface -- currently unused
+   spr_cs, spr_write, spr_addr, spr_dat_i, spr_dat_o
+  );
 
+  parameter width = `OR1200_OPERAND_WIDTH;
+
+  //
+  // I/O
+  //
+
+  //
+  // Clock and reset
+  //
+  input				clk;
+  input				rst;
+
+  //
+  // FPU interface
+  //
+  input				ex_freeze;
+  input [width-1:0] 			a;
+  input [width-1:0] 			b;
+  input [`OR1200_FPUOP_WIDTH-1:0] 	fpu_op;
+  output [width-1:0] 			result;
+  output 				done;
+
+  //
+  // Flag signals
+  //
+  output 				flagforw;
+  output 				flag_we;
+
+  //
+  // FPCSR interface
+  //  
+  input 				fpcsr_we;   
+  output [`OR1200_FPCSR_WIDTH-1:0] 	fpcsr;   
+
+  //
+  // Exception signal
+  //   
+  output 				sig_fp;
+  input 				except_started;
+
+
+  //
+  // SPR interface
+  //
+  input				  spr_cs;
+  input				  spr_write;
+  input  [31:0] spr_addr;
+  input  [31:0] spr_dat_i;
+  output [31:0] spr_dat_o;
 
 `ifndef OR1200_FPU_IMPLEMENTED
-   
-   // No FPU needed
-   assign result = 0;
-   assign flagforw  = 0;
-   assign flag_we = 0;
-   assign sig_fp = 0;
-   assign spr_dat_o = 0;
-   assign fpcsr = 0;
-   assign done = 1;   
+
+  // No FPU needed
+  assign result = 0;
+  assign flagforw  = 0;
+  assign flag_we = 0;
+  assign sig_fp = 0;
+  assign spr_dat_o = 0;
+  assign fpcsr = 0;
+  assign done = 1;   
 `else
 
-   
    //
    // Internals
    //
@@ -206,7 +204,7 @@ module or1200_fpu(
    //   
    always @(posedge clk or `OR1200_RST_EVENT rst) begin
       if (rst == `OR1200_RST_VALUE)
-	fpcsr_r <= 0;
+      fpcsr_r <= 0;
       else
 	begin
 	   if (fpcsr_we)
@@ -310,13 +308,13 @@ module or1200_fpu(
    reg a_is_snan, b_is_snan;
    reg a_is_qnan, b_is_qnan;
    
-   always @(posedge clk)
-     begin
-	a_is_snan <= (a[30:23]==8'hff) & !a[22] & (|a[21:0]);
-	b_is_snan <= (b[30:23]==8'hff) & !b[22] & (|b[21:0]);
-	a_is_qnan <= (a[30:23]==8'hff) & a[22];
-	b_is_qnan <= (b[30:23]==8'hff) & b[22];	
-     end
+  always @(posedge clk) begin
+    a_is_snan <= (a[30:23]==8'hff) & !a[22] & (|a[21:0]);
+    b_is_snan <= (b[30:23]==8'hff) & !b[22] & (|b[21:0]);
+    a_is_qnan <= (a[30:23]==8'hff) & a[22];
+    b_is_qnan <= (b[30:23]==8'hff) & b[22];	
+  end
+  
    // Signal to indicate there was a signaling NaN on input
    assign snan_in = a_is_snan | b_is_snan;
 
@@ -324,11 +322,10 @@ module or1200_fpu(
    // same signed infinities.
    reg a_is_inf, b_is_inf, a_b_sign_xor;
    
-   always @(posedge clk)
-     begin
-	a_is_inf <= (a[30:23]==8'hff) & !(|a[22:0]);
-	b_is_inf <= (b[30:23]==8'hff) & !(|a[22:0]);
-	a_b_sign_xor <= a[31] ^ b[31];
+   always @(posedge clk) begin
+    a_is_inf <= (a[30:23]==8'hff) & !(|a[22:0]);
+    b_is_inf <= (b[30:23]==8'hff) & !(|a[22:0]);
+    a_b_sign_xor <= a[31] ^ b[31];
      end
    
    assign inv_inf_op_in = (a_is_inf & b_is_inf) & 
@@ -344,8 +341,8 @@ module or1200_fpu(
    
    always @(posedge clk)
      begin
-	a_is_zero <= !(|a[30:0]);
-	b_is_zero <= !(|b[30:0]);
+    a_is_zero <= !(|a[30:0]);
+    b_is_zero <= !(|b[30:0]);
      end
    assign dbz_in = ({1'b0,fpu_op_r[`OR1200_FPUOP_WIDTH-2:0]} == 
 		    `OR1200_FPUOP_DIV) & (a_is_zero & b_is_zero);

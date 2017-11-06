@@ -117,9 +117,13 @@ module or1200_reg2mem
   // 复用到memdata[31:24]
   always @(lsu_op or addr or regdata) begin
     casez({lsu_op, addr[1:0]})	// synopsys parallel_case
+    
     {`OR1200_LSUOP_SB, 2'b00} : memdata_hh = regdata[7:0];  // 执行l.sb指令
+    
     {`OR1200_LSUOP_SH, 2'b00} : memdata_hh = regdata[15:8]; // 执行l.sh指令
+    
     default : memdata_hh = regdata[31:24];
+    
     endcase
   end
 
@@ -129,8 +133,11 @@ module or1200_reg2mem
   // 复用memdata[23:16]
   always @(lsu_op or addr or regdata) begin
     casez({lsu_op, addr[1:0]})	// synopsys parallel_case
+    
     {`OR1200_LSUOP_SW, 2'b00} : memdata_hl = regdata[23:16]; // 指令l.sw
+    
     default : memdata_hl = regdata[7:0];
+    
     endcase
   end
 
@@ -140,8 +147,11 @@ module or1200_reg2mem
   // 复用到memdata[15:8]
   always @(lsu_op or addr or regdata) begin
     casez({lsu_op, addr[1:0]})	// synopsys parallel_case
+    
     {`OR1200_LSUOP_SB, 2'b10} : memdata_lh = regdata[7:0]; //指令l.sb
+    
     default : memdata_lh = regdata[15:8];
+    
     endcase
   end
 

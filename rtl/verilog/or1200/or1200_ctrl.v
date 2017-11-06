@@ -81,15 +81,15 @@ module or1200_ctrl
    // Internal i/f
    // 内部接口
    except_flushpipe, extend_flush, if_flushpipe, id_flushpipe, ex_flushpipe, ma_flushpipe, wb_flushpipe,
-   
+
    id_freeze, ex_freeze, ma_freeze, wb_freeze, if_insn, id_insn, ex_insn, abort_mvspr,
    id_branch_op, ex_branch_op, ex_branch_taken, pc_we,
    rf_addra, rf_addrb, rf_rda, rf_rdb, alu_op, alu_op2, mac_op,
-   comp_op, 
-   
+   comp_op,
+
    // Register read and write signal
-   rf_addrw, rfwb_op, 
-   
+   rf_addrw, rfwb_op,
+
    fpu_op,
    wb_insn, id_simm, ex_simm, id_branch_addrtarget, ex_branch_addrtarget, sel_a,
    sel_b, id_lsu_op,
@@ -105,12 +105,12 @@ module or1200_ctrl
   //
   input               clk;
   input               rst;
-  
+
   input               id_freeze;
   input               ex_freeze /* verilator public */;
   input               ma_freeze /* verilator public */;
   input               wb_freeze /* verilator public */;
-  
+
   output              if_flushpipe; // IF段的刷新命令
   output              id_flushpipe; // ID段的刷新命令
   output              ex_flushpipe; // EX段的刷新命令
@@ -119,11 +119,11 @@ module or1200_ctrl
   input               extend_flush;
   input               except_flushpipe;
   input               abort_mvspr ;
-  
+
   input   [31:0]      if_insn;  // 从IF段得到的Instruction；
   output  [31:0]      id_insn;  // 处于流水线译ID段的指令
   output  [31:0]      ex_insn /* verilator public */;   // 处于流水线EX阶段的指令
-  
+
   output  [`OR1200_BRANCHOP_WIDTH-1:0]      ex_branch_op;
   output  [`OR1200_BRANCHOP_WIDTH-1:0]      id_branch_op;
   input                                     ex_branch_taken;
@@ -189,11 +189,13 @@ module or1200_ctrl
 `endif
 
   /* ??? 为什么没有MEM的段的信号？？？ */
+  // 因为OR1200就不是正统的五级流水线的CPU，
+  // lsu模块在EX段实现的；
   reg  [31:0]        id_insn /* verilator public */;
   reg  [31:0]        ex_insn /* verilator public */;
   reg  [31:0]        ma_insn /* verilator public */;
   reg  [31:0]        wb_insn /* verilator public */;
-  
+
   reg  [`OR1200_REGFILE_ADDR_WIDTH-1:0]   rf_addrw;
   reg  [`OR1200_REGFILE_ADDR_WIDTH-1:0]   wb_rfaddrw;
   reg  [`OR1200_RFWBOP_WIDTH-1:0]         rfwb_op;
@@ -203,7 +205,7 @@ module or1200_ctrl
   reg  [`OR1200_LSUOP_WIDTH-1:0]          id_lsu_op;
   reg  [`OR1200_COMPOP_WIDTH-1:0]         comp_op;
   reg  [`OR1200_MULTICYCLE_WIDTH-1:0]     multicycle;
-  reg [`OR1200_WAIT_ON_WIDTH-1:0]         wait_on;
+  reg  [`OR1200_WAIT_ON_WIDTH-1:0]        wait_on;
   reg   [31:0]        id_simm;
   reg   [31:0]        ex_simm;
   reg                 sig_syscall;
@@ -213,8 +215,11 @@ module or1200_ctrl
   wire                ex_void;
   wire                wb_void;
   // 感觉这两个信号没有什么用啊？？？
+  // 从DEBUG中删除这两项
+  //////////////////////////////////////////////
   reg                 ex_delayslot_dsi;
   reg                 ex_delayslot_nop;
+  //////////////////////////////////////////////
   reg                 spr_read;
   reg                 spr_write;
   reg     [31:2]      ex_branch_addrtarget;
@@ -238,10 +243,17 @@ module or1200_ctrl
   // 当跳转/分支被load/store指令处理时，强迫延迟槽指令的支取。
   // NOTE : dslot = delay slot, 就是延时槽的意思
   assign force_dslot_fetch = 1'b0;
-  // RFE表示从例外返回指令，ex_branch_taken表示if已取走分支指令信号，得到没有更多的延迟槽信号
+  
+  // RFE表示从例外返回指令，ex_branch_taken表示if已取走分支指令信号，目前没有更多的延迟槽信号
+  // 第一种情况：
+  //    1） 当前在EX段为一个跳转指令
+  //    2) 当前在EX段为跳转指令，但是在ID段里面不是一个VOID指令（NOP）
+  //    3) 且在l.bnf、l.bf、l.j等跳转指令成立的时候，如果跳转条件不成立耳的时候，则ex_branch_taken无效
+  // 第二种情况：
+  //    1） 当前在EX段为一个l.rfe指令，ref指令没有延时槽
   assign no_more_dslot = (|ex_branch_op & !id_void & ex_branch_taken) |
                          // 在EX段是一个RFE的指令，RFE指令是没有延迟槽
-                         (ex_branch_op == `OR1200_BRANCHOP_RFE); 
+                         (ex_branch_op == `OR1200_BRANCHOP_RFE);
 
   // 对NOP指令的解析
   // id空指令，id_insn[31:26]为指令编码，id_insn[20:16]为源寄存器编号，id_insn[16]表示非r0寄存器
@@ -304,7 +316,7 @@ module or1200_ctrl
   //
   // Flush pipeline
   //
-  //////////////////////////////////////////////////////////////////////// 
+  ////////////////////////////////////////////////////////////////////////
   //
   // except_flushpipe : 异常flush流水线操作
   // pc_we : 使用l.mtspr指令来重写NPC的时候也将重新刷新流水线
@@ -343,13 +355,13 @@ module or1200_ctrl
   always @(id_insn) begin
     case (id_insn[31:26])     // synopsys parallel_case
 
-    // l.addi, l.addic, l.xori, 
+    // l.addi, l.addic, l.xori,
     // l.sfxxi (SFXX with immediate)
-    `OR1200_OR32_ADDI, `OR1200_OR32_ADDIC, 
+    `OR1200_OR32_ADDI, `OR1200_OR32_ADDIC,
     `OR1200_OR32_XORI,
     `OR1200_OR32_SFXXI :
       id_simm = {{16{id_insn[15]}}, id_insn[15:0]};
-      
+
     // l.lxx (load instructions)
     `OR1200_OR32_LWZ, `OR1200_OR32_LBZ, `OR1200_OR32_LBS,
     `OR1200_OR32_LHZ, `OR1200_OR32_LHS:
@@ -396,7 +408,7 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       ex_branch_addrtarget <=  0;
-    
+
     else if (!ex_freeze)
       ex_branch_addrtarget <=  id_branch_addrtarget;
   end
@@ -525,11 +537,11 @@ module or1200_ctrl
   always @(id_insn) begin
     // 指令中[31:26]位是指令编码
     case (id_insn[31:26])    // synopsys parallel_case
-      // l.rfe
-      `OR1200_OR32_RFE,
-      // l.mfspr
-      `OR1200_OR32_MFSPR:
+      
+      `OR1200_OR32_RFE,   // l.rfe
+      `OR1200_OR32_MFSPR: // l.mfspr
         multicycle = `OR1200_TWO_CYCLES;  // to read from ITLB/DTLB (sync RAMs)
+        
       // Single cycle instructions
       default: begin
         // 单周期指令
@@ -542,10 +554,10 @@ module or1200_ctrl
   // Encode wait_on signal
   // 流水线等待的周期数
   always @(id_insn) begin
-  
+
     // 指令中[31:26]位是指令编码
     case (id_insn[31:26])    // synopsys parallel_case
-    
+
     `OR1200_OR32_ALU:
       wait_on =  ( 1'b0
 `ifdef OR1200_DIV_IMPLEMENTED
@@ -605,13 +617,17 @@ module or1200_ctrl
       rf_addrw <=  5'd00;
 
     else if (!ex_freeze)
+      
       case (id_insn[31:26])  // synopsys parallel_case
+      
       // l.jr rB跳转寄存器rB值
       `OR1200_OR32_JAL, `OR1200_OR32_JALR:
         rf_addrw <=  5'd09;  // link register r9
+      
       default:
         // 指令中rD的序号地址
         rf_addrw <=  id_insn[25:21];
+      
       endcase
   end
 
@@ -622,6 +638,7 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       wb_rfaddrw <=  5'd0;
+    
     else if (!wb_freeze)
       wb_rfaddrw <=  rf_addrw;
   end
@@ -633,12 +650,12 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       id_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
-    
+
     else if (id_flushpipe)
       // 同样的道理，刷新流水线的时候，给与当前段空操作；
       // 故： 赋给id段空操作指令。
       id_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};        // NOP -> id_insn[16] must be 1
-    
+
     else if (!id_freeze) begin
       // 问，如果IF段被冻结的时候怎么办？
       // 这里是否应该加上如下的判断：
@@ -651,7 +668,7 @@ module or1200_ctrl
       // synopsys translate_on
 `endif
     end
-    
+
   end
 
   //
@@ -662,7 +679,7 @@ module or1200_ctrl
     if (rst == `OR1200_RST_VALUE)
       // 初始化的时候给与空操作
       ex_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
-    
+
     else if (!ex_freeze & id_freeze | ex_flushpipe)
       // 1) 如果ID段被冻结，但是EX段没有被冻结。这种情况就是典型的滑行操作;
       //    这种情况的一个例子就是数据相关性的时候，新的指令需要EX段的计算结果的时候
@@ -670,7 +687,7 @@ module or1200_ctrl
       // 2) 当前的EX段被刷新；刷新就相当于大清扫操作，回到NOP状态；
       // ex_insn[16] must be 1
       ex_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};  // NOP -> ex_insn[16] must be 1
-    
+
     else if (!ex_freeze) begin
       //如果ex级没有暂停时，从id得到输入指令id_insn
       ex_insn <=  id_insn;
@@ -691,12 +708,12 @@ module or1200_ctrl
 
     if (rst == `OR1200_RST_VALUE)
       ma_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
-      
+
     else if (!ma_freeze)
       ma_insn <=  ex_insn;
 
   end
-  
+
   //
   // Instruction latch in wb_insn
   //
@@ -705,13 +722,13 @@ module or1200_ctrl
 
     if (rst == `OR1200_RST_VALUE)
       wb_insn <=  {`OR1200_OR32_NOP, 26'h041_0000};
-      
+
     // wb_insn should not be changed by exceptions due to correct
     // recording of display_arch_state in the or1200_monitor!
     // wb_insn changed by exception is not used elsewhere!
     else if (!wb_freeze)
-      wb_insn <=  ma_insn;
-
+      // wb_insn <=  ma_insn;
+      wb_insn <=  ex_insn;
   end
 
   //
@@ -740,7 +757,7 @@ module or1200_ctrl
       `OR1200_OR32_MFSPR, `OR1200_OR32_MTSPR,
       `OR1200_OR32_XSYNC,
       `OR1200_OR32_SW, `OR1200_OR32_SB, `OR1200_OR32_SH,
-      `OR1200_OR32_ALU, 
+      `OR1200_OR32_ALU,
       `OR1200_OR32_SFXX,
       `OR1200_OR32_NOP :
         sel_imm <=  1'b0;
@@ -832,6 +849,7 @@ module or1200_ctrl
       `OR1200_OR32_NOP:
         // 在指令合法时为0
         except_illegal <=  1'b0;
+
 `ifdef OR1200_FPU_IMPLEMENTED
       `OR1200_OR32_FLOAT:
         // Check it's not a double precision instruction
@@ -976,13 +994,13 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       alu_op2 <=  0;
-      
+
     else if (!ex_freeze & id_freeze | ex_flushpipe)
       alu_op2 <= 0;
-    
+
     else if (!ex_freeze) begin
       alu_op2 <=  id_insn[`OR1200_ALUOP2_POS];
-      
+
     end
   end
 
@@ -994,11 +1012,14 @@ module or1200_ctrl
       spr_read <=  1'b0;
       spr_write <=  1'b0;
     end
+    
     else if (!ex_freeze & id_freeze | ex_flushpipe) begin
       spr_read <=  1'b0;
       spr_write <=  1'b0;
     end
+    
     else if (!ex_freeze) begin
+
       case (id_insn[31:26])     // synopsys parallel_case
 
       // l.mfspr
@@ -1051,10 +1072,13 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       ex_mac_op <=  `OR1200_MACOP_NOP;
+      
     else if (!ex_freeze & id_freeze | ex_flushpipe)
       ex_mac_op <=  `OR1200_MACOP_NOP;
+      
     else if (!ex_freeze)
       ex_mac_op <=  id_mac_op;
+
   end
 
   assign mac_op = abort_mvspr ? `OR1200_MACOP_NOP : ex_mac_op;
@@ -1188,7 +1212,7 @@ module or1200_ctrl
   // Decode of id_branch_op
   //
   // id_branch_op : 跳转指令的分类
-  // 
+  //
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
     if (rst == `OR1200_RST_VALUE)
@@ -1369,9 +1393,12 @@ module or1200_ctrl
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE)
       sig_trap <=  1'b0;
+    
     else if (!ex_freeze & id_freeze | ex_flushpipe)
       sig_trap <=  1'b0;
+    
     else if (!ex_freeze) begin
+    
 `ifdef OR1200_VERBOSE
       // synopsys translate_off
       if (id_insn[31:23] == {`OR1200_OR32_XSYNC, 3'b010})
@@ -1388,8 +1415,7 @@ module or1200_ctrl
   // are being done from the stack register (r1) or frame pointer register (r2)
   // 读写data cache的寄存器地址
 `ifdef OR1200_DC_NOSTACKWRITETHROUGH
-  always @(posedge clk or `OR1200_RST_EVENT rst)
-  begin
+  always @(posedge clk or `OR1200_RST_EVENT rst) begin
 
      if (rst == `OR1200_RST_VALUE)
        dc_no_writethrough <= 0;

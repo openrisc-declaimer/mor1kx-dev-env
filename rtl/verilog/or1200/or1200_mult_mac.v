@@ -229,6 +229,7 @@ module or1200_mult_mac
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       ex_freeze_r <= 1'b1;
+    
     else
       ex_freeze_r <= ex_freeze;
 
@@ -482,6 +483,7 @@ module or1200_mult_mac
   always @(`OR1200_RST_EVENT rst or posedge clk)
     if (rst == `OR1200_RST_VALUE)
       mac_stall_r <=  1'b0;
+    
     else
       mac_stall_r <=  (|mac_op | (|mac_op_r1) | (|mac_op_r2)) & (id_macrc_op | mac_stall_r);
 
@@ -505,17 +507,18 @@ module or1200_mult_mac
 
   assign div_tmp = div_quot_r[63:32] - y;
 
-  always @(`OR1200_RST_EVENT rst or posedge clk)
+  always @(`OR1200_RST_EVENT rst or posedge clk) begin
+  
     if (rst == `OR1200_RST_VALUE) begin
-      div_quot_r <=  64'h0000_0000_0000_0000;
-      div_free <=  1'b1;
-      div_cntr <=  6'b00_0000;
+      div_quot_r  <=  64'h0000_0000_0000_0000;
+      div_free    <=  1'b1;
+      div_cntr    <=  6'b00_0000;
     end
 
     else if (div_by_zero) begin
-      div_quot_r <=  64'h0000_0000_0000_0000;
-      div_free <=  1'b1;
-      div_cntr <=  6'b00_0000;
+      div_quot_r  <=  64'h0000_0000_0000_0000;
+      div_free    <=  1'b1;
+      div_cntr    <=  6'b00_0000;
     end
 
     else if (|div_cntr) begin
@@ -524,7 +527,7 @@ module or1200_mult_mac
       else
         div_quot_r <=  {div_tmp[30:0], div_quot_r[31:0], 1'b1};
 
-      div_cntr <=  div_cntr - 6'd1;
+      div_cntr    <=  div_cntr - 6'd1;
     end
 
     else if (alu_op_div && div_free) begin
@@ -536,7 +539,9 @@ module or1200_mult_mac
     else if (div_free | !ex_freeze) begin
       div_free <=  1'b1;
     end
-
+  
+  end
+  
   assign div_stall = (|div_cntr) | (!ex_freeze_r & alu_op_div);
 
 `else // !`ifdef OR1200_DIV_SERIAL

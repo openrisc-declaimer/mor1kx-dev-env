@@ -109,13 +109,13 @@ module or1200_operandmuxes
     if (rst == `OR1200_RST_VALUE) begin
       // 复位
       operand_a <=  32'd0;
-      saved_a <=  1'b0;
+      saved_a   <=  1'b0;
     end
 
     // EX级没有暂停且ID级暂停且操作数A没有存到operand_a上。
     else if (!ex_freeze && id_freeze && !saved_a) begin
-      operand_a <=  muxed_a; // 得到选择器的数据。
-      saved_a <=  1'b1; // 表示数据已存储的信号。
+      operand_a <=  muxed_a;  // 得到选择器的数据。
+      saved_a   <=  1'b1;     // 表示数据已存储的信号。
     end
 
     // saved_a表示操作数A已存到operand_a上
@@ -125,7 +125,7 @@ module or1200_operandmuxes
 
     // ex_freeze 表示EX级暂停
     else if (!ex_freeze && !id_freeze)
-      saved_a <=  1'b0;
+      saved_a   <=  1'b0;
   end
 
   //
@@ -135,12 +135,12 @@ module or1200_operandmuxes
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE) begin
       operand_b <=  32'd0;
-      saved_b <=  1'b0;
+      saved_b   <=  1'b0;
     end
 
     else if (!ex_freeze && id_freeze && !saved_b) begin
       operand_b <=  muxed_b;
-      saved_b <=  1'b1;
+      saved_b   <=  1'b1;
     end
 
     else if (!ex_freeze && !saved_b) begin
@@ -148,7 +148,7 @@ module or1200_operandmuxes
     end
 
     else if (!ex_freeze && !id_freeze)
-      saved_b <=  1'b0;
+      saved_b   <=  1'b0;
   end
 
   //

@@ -207,21 +207,28 @@ module or1200_mem2reg
   // 选择sel_byte2
   always @(addr or lsu_op) begin
     casex({lsu_op[2:0], addr})	// synopsys parallel_case
+
     {3'b010, 2'bxx},			// lbz
     {3'b100, 2'bxx}:			// lhz
       sel_byte2 = `OR1200_M2R_ZERO;	// zero extend
+    
     {3'b011, 2'b00},			// lbs 0
     {3'b101, 2'b00}:			// lhs 0
       sel_byte2 = `OR1200_M2R_EXTB3;	// sign extend from byte 3
+    
     {3'b011, 2'b01}:			// lbs 1
       sel_byte2 = `OR1200_M2R_EXTB2;	// sign extend from byte 2
+    
     {3'b011, 2'b10},			// lbs 2
     {3'b101, 2'b10}:			// lhs 0
       sel_byte2 = `OR1200_M2R_EXTB1;	// sign extend from byte 1
+    
     {3'b011, 2'b11}:			// lbs 3
       sel_byte2 = `OR1200_M2R_EXTB0;	// sign extend from byte 0
+    
     default:				// all other cases
       sel_byte2 = `OR1200_M2R_BYTE2;	// take byte 2
+    
     endcase
   end
 
@@ -229,22 +236,30 @@ module or1200_mem2reg
   // Byte select 3
   //
   always @(addr or lsu_op) begin
+    
     casex({lsu_op[2:0], addr}) // synopsys parallel_case
+    
     {3'b010, 2'bxx},			// lbz
     {3'b100, 2'bxx}:			// lhz
       sel_byte3 = `OR1200_M2R_ZERO;	// zero extend
+    
     {3'b011, 2'b00},			// lbs 0
     {3'b101, 2'b00}:			// lhs 0
       sel_byte3 = `OR1200_M2R_EXTB3;	// sign extend from byte 3
+    
     {3'b011, 2'b01}:			// lbs 1
       sel_byte3 = `OR1200_M2R_EXTB2;	// sign extend from byte 2
+    
     {3'b011, 2'b10},			// lbs 2
     {3'b101, 2'b10}:			// lhs 0
       sel_byte3 = `OR1200_M2R_EXTB1;	// sign extend from byte 1
+    
     {3'b011, 2'b11}:			// lbs 3
       sel_byte3 = `OR1200_M2R_EXTB0;	// sign extend from byte 0
+    
     default:				// all other cases
       sel_byte3 = `OR1200_M2R_BYTE3;	// take byte 3
+    
     endcase
   end
 
@@ -268,25 +283,21 @@ module or1200_mem2reg
     case(sel_byte0) // synopsys full_case parallel_case
 `endif
 `endif
-    `OR1200_M2R_BYTE0: begin // 选择字节0
+    `OR1200_M2R_BYTE0: // 选择字节0
       regdata_ll = memdata[7:0];
-    end
 
-    `OR1200_M2R_BYTE1: begin // 选择字节1
+    `OR1200_M2R_BYTE1: // 选择字节1
       regdata_ll = memdata[15:8];
-    end
 
-    `OR1200_M2R_BYTE2: begin // 选择字节2
+    `OR1200_M2R_BYTE2: // 选择字节2
       regdata_ll = memdata[23:16];
-    end
 
 `ifdef OR1200_CASE_DEFAULT
-    default: begin
+    default:
 `else
-    `OR1200_M2R_BYTE3: begin // 选择字节3
+    `OR1200_M2R_BYTE3: // 选择字节3
 `endif
       regdata_ll = memdata[31:24];
-    end
 
     endcase
   end
@@ -310,32 +321,33 @@ module or1200_mem2reg
     case(sel_byte1) // synopsys full_case parallel_case
 `endif
 `endif
-    `OR1200_M2R_ZERO: begin
+    `OR1200_M2R_ZERO:
       regdata_lh = 8'h00;
-    end
-    `OR1200_M2R_BYTE1: begin
+    
+    `OR1200_M2R_BYTE1:
       regdata_lh = memdata[15:8];
-    end
-    `OR1200_M2R_BYTE3: begin
+    
+    `OR1200_M2R_BYTE3:
       regdata_lh = memdata[31:24];
-    end
-    `OR1200_M2R_EXTB0: begin
+    
+    `OR1200_M2R_EXTB0:
       regdata_lh = {8{memdata[7]}};
-    end
-    `OR1200_M2R_EXTB1: begin
+    
+    `OR1200_M2R_EXTB1:
       regdata_lh = {8{memdata[15]}};
-    end
-    `OR1200_M2R_EXTB2: begin
+    
+    `OR1200_M2R_EXTB2:
       regdata_lh = {8{memdata[23]}};
-    end
+    
 `ifdef OR1200_CASE_DEFAULT
-    default: begin
+    default:
 `else
-    `OR1200_M2R_EXTB3: begin
+    `OR1200_M2R_EXTB3:
 `endif
       regdata_lh = {8{memdata[31]}};
-    end
+    
     endcase
+    
   end
 
   //
@@ -355,28 +367,28 @@ module or1200_mem2reg
     case(sel_byte2) // synopsys full_case parallel_case
 `endif
 `endif
-    `OR1200_M2R_ZERO: begin
-        regdata_hl = 8'h00;
-      end
-    `OR1200_M2R_BYTE2: begin
-        regdata_hl = memdata[23:16];
-      end
-    `OR1200_M2R_EXTB0: begin
-        regdata_hl = {8{memdata[7]}}; // 第0字节符号扩展
-      end
-    `OR1200_M2R_EXTB1: begin
-        regdata_hl = {8{memdata[15]}}; // 第1字节符号扩展
-      end
-    `OR1200_M2R_EXTB2: begin
-        regdata_hl = {8{memdata[23]}}; // 第2字节符号扩展
-      end
+    
+    `OR1200_M2R_ZERO:
+      regdata_hl = 8'h00;
+    
+    `OR1200_M2R_BYTE2:
+      regdata_hl = memdata[23:16];
+    
+    `OR1200_M2R_EXTB0:
+      regdata_hl = {8{memdata[7]}}; // 第0字节符号扩展
+    
+    `OR1200_M2R_EXTB1:
+      regdata_hl = {8{memdata[15]}}; // 第1字节符号扩展
+    
+    `OR1200_M2R_EXTB2:
+      regdata_hl = {8{memdata[23]}}; // 第2字节符号扩展
+      
 `ifdef OR1200_CASE_DEFAULT
-    default: begin
+    default:
 `else
-    `OR1200_M2R_EXTB3: begin
+    `OR1200_M2R_EXTB3:
 `endif
       regdata_hl = {8{memdata[31]}}; // 第3字节符号扩展
-    end
 
     endcase
   end
@@ -385,6 +397,7 @@ module or1200_mem2reg
   // Byte 3
   //
   always @(sel_byte3 or memdata) begin
+
 `ifdef OR1200_ADDITIONAL_SYNOPSYS_DIRECTIVES
 `ifdef OR1200_CASE_DEFAULT
     case(sel_byte3) // synopsys parallel_case infer_mux
@@ -397,29 +410,30 @@ module or1200_mem2reg
 `else
     case(sel_byte3) // synopsys full_case parallel_case
 `endif
+
 `endif
-    `OR1200_M2R_ZERO: begin
+    `OR1200_M2R_ZERO:
       regdata_hh = 8'h00;
-    end
-    `OR1200_M2R_BYTE3: begin
+
+    `OR1200_M2R_BYTE3:
       regdata_hh = memdata[31:24];
-    end
-    `OR1200_M2R_EXTB0: begin
+
+    `OR1200_M2R_EXTB0:
       regdata_hh = {8{memdata[7]}};
-    end
-    `OR1200_M2R_EXTB1: begin
+
+    `OR1200_M2R_EXTB1:
       regdata_hh = {8{memdata[15]}};
-    end
-    `OR1200_M2R_EXTB2: begin
+
+    `OR1200_M2R_EXTB2:
       regdata_hh = {8{memdata[23]}};
-    end
+
 `ifdef OR1200_CASE_DEFAULT
-    `OR1200_M2R_EXTB3: begin
+    `OR1200_M2R_EXTB3:
 `else
-    `OR1200_M2R_EXTB3: begin
+    `OR1200_M2R_EXTB3:
 `endif
       regdata_hh = {8{memdata[31]}};
-    end
+
     endcase
   end
 
@@ -442,12 +456,16 @@ module or1200_mem2reg
 `else
     case(addr) // synopsys parallel_case
 `endif
+    
     2'b00:
       aligned = memdata;
+    
     2'b01:
       aligned = {memdata[23:0], 8'b0};
+    
     2'b10:
       aligned = {memdata[15:0], 16'b0};
+    
     2'b11:
       aligned = {memdata[7:0], 24'b0};
     endcase

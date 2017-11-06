@@ -546,7 +546,7 @@ module or1200_top
     .icpu_cycstb_i(icpu_cycstb_cpu),
     .icpu_adr_o   (icpu_adr_immu),
     .icpu_tag_o   (icpu_tag_immu),
-    .icpu_rty_o   (icpu_rty_immu),
+    .icpu_rty_o   (icpu_rty_immu),        // 没有没有IMMU的时候， icpu_rty_immu = qmemimmu_rty_qmem；
     .icpu_err_o   (icpu_err_immu),
 
     // SR Interface
@@ -560,7 +560,7 @@ module or1200_top
     .spr_dat_o(spr_dat_immu),
 
     // QMEM and IMMU
-    .qmemimmu_rty_i(qmemimmu_rty_qmem),
+    .qmemimmu_rty_i(qmemimmu_rty_qmem),    // 没有没有IMMU的时候， icpu_rty_immu = qmemimmu_rty_qmem；
     .qmemimmu_err_i(qmemimmu_err_qmem),
     .qmemimmu_tag_i(qmemimmu_tag_qmem),
     .qmemimmu_adr_o(qmemimmu_adr_immu),

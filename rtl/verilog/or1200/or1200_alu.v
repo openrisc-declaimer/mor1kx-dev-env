@@ -406,8 +406,7 @@ module or1200_alu
   // Shifts and rotation
   //
   // 移位和旋转，移位结果放入寄存器shifted_rotated，以便输出
-  always @(alu_op2 or a or b)
-  begin
+  always @(alu_op2 or a or b) begin
 
     case (alu_op2)    // synopsys parallel_case
     `OR1200_SHROTOP_SLL :
@@ -507,8 +506,8 @@ module or1200_alu
 `endif
 
 `ifdef OR1200_IMPL_ALU_EXT
-  always @(alu_op or alu_op2 or a)
-  begin
+  always @(alu_op or alu_op2 or a) begin
+
     casez (alu_op2)
     `OR1200_EXTHBOP_HS : extended = {{16{a[15]}},a[15:0]};
     `OR1200_EXTHBOP_BS : extended = {{24{a[7]}},a[7:0]};
@@ -516,6 +515,7 @@ module or1200_alu
     `OR1200_EXTHBOP_BZ : extended = {24'd0,a[7:0]};
     default: extended = a; // Used for l.extw instructions
     endcase // casez (alu_op2)
+
   end
 `endif
 
@@ -527,8 +527,8 @@ module or1200_alu
   // Examples for move byte, set bit and clear bit
   //
   // l.cust5定制指令样例：移动字节、设置和清除bit位
-  always @(cust5_op or cust5_limm or a or b)
-  begin
+  always @(cust5_op or cust5_limm or a or b) begin
+  
     casez (cust5_op)    // synopsys parallel_case
     5'h1 : begin
       casez (cust5_limm[1:0]) // 各种字节组合方式

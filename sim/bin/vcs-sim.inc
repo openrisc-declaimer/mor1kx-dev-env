@@ -131,7 +131,6 @@ VCS_VSIM_ARGS = +v2k             		   \
 				-timescale=1ns/1ns         \
                 -full64                    \
 				-lca                       \
-				-debug_all   		       \
 				-Mupdate                   \
 				-race                      \
 				-simprofile                \

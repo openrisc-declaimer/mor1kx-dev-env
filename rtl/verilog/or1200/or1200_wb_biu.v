@@ -406,7 +406,7 @@ module or1200_wb_biu
         // 分析叠4突发和叠8突发的不同
         // 这里比较精彩，一看就明白了
         if (bl==4) begin
-          wb_adr_o[3:2]  <=  2'bx; //wb_adr_o[3:2] + 1;
+          wb_adr_o[3:2]  <=  wb_adr_o[3:2] + 1;
         end
 
         if (bl==8) begin
