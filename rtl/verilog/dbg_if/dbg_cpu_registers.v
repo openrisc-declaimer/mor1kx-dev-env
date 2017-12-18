@@ -69,128 +69,116 @@
 // synopsys translate_on
 `include "dbg_cpu_defines.v"
 
-module dbg_cpu_registers  (
-                            data_i, 
-                            we_i, 
-                            tck_i, 
-                            bp_i, 
-                            rst_i,
-                            cpu_clk_i, 
-                            ctrl_reg_o,
-                            cpu_stall_o, 
-                            cpu_rst_o 
-                          );
+module dbg_cpu_registers
+  (
+   data_i,
+   we_i,
+   tck_i,
+   bp_i,
+   rst_i,
+   cpu_clk_i,
+   ctrl_reg_o,
+   cpu_stall_o,
+   cpu_rst_o
+  );
 
+  input  [`DBG_CPU_CTRL_LEN -1:0] data_i;
+  input                   we_i;
+  input                   tck_i;
+  input                   bp_i;
+  input                   rst_i;
+  input                   cpu_clk_i;
 
-input  [`DBG_CPU_CTRL_LEN -1:0] data_i;
-input                   we_i;
-input                   tck_i;
-input                   bp_i;
-input                   rst_i;
-input                   cpu_clk_i;
+  output [`DBG_CPU_CTRL_LEN -1:0]ctrl_reg_o;
+  output                  cpu_stall_o;
+  output                  cpu_rst_o;
 
-output [`DBG_CPU_CTRL_LEN -1:0]ctrl_reg_o;
-output                  cpu_stall_o;
-output                  cpu_rst_o;
+  reg                     cpu_reset;
+  wire             [2:1]  cpu_op_out;
 
-reg                     cpu_reset;
-wire             [2:1]  cpu_op_out;
+  reg                     stall_bp, stall_bp_csff, stall_bp_tck;
+  reg                     stall_reg, stall_reg_csff, stall_reg_cpu;
+  reg                     cpu_reset_csff;
+  reg                     cpu_rst_o;
 
-reg                     stall_bp, stall_bp_csff, stall_bp_tck;
-reg                     stall_reg, stall_reg_csff, stall_reg_cpu;
-reg                     cpu_reset_csff;
-reg                     cpu_rst_o;
+  // Breakpoint is latched and synchronized. Stall is set and latched.
+  always @ (posedge cpu_clk_i or posedge rst_i) begin
 
+    if(rst_i)
+      stall_bp <=  1'b0;
 
+    else if(bp_i)
+      stall_bp <=  1'b1;
 
-// Breakpoint is latched and synchronized. Stall is set and latched.
-always @ (posedge cpu_clk_i or posedge rst_i)
-begin
-  if(rst_i)
-    stall_bp <=  1'b0;
-  else if(bp_i)
-    stall_bp <=  1'b1;
-  else if(stall_reg_cpu)
-    stall_bp <=  1'b0;
-end
+    else if(stall_reg_cpu)
+      stall_bp <=  1'b0;
 
+  end
 
-// Synchronizing
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    begin
+  // Synchronizing
+  always @ (posedge tck_i or posedge rst_i) begin
+
+    if (rst_i) begin
       stall_bp_csff <=  1'b0;
       stall_bp_tck  <=  1'b0;
     end
-  else
-    begin
+
+    else begin
       stall_bp_csff <=  stall_bp;
       stall_bp_tck  <=  stall_bp_csff;
     end
-end
+  end
 
-
-always @ (posedge cpu_clk_i or posedge rst_i)
-begin
-  if (rst_i)
-    begin
+  always @ (posedge cpu_clk_i or posedge rst_i) begin
+    if (rst_i) begin
       stall_reg_csff <=  1'b0;
       stall_reg_cpu  <=  1'b0;
     end
-  else
-    begin
+
+    else begin
       stall_reg_csff <=  stall_reg;
       stall_reg_cpu  <=  stall_reg_csff;
     end
-end
+  end
 
+  assign cpu_stall_o = bp_i | stall_bp | stall_reg_cpu;
 
-assign cpu_stall_o = bp_i | stall_bp | stall_reg_cpu;
+  // Writing data to the control registers (stall)
+  always @ (posedge tck_i or posedge rst_i) begin
+    if (rst_i)
+      stall_reg <=  1'b0;
 
+    else if (stall_bp_tck)
+      stall_reg <=  1'b1;
 
-// Writing data to the control registers (stall)
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    stall_reg <=  1'b0;
-  else if (stall_bp_tck)
-    stall_reg <=  1'b1;
-  else if (we_i)
-    stall_reg <=  data_i[0];
-end
+    else if (we_i)
+      stall_reg <=  data_i[0];
+  end
 
+  // Writing data to the control registers (reset)
+  always @ (posedge tck_i or posedge rst_i) begin
+    if (rst_i)
+      cpu_reset  <=  1'b0;
 
-// Writing data to the control registers (reset)
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    cpu_reset  <=  1'b0;
-  else if(we_i)
-    cpu_reset  <=  data_i[1];
-end
+    else if(we_i)
+      cpu_reset  <=  data_i[1];
+  end
 
-
-// Synchronizing signals from registers
-always @ (posedge cpu_clk_i or posedge rst_i)
-begin
-  if (rst_i)
-    begin
-      cpu_reset_csff      <=  1'b0; 
-      cpu_rst_o           <=  1'b0; 
+  // Synchronizing signals from registers
+  always @ (posedge cpu_clk_i or posedge rst_i) begin
+    if (rst_i) begin
+      cpu_reset_csff      <=  1'b0;
+      cpu_rst_o           <=  1'b0;
     end
-  else
-    begin
+
+    else begin
       cpu_reset_csff      <=  cpu_reset;
       cpu_rst_o           <=  cpu_reset_csff;
     end
-end
+  end
 
-
-
-// Value for read back
-assign ctrl_reg_o = {cpu_reset, stall_reg};
-
+  // Value for read back
+  assign ctrl_reg_o = {cpu_reset, stall_reg};
 
 endmodule
 

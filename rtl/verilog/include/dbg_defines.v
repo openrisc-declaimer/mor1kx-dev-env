@@ -120,19 +120,19 @@
 
 
 // Length of the MODULE ID register
-`define	DBG_TOP_MODULE_ID_LENGTH	4
+`define	DBG_TOP_MODULE_ID_LENGTH	    4
 
 // Length of data
-`define DBG_TOP_MODULE_DATA_LEN  `DBG_TOP_MODULE_ID_LENGTH + 1
-`define DBG_TOP_DATA_CNT          3
+`define DBG_TOP_MODULE_DATA_LEN       `DBG_TOP_MODULE_ID_LENGTH + 1
+`define DBG_TOP_DATA_CNT              3
 
 // Length of status
-`define DBG_TOP_STATUS_LEN        3'd4
-`define DBG_TOP_STATUS_CNT_WIDTH  3
+`define DBG_TOP_STATUS_LEN            3'd4
+`define DBG_TOP_STATUS_CNT_WIDTH      3
 
 // Length of the CRC
-`define	DBG_TOP_CRC_LEN           32
-`define DBG_TOP_CRC_CNT           6
+`define	DBG_TOP_CRC_LEN               32
+`define DBG_TOP_CRC_CNT               6
 
 // Chains
 `define DBG_TOP_WISHBONE_DEBUG_MODULE 4'h0
@@ -149,5 +149,5 @@
 //`define DBG_CPU1_SUPPORTED
 
 // If more debug info is needed, uncomment the follofing line
-//`define DBG_MORE_INFO
+`define DBG_MORE_INFO
 

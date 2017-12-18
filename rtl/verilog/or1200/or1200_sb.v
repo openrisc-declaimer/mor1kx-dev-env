@@ -138,6 +138,7 @@ module or1200_sb
   wire                fifo_empty;
   wire                sel_sb;
   reg                 sb_en_reg;
+  // 还有没有回写的数据在FIFO中的标记。
   reg                 outstanding_store;
   reg                 fifo_wr_ack;
 
@@ -152,13 +153,16 @@ module or1200_sb
   //
   assign fifo_wr     = dcsb_cyc_i & dcsb_stb_i & dcsb_we_i & ~fifo_full & ~fifo_wr_ack;
   assign fifo_rd     = ~outstanding_store;
+  // 读数据，不会经过SB的FIFO的，直接从BIU中传递到DC中去；
   assign dcsb_dat_o  = sbbiu_dat_i;
   assign dcsb_ack_o  = sel_sb ? fifo_wr_ack : sbbiu_ack_i;
   assign dcsb_err_o  = sel_sb ? 1'b0 : sbbiu_err_i;  // SB never returns error
   assign sbbiu_cyc_o = sel_sb ? outstanding_store : dcsb_cyc_i;
   assign sbbiu_stb_o = sel_sb ? outstanding_store : dcsb_stb_i;
+  // 当FIFO中有数据的时候，可以继续写，但是不能读操作；
   assign sbbiu_we_o  = sel_sb ? 1'b1 : dcsb_we_i;
   assign sbbiu_cab_o = sel_sb ? 1'b0 : dcsb_cab_i;
+  // 当FIFO里面有数据的时候，我们不会进行读操作；
   assign sel_sb      = sb_en_reg & (~fifo_empty | (fifo_empty & outstanding_store));
 
   //

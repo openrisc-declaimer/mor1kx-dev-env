@@ -1,0 +1,12 @@
+// Synopsys VCS PLI table to register PLI applications
+// For the vcs_jp_vpi
+
+$hello call=hello
+$check_for_command check=check_for_command acc=rw:*
+$get_command_data call=get_command_data acc=rw:*
+$return_command_data call=return_command_data acc=rw:*
+$get_command_address call=get_command_address acc=rw:*
+$get_command_block_data call=get_command_block_data acc=rw:*
+$return_command_block_data call=return_command_block_data acc=rw:*
+$return_response call=return_response acc=rw:*
+ 

@@ -211,11 +211,11 @@ module or1200_dc_top
   //
   // RAM BIST
   //
-  wire				mbist_ram_so;
-  wire				mbist_tag_so;
-  wire				mbist_ram_si = mbist_si_i;
-  wire				mbist_tag_si = mbist_ram_so;
-  assign			mbist_so_o = mbist_tag_so;
+  wire				        mbist_ram_so;
+  wire				        mbist_tag_so;
+  wire				        mbist_ram_si = mbist_si_i;
+  wire				        mbist_tag_si = mbist_ram_so;
+  assign			        mbist_so_o = mbist_tag_so;
 `endif
 
   // Address out to external bus - always from FSM
@@ -230,26 +230,29 @@ module or1200_dc_top
   assign dc_block_invalidate = spr_cs & spr_write &
                              ((spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBIR) |
                               (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBFR));
-  assign dc_block_flush = 0;
-  assign dc_block_writeback = 0;
+  assign dc_block_flush      = 0;
+  assign dc_block_writeback  = 0;
+  
 `else
+
+  // write back statergy?
   assign dc_block_invalidate = spr_cs & spr_write &
                               (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBIR);
-  assign dc_block_flush = spr_cs & spr_write &
-                         (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBFR);
-  assign dc_block_writeback = spr_cs & spr_write &
-                             (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBWR);
+  assign dc_block_flush      = spr_cs & spr_write &
+                              (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBFR);
+  assign dc_block_writeback  = spr_cs & spr_write &
+                              (spr_addr[`OR1200_SPRGRP_DC_ADR_WIDTH-1:0]==`OR1200_SPRGRP_DC_DCBWR);
 `endif // !`ifdef OR1200_DC_WRITETHROUGH
 
   // 发现
-  assign dctag_we = dcfsm_tag_we | dc_block_invalidate;
-  assign dctag_addr = dc_block_invalidate ?
+  assign dctag_we     = dcfsm_tag_we | dc_block_invalidate;
+  assign dctag_addr   = dc_block_invalidate ?
                           spr_dat_i[`OR1200_DCINDXH:`OR1200_DCLS] :
                           dc_addr[`OR1200_DCINDXH:`OR1200_DCLS];
-  assign dctag_en = dc_block_invalidate | dc_en;
+  assign dctag_en     = dc_block_invalidate | dc_en;
 
-  assign dctag_v = dc_block_invalidate ? 1'b0 : dcfsm_tag_valid;
-  assign dctag_dirty = dc_block_invalidate ? 1'b0 : dcfsm_tag_dirty;
+  assign dctag_v      = dc_block_invalidate ? 1'b0 : dcfsm_tag_valid;
+  assign dctag_dirty  = dc_block_invalidate ? 1'b0 : dcfsm_tag_dirty;
 
   //
   // Data to BIU is from DCRAM when bursting lines back into memory

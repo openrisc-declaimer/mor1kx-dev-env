@@ -83,39 +83,39 @@ module or1200_dc_fsm
   //
   // I/O
   //
-  input				clk;
-  input				rst;
-  input				dc_en;
-  input				dcqmem_cycstb_i;
-  input				dcqmem_ci_i;
-  input				dcqmem_we_i;
+  input				        clk;
+  input				        rst;
+  input				        dc_en;
+  input				        dcqmem_cycstb_i;
+  input				        dcqmem_ci_i;
+  input				        dcqmem_we_i;
   input [3:0] 				dcqmem_sel_i;
-  input				tagcomp_miss;
-  input				biudata_valid;
-  input				biudata_error;
-  input [31:0] 			lsu_addr;
-  output [3:0] 			dcram_we;
-  output				biu_read;
-  output				biu_write;
-  output 				dcram_di_sel;
-  output 				biu_do_sel;
-  output				first_hit_ack;
-  output				first_miss_ack;
-  output				first_miss_err;
-  output				burst;
-  output				tag_we;
-  output 				tag_valid;
+  input				        tagcomp_miss;
+  input				        biudata_valid;
+  input				        biudata_error;
+  input [31:0] 			  lsu_addr;
+  output [3:0] 			  dcram_we;
+  output				      biu_read;
+  output				      biu_write;
+  output 				      dcram_di_sel;
+  output 				      biu_do_sel;
+  output				      first_hit_ack;
+  output				      first_miss_ack;
+  output				      first_miss_err;
+  output				      burst;
+  output				      tag_we;
+  output 				      tag_valid;
   output [31:0] 			dc_addr;
-  input 				dc_no_writethrough;
-  output 				tag_dirty;
-  input 				dirty;
+  input 				      dc_no_writethrough;
+  output 				      tag_dirty;
+  input 				      dirty;
   input [`OR1200_DCTAG_W-2:0] 		tag;
-  input 				tag_v;
-  input 				dc_block_flush;
-  input 				dc_block_writeback;
-  input [31:0] 			spr_dat_i;
-  output 				mtspr_dc_done;
-  input 				spr_cswe;
+  input 				      tag_v;
+  input 				      dc_block_flush;
+  input 				      dc_block_writeback;
+  input [31:0] 			  spr_dat_i;
+  output 				      mtspr_dc_done;
+  input 				      spr_cswe;
 
   //
   // Internal wires and regs
@@ -155,7 +155,7 @@ module or1200_dc_fsm
 
   // Indicates whether cache is inhibited, during hitmiss_eval and after
   assign cache_inhibit_with_eval = (hitmiss_eval & dcqmem_ci_i) |
-          (!hitmiss_eval & cache_inhibit);
+                                   (!hitmiss_eval & cache_inhibit);
 
   //
   // Generate of DCRAM write enables
@@ -163,12 +163,12 @@ module or1200_dc_fsm
 
   // WE when non-writethrough, and had to wait for a line to load.
   assign dcram_we_after_line_load = (state == `OR1200_DCFSM_LOOP3) &
-          dcqmem_we_i & !cache_dirty_needs_writeback &
-           !did_early_load_ack;
+                                    dcqmem_we_i & !cache_dirty_needs_writeback &
+                                    !did_early_load_ack;
 
   // WE when receiving the data cache line
   assign dcram_we_during_line_load = (state == `OR1200_DCFSM_LOOP2) & load &
-            biudata_valid;
+                                     biudata_valid;
 
   // 产生dcram写使能信号，Cache ??
   assign dcram_we =(// Write when hit - make sure it is only when hit - could
@@ -186,7 +186,7 @@ module or1200_dc_fsm
 
   // WE to tag RAM when we finish loading a line.
   assign tagram_we_end_of_loadstore_loop = ((state==`OR1200_DCFSM_LOOP2) &
-             biudata_valid & !(|cnt));
+                                           biudata_valid & !(|cnt));
 
 `ifndef OR1200_DC_WRITETHROUGH
   // No writethrough, so mark a line dirty whenever we write to it
@@ -194,24 +194,28 @@ module or1200_dc_fsm
 
   // Generate done signal for MTSPR instructions that may block execution
   assign mtspr_dc_done = // Either DC disabled or we're not selected, or
-      !dc_en | !spr_cswe |
-      // Requested address not valid or writeback and !dirty
-      ((state==`OR1200_DCFSM_FLUSH5) &
-       (!tag_v | (cache_spr_block_writeback & !dirty))) |
-      // Writeback or flush is finished
-      ((state==`OR1200_DCFSM_LOOP3) &
-       (cache_spr_block_flush | cache_spr_block_writeback))|
-      // Invalidate of clean line finished
-      ((state==`OR1200_DCFSM_INV6) & cache_spr_block_flush);
+                         !dc_en | !spr_cswe |
+                         // Requested address not valid or writeback and !dirty
+                         ((state==`OR1200_DCFSM_FLUSH5) &
+                          (!tag_v | (cache_spr_block_writeback & !dirty))) |
+                         // Writeback or flush is finished
+                         ((state==`OR1200_DCFSM_LOOP3) &
+                          (cache_spr_block_flush | cache_spr_block_writeback))|
+                         // Invalidate of clean line finished
+                         ((state==`OR1200_DCFSM_INV6) & cache_spr_block_flush);
 
 
 `else
+
 `ifdef OR1200_DC_NOSTACKWRITETHROUGH
   // For dirty bit setting when having writethrough but not for stack
   assign tagram_dirty_bit_set = store_hit_ack | store_miss_ack;
+
 `else
+
   // Lines will never be dirty if always writethrough
   assign tagram_dirty_bit_set = 0;
+
 `endif
 
   assign mtspr_dc_done = 1'b1;
@@ -228,8 +232,8 @@ module or1200_dc_fsm
   // Valid bit
   // Set valid when end of line load, or marking dirty (is still valid)
   assign tag_valid = ( tagram_we_end_of_loadstore_loop &
-    (load | (store & cache_spr_block_writeback)) ) |
-        tagram_dirty_bit_set;
+                     ( load | (store & cache_spr_block_writeback)) ) |
+                       tagram_dirty_bit_set;
 
   //
   // BIU read and write
@@ -317,12 +321,12 @@ module or1200_dc_fsm
 
   // ACK cache hit on load
   assign load_hit_ack = (state == `OR1200_DCFSM_CLOADSTORE) &
-     hitmiss_eval & !tagcomp_miss & !dcqmem_ci_i & load;
+                        hitmiss_eval & !tagcomp_miss & !dcqmem_ci_i & load;
 
   // ACK cache hit on store, no writethrough
   assign store_hit_ack = (state == `OR1200_DCFSM_CLOADSTORE) &
-      hitmiss_eval  & !tagcomp_miss & !dcqmem_ci_i &
-      store & !writethrough;
+                         hitmiss_eval  & !tagcomp_miss & !dcqmem_ci_i &
+                         store & !writethrough;
 
   // ACK cache hit on store with writethrough
   assign store_hit_writethrough_ack = (state == `OR1200_DCFSM_CLOADSTORE) &
@@ -365,12 +369,12 @@ module or1200_dc_fsm
   // dcache主状态机
   always @(posedge clk or `OR1200_RST_EVENT rst) begin
     if (rst == `OR1200_RST_VALUE) begin
-      state <=  `OR1200_DCFSM_IDLE;
-      addr_r <=  32'd0;
+      state   <=  `OR1200_DCFSM_IDLE;
+      addr_r  <=  32'd0;
       hitmiss_eval <=  1'b0;
-      store <=  1'b0;
-      load <=  1'b0;
-      cnt <=  `OR1200_DCLS'd0;
+      store   <=  1'b0;
+      load    <=  1'b0;
+      cnt     <=  `OR1200_DCLS'd0;
       cache_miss <=  1'b0;
       cache_dirty_needs_writeback <= 1'b0;
       cache_inhibit <=  1'b0;
@@ -378,41 +382,44 @@ module or1200_dc_fsm
       cache_spr_block_flush <= 1'b0;
       cache_spr_block_writeback <= 1'b0;
     end
+    
     else
       case (state)	// synopsys parallel_case
       `OR1200_DCFSM_IDLE : begin
+      
         // 收到dcache写操作请求，转移到写状态`OR1200_DCFSM_FLUSH5
-        if (dc_en & (dc_block_flush | dc_block_writeback))
-        begin
+        if ( dc_en & (dc_block_flush | dc_block_writeback) ) begin
           cache_spr_block_flush <= dc_block_flush;
           cache_spr_block_writeback <= dc_block_writeback;
           hitmiss_eval <= 1'b1;
-          state <= `OR1200_DCFSM_FLUSH5;
-          addr_r <=  spr_dat_i;
+          state   <= `OR1200_DCFSM_FLUSH5;
+          addr_r  <=  spr_dat_i;
         end
+        
         // 收到dcache操作请求，转移到状态`OR1200_DCFSM_CLOADSTORE
-        else if (dc_en & dcqmem_cycstb_i)
-        begin
+        else if (dc_en & dcqmem_cycstb_i) begin
           state <= `OR1200_DCFSM_CLOADSTORE;
           hitmiss_eval <=  1'b1;
           store <=  dcqmem_we_i;
-          load <=  !dcqmem_we_i;
+          load  <=  !dcqmem_we_i;
         end
       end // case: `OR1200_DCFSM_IDLE
 
       `OR1200_DCFSM_CLOADSTORE: begin
+        
         hitmiss_eval <=  1'b0;
+        
         if (hitmiss_eval) begin
           cache_inhibit <=  dcqmem_ci_i; // Check for cache inhibit here
           cache_miss <=  tagcomp_miss;
           cache_dirty_needs_writeback <= dirty;
-          addr_r <=  lsu_addr;
+          addr_r    <=  lsu_addr;
         end
 
         // Evaluate any cache line load/stores in first cycle:
         //
-        if (hitmiss_eval & tagcomp_miss & !(store & writethrough) & !dcqmem_ci_i)
-        begin
+        if (hitmiss_eval & tagcomp_miss & !(store & writethrough) & !dcqmem_ci_i) begin
+        
           // Miss - first either:
           //  1) write back dirty line
           if (dirty) begin
@@ -424,16 +431,19 @@ module or1200_dc_fsm
             $display("%t: dcache miss and dirty", $time);
 `endif
           end
+          
           //  2) load requested line
           else begin
             addr_r <=  lsu_addr;
             load <= 1'b1;
             store <= 1'b0;
           end // else: !if(dirty)
+          
           state <= `OR1200_DCFSM_LOOP2;		
           // Set the counter for the burst accesses
           cnt <=  ((1 << `OR1200_DCLS) - 4);
         end
+        
         else if (// Strobe goes low
                   !dcqmem_cycstb_i |
                   // Cycle finishes
@@ -442,15 +452,18 @@ module or1200_dc_fsm
                   (hitmiss_eval & !tagcomp_miss & !dcqmem_ci_i &
                   // .. and you're not doing a writethrough store..
                   !(store & writethrough))) begin
+
           state <=  `OR1200_DCFSM_IDLE;
           load <=  1'b0;
           store <= 1'b0;
           cache_inhibit <= 1'b0;
           cache_dirty_needs_writeback <= 1'b0;
+
         end	
       end // case: `OR1200_DCFSM_CLOADSTORE	
 
       `OR1200_DCFSM_LOOP2 : begin // loop/abort	
+
         if (!dc_en| biudata_error) begin
           state <=  `OR1200_DCFSM_IDLE;
           load <=  1'b0;
@@ -463,8 +476,7 @@ module or1200_dc_fsm
           addr_r[`OR1200_DCLS-1:2] <=  addr_r[`OR1200_DCLS-1:2] + 1;
         end
 
-        else if (biudata_valid & !(|cnt)) 
-        begin
+        else if (biudata_valid & !(|cnt)) begin
           state <= `OR1200_DCFSM_LOOP3;
           addr_r <=  lsu_addr;
           load <= 1'b0;
@@ -474,6 +486,7 @@ module or1200_dc_fsm
         // Track if we did an early ack during a load
         if (load_miss_ack)
             did_early_load_ack <= 1'b1;
+            
       end // case: `OR1200_DCFSM_LOOP2
 
       `OR1200_DCFSM_LOOP3: begin // figure out next step
@@ -487,13 +500,14 @@ module or1200_dc_fsm
           cache_dirty_needs_writeback <= 1'b0;
           state <= `OR1200_DCFSM_LOOP2;
         end // if (cache_dirty_needs_writeback)
-        else if (cache_spr_block_flush | cache_spr_block_writeback) 
-        begin
+        
+        else if (cache_spr_block_flush | cache_spr_block_writeback) begin
           // Just wrote back the line to memory, we're finished.
           cache_spr_block_flush <= 1'b0;
           cache_spr_block_writeback <= 1'b0;
           state <= `OR1200_DCFSM_WAITSPRCS7;
         end
+        
         else begin
           // Just loaded a new line, finish up
           did_early_load_ack <= 1'b0;
@@ -506,19 +520,18 @@ module or1200_dc_fsm
       end
 
       `OR1200_DCFSM_FLUSH5: begin
-         hitmiss_eval <= 1'b0;
-         if (hitmiss_eval & !tag_v)
-           begin
+        hitmiss_eval <= 1'b0;
+        if (hitmiss_eval & !tag_v) begin
           // Not even cached, just ignore
           cache_spr_block_flush <= 1'b0;
           cache_spr_block_writeback <= 1'b0;
           state <=  `OR1200_DCFSM_WAITSPRCS7;
         end
-        else if (hitmiss_eval & tag_v)
-        begin
+        
+        else if (hitmiss_eval & tag_v) begin
+        
           // Tag is valid - what do we do?
-          if ((cache_spr_block_flush | cache_spr_block_writeback) & dirty) 
-          begin
+          if ((cache_spr_block_flush | cache_spr_block_writeback) & dirty) begin
             // Need to writeback
             // Address for writeback (spr_dat_i has already changed so
             // use line number from addr_r)
@@ -532,17 +545,18 @@ module or1200_dc_fsm
             // Set the counter for the burst accesses
             cnt <=  ((1 << `OR1200_DCLS) - 4);
           end
-          else if (cache_spr_block_flush & !dirty)
-          begin
+          
+          else if (cache_spr_block_flush & !dirty) begin
             // Line not dirty, just need to invalidate
             state <=  `OR1200_DCFSM_INV6;
           end // else: !if(dirty)
-          else if (cache_spr_block_writeback & !dirty)
-          begin
+          
+          else if (cache_spr_block_writeback & !dirty) begin
             // Nothing to do - line is valid but not dirty
             cache_spr_block_writeback <= 1'b0;
             state <=  `OR1200_DCFSM_WAITSPRCS7;
           end
+          
         end // if (hitmiss_eval & tag_v)
       end
       

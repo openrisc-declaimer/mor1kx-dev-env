@@ -38,12 +38,12 @@
 
 #include <stdint.h> // For uint32_t types
 
-#define DEBUG 0
-#define DEBUG2 0
-#define DBG_ON  0
-#define DBG_JP_VPI 0
-#define DBG_VPI 0
-#define DBG_CALLS 0
+#define DEBUG 1
+#define DEBUG2 1
+#define DBG_ON  1
+#define DBG_JP_VPI 1
+#define DBG_VPI 1
+#define DBG_CALLS 1
 
 
 #define Boolean int

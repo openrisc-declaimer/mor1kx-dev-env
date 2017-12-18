@@ -90,29 +90,29 @@ module or1200_dmmu_top
   //
   // Clock and reset
   //
-  input                clk;
-  input                rst;
-
-  //
-  // CPU I/F
-  //
-  input                dc_en;          /* SR[3]: Enable Data Cache */
-  input                dmmu_en;        /* SR[5]: Enable Data MMU */
-  input                supv;           /* SR[0]: Super Model */
-  input  [aw-1:0]      dcpu_adr_i;     /* Virtual Address Input*/
-  input                dcpu_cycstb_i;  /* WB BUS */
-  input                dcpu_we_i;
-  output  [3:0]        dcpu_tag_o;
-  output              dcpu_err_o;
+  input                 clk;
+  input                 rst;
+  
+  //  
+  // CPU I/F  
+  //  
+  input                 dc_en;          /* SR[3]: Enable Data Cache */
+  input                 dmmu_en;        /* SR[5]: Enable Data MMU */
+  input                 supv;           /* SR[0]: Super Model */
+  input   [aw-1:0]      dcpu_adr_i;     /* Virtual Address Input*/
+  input                 dcpu_cycstb_i;  /* WB BUS */
+  input                 dcpu_we_i;
+  output  [3:0]         dcpu_tag_o;
+  output                dcpu_err_o;
 
   //
   // SPR access
   //
-  input                    spr_cs;     /* MMU specify register select */
-  input                    spr_write;  /* MMU specify register write enable */
-  input  [aw-1:0]          spr_addr;   /* MMU specify register address */
-  input  [31:0]            spr_dat_i;  /* MMU specify register input data */
-  output  [31:0]          spr_dat_o;  /* MMU specify register output data */
+  input                 spr_cs;     /* MMU specify register select */
+  input                 spr_write;  /* MMU specify register write enable */
+  input   [aw-1:0]      spr_addr;   /* MMU specify register address */
+  input   [31:0]        spr_dat_i;  /* MMU specify register input data */
+  output  [31:0]        spr_dat_o;  /* MMU specify register output data */
 
 `ifdef OR1200_BIST
   //
@@ -126,30 +126,31 @@ module or1200_dmmu_top
   //
   // DC I/F
   //
-  input                qmemdmmu_err_i;
-  input  [3:0]          qmemdmmu_tag_i;
-  output  [aw-1:0]    qmemdmmu_adr_o;
-  output              qmemdmmu_cycstb_o;
-  output              qmemdmmu_ci_o;  /* Data Cache Disable */
+  input                 qmemdmmu_err_i;
+  input   [3:0]         qmemdmmu_tag_i;
+  output  [aw-1:0]      qmemdmmu_adr_o;
+  output                qmemdmmu_cycstb_o;
+  output                qmemdmmu_ci_o;  /* Data Cache Disable */
 
   //
   // Internal wires and regs
   //
-  wire                dtlb_spr_access;
+  wire                  dtlb_spr_access;
   wire  [31:`OR1200_DMMU_PS]  dtlb_ppn;
-  wire                dtlb_hit;
-  wire                dtlb_uwe;
-  wire                dtlb_ure;
-  wire                dtlb_swe;
-  wire                dtlb_sre;
-  wire  [31:0]        dtlb_dat_o;
-  wire                dtlb_en;
-  wire                dtlb_ci;
-  wire                fault;
-  wire                miss;
+  wire                  dtlb_hit;
+  wire                  dtlb_uwe;
+  wire                  dtlb_ure;
+  wire                  dtlb_swe;
+  wire                  dtlb_sre;
+  wire  [31:0]          dtlb_dat_o;
+  wire                  dtlb_en;
+  wire                  dtlb_ci;
+  wire                  fault;
+  wire                  miss;
 `ifdef OR1200_NO_DMMU
 `else
-  reg                  dtlb_done;
+  reg                   dtlb_done;
+  // 这个是用于cross page判断的，怎么没有了，偷工减料的！！
   reg  [31:`OR1200_DMMU_PS]  dcpu_vpn_r;
 `endif
 
@@ -176,6 +177,9 @@ module or1200_dmmu_top
   assign dcpu_tag_o = qmemdmmu_tag_i;       // 从QMEM过来的TAG信号，直接送给CPU模块
   assign qmemdmmu_cycstb_o = dcpu_cycstb_i; // CPU输出的总线周期有效信号直接输出给QMEM
   assign dcpu_err_o = qmemdmmu_err_i;       // 从QMEM过来的ERR信号，直接送给CPU模块
+  // CI标记：
+  //    0：表示对于本页高速缓存是使能的
+  //    1：表示本页禁止使用高速缓存
   assign qmemdmmu_ci_o = `OR1200_DMMU_CI;   // 在默认的情况下，`OR1200_DMMU_CI=dcpu_adr_i[31]，
                                             // 相当于2GB-4GB的地址是不进行高速缓存的，而2GB以下的空间则进行高速缓存（CACHE）。
 `ifdef OR1200_BIST
@@ -219,8 +223,10 @@ module or1200_dmmu_top
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       dtlb_done <=  1'b0;
+    
     else if (dtlb_en)
       dtlb_done <=  dcpu_cycstb_i;
+    
     else
       dtlb_done <=  1'b0;
 
@@ -244,9 +250,11 @@ module or1200_dmmu_top
   // expected to come one clock cycle after offset part.
   //
   // dcpu_vpn_r表示为虚拟页号
+  // 如果是8k的page，则Page Offset为13位:[12:0]
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       dcpu_vpn_r <=  {32-`OR1200_DMMU_PS{1'b0}}; // 即31-13｛1'b0｝
+    
     else
       dcpu_vpn_r <=  dcpu_adr_i[31:`OR1200_DMMU_PS]; // 即dcpu_adr_i[31：13]
 
@@ -256,9 +264,10 @@ module or1200_dmmu_top
   //
   // dtlb_ppn是寄存器DTLBWTR[31:13]值，即翻译后的物理页面，dcpu_adr_i[13-1:0]为页内地址。
   // 当DMMU未激活时，将来自CPU核心的虚拟地址dcpu_adr_i送到QMEM
+  // 物理地址的产生 = {PPN, Page_Offset}
   assign qmemdmmu_adr_o = dmmu_en ?
-                                {dtlb_ppn, dcpu_adr_i[`OR1200_DMMU_PS-1:0]} :
-                                dcpu_adr_i;
+                          {dtlb_ppn, dcpu_adr_i[`OR1200_DMMU_PS-1:0]} :
+                          dcpu_adr_i;
 
   //
   // Output to SPRS unit
@@ -271,10 +280,10 @@ module or1200_dmmu_top
   //
   // 页出错例外逻辑
   assign fault = dtlb_done & // DTLB操作完成
-                (  (!dcpu_we_i & !supv & !dtlb_ure) // Load in user mode not enabled，用户模式下不允许装载
-                || (!dcpu_we_i & supv & !dtlb_sre)  // Load in supv mode not enabled，超级监管者模式下不允许装载
-                || (dcpu_we_i & !supv & !dtlb_uwe)  // Store in user mode not enabled，用户模式下不允许存储
-                || (dcpu_we_i & supv & !dtlb_swe)); // Store in supv mode not enabled，超级监管者模式模式下不允许存储
+                (  (!dcpu_we_i & !supv & !dtlb_ure)   // Load in user mode not enabled，用户模式下不允许装载
+                || (!dcpu_we_i & supv  & !dtlb_sre)   // Load in supv mode not enabled，超级监管者模式下不允许装载
+                || (dcpu_we_i  & !supv & !dtlb_uwe)   // Store in user mode not enabled，用户模式下不允许存储
+                || (dcpu_we_i  & supv  & !dtlb_swe)); // Store in supv mode not enabled，超级监管者模式模式下不允许存储
 
   //
   // TLB Miss exception logic
