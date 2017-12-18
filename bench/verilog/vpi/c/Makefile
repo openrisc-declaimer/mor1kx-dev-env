@@ -43,7 +43,10 @@ SOURCE_FILES= jp_vpi.c rsp-rtl_sim.c gdb.c
 
 # Uncomment this line to enable debugging of all VPI code
 
-#DEBUG_DEFINES=-DDEBUG -DDEBUG2 -DDEBUG_ON=1 -DDEBUG_GDB=1 -DDEBUG_CMDS=1
+DEBUG_DEFINES=-DDEBUG -DDEBUG2 -DDEBUG_ON=1 -DDEBUG_GDB=1 -DDEBUG_CMDS=1
+VCS_CC = gcc
+VCS_CCFLAGS = -Wall -g -I${VCS_HOME}/include
+OBJS = $(SOURCE_FILES:.c=.o)
 
 # Due to a difference in the type for a memory array passed back to the VPI
 # interface, we must indicate whether we're compiling the jp_vpi module for use
@@ -52,6 +55,7 @@ SOURCE_FILES= jp_vpi.c rsp-rtl_sim.c gdb.c
 
 # Set V=1 when calling make to enable verbose output
 # mainly for debugging purposes.
+V=1
 ifeq ($(V), 1)
 Q=
 QUIET=
@@ -60,7 +64,16 @@ Q ?=@
 QUIET=-quiet
 endif
 
-all: jp_vpi
+all: vcs_jp_vpi.a
+
+.c.o: $(SOURCE_FILES)
+	$(VCS_CC) $(VCS_CCFLAGS) $(DEBUG_DEFINES) -c $<
+
+vcs_jp_vpi.a: $(OBJS)
+	echo $(OBJS)
+	\rm -f vcs_jp_vpi.a
+	ar cru vcs_jp_vpi.a $(OBJS)
+	ranlib vcs_jp_vpi.a
 
 jp_vpi: $(SOURCE_FILES)
 	iverilog-vpi $(SOURCE_FILES) $(DEBUG_DEFINES) -DICARUS_VPI
@@ -71,15 +84,16 @@ OBJ_FILES=    jp_vpi.o rsp-rtl_sim.o gdb.o
 MODELTECH_INC_PATH=$(MGC_PATH)/modeltech/include
 MODELTECH_VPI_CFLAGS=-fPIC -fno-stack-protector -DMODELSIM_VPI
 # Modelsim VPI compile commands
-msim_jp_vpi.sl: $(OBJ_FILES)
-	ld -shared -E -o $@ $?
-%.o: %.c
-	$(Q)echo; echo "\t### Building VPI debug components for Modelsim ###"; echo;
-	$(Q)gcc -g ${DEBUG_DEFINES} -I${MODELTECH_INC_PATH} \
-	-l${MODELTECH_INC_PATH} \
-	$(MODELTECH_VPI_CFLAGS) \
-	-c $< -o $*.o
+
+## msim_jp_vpi.sl: $(OBJ_FILES)
+## 	ld -shared -E -o $@ $?
+## %.o: %.c
+## 	$(Q)echo; echo "\t### Building VPI debug components for Modelsim ###"; echo;
+## 	$(Q)gcc -g ${DEBUG_DEFINES} -I${MODELTECH_INC_PATH} \
+## 	-l${MODELTECH_INC_PATH} \
+## 	$(MODELTECH_VPI_CFLAGS) \
+## 	-c $< -o $*.o
 
 clean:
 	$(Q)echo; echo "\t### Cleaning VPI debug directory ###"; echo;
-	$(Q)rm -f *.o *~ jp_vpi.vpi msim_jp_vpi.sl
+	$(Q)rm -f *.o *~ jp_vpi.vpi msim_jp_vpi.sl vcs_jp_vpi vcs_jp_vpi.a

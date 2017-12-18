@@ -100,8 +100,8 @@
 // Trst signal is not inverted here any more. Inverted on higher layer !!!.
 //
 // Revision 1.27  2002/10/10 02:42:55  mohor
-// WISHBONE Scan Chain is changed to reflect state of the WISHBONE access (WBInProgress bit added). 
-// Internal counter is used (counts 256 wb_clk cycles) and when counter exceeds that value, 
+// WISHBONE Scan Chain is changed to reflect state of the WISHBONE access (WBInProgress bit added).
+// Internal counter is used (counts 256 wb_clk cycles) and when counter exceeds that value,
 // wb_cyc_o is negated.
 //
 // Revision 1.26  2002/05/07 14:43:59  mohor
@@ -207,597 +207,604 @@
 
 // Top module
 //module dbg_top(
-module dbg_if( // Renamed by julius
-                // JTAG signals
-                tck_i,
-                tdi_i,
-                tdo_o,
-                rst_i,
+module dbg_if
+  (
+   // Renamed by julius
+   // JTAG signals
+   tck_i,
+   tdi_i,
+   tdo_o,
+   rst_i,
 
-                // TAP states
-                shift_dr_i,
-                pause_dr_i,
-                update_dr_i,
+   // TAP states
+   shift_dr_i,
+   pause_dr_i,
+   update_dr_i,
 
-                // Instructions
-                debug_select_i
-
-
-                `ifdef DBG_WISHBONE_SUPPORTED
-                // WISHBONE common signals
-                ,
-                wb_clk_i,
-                                                                                
-                // WISHBONE master interface
-                wb_adr_o,
-                wb_dat_o,
-                wb_dat_i,
-                wb_cyc_o,
-                wb_stb_o,
-                wb_sel_o,
-                wb_we_o,
-                wb_ack_i,
-                wb_cab_o,
-                wb_err_i,
-                wb_cti_o,
-                wb_bte_o
-                `endif
-
-                `ifdef DBG_CPU0_SUPPORTED
-                // CPU signals
-                ,
-                cpu0_clk_i, 
-                cpu0_addr_o, 
-                cpu0_data_i, 
-                cpu0_data_o,
-                cpu0_bp_i,
-                cpu0_stall_o,
-                cpu0_stb_o,
-                cpu0_we_o,
-                cpu0_ack_i,
-                cpu0_rst_o
-                `endif
-
-                `ifdef DBG_CPU1_SUPPORTED
-                // CPU signals
-                ,
-                cpu1_clk_i, 
-                cpu1_addr_o, 
-                cpu1_data_i, 
-                cpu1_data_o,
-                cpu1_bp_i,
-                cpu1_stall_o,
-                cpu1_stb_o,
-                cpu1_we_o,
-                cpu1_ack_i,
-                cpu1_rst_o
-                `endif
-
-              );
-
-
-// JTAG signals
-input   tck_i;
-input   tdi_i;
-output  tdo_o;
-input   rst_i;
-
-// TAP states
-input   shift_dr_i;
-input   pause_dr_i;
-input   update_dr_i;
-
-// Instructions
-input   debug_select_i;
+   // Instructions
+   debug_select_i
 
 `ifdef DBG_WISHBONE_SUPPORTED
-input         wb_clk_i;
-output [31:0] wb_adr_o;
-output [31:0] wb_dat_o;
-input  [31:0] wb_dat_i;
-output        wb_cyc_o;
-output        wb_stb_o;
-output  [3:0] wb_sel_o;
-output        wb_we_o;
-input         wb_ack_i;
-output        wb_cab_o;
-input         wb_err_i;
-output  [2:0] wb_cti_o;
-output  [1:0] wb_bte_o;
+   // WISHBONE common signals
+   ,
+   wb_clk_i,
 
-reg           wishbone_module;
-reg           wishbone_ce;
-wire          tdi_wb;
-wire          tdo_wb;
-wire          crc_en_wb;
-wire          shift_crc_wb;
-`else
-wire          crc_en_wb = 1'b0;
-wire          shift_crc_wb = 1'b0;
+   // WISHBONE master interface
+   wb_adr_o,
+   wb_dat_o,
+   wb_dat_i,
+   wb_cyc_o,
+   wb_stb_o,
+   wb_sel_o,
+   wb_we_o,
+   wb_ack_i,
+   wb_cab_o,
+   wb_err_i,
+   wb_cti_o,
+   wb_bte_o
 `endif
 
 `ifdef DBG_CPU0_SUPPORTED
-// CPU signals
-input         cpu0_clk_i; 
-output [31:0] cpu0_addr_o; 
-input  [31:0] cpu0_data_i; 
-output [31:0] cpu0_data_o;
-input         cpu0_bp_i;
-output        cpu0_stall_o;
-output        cpu0_stb_o;
-output        cpu0_we_o;
-input         cpu0_ack_i;
-output        cpu0_rst_o;
-
-reg           cpu0_debug_module;
-reg           cpu0_ce;
-wire          cpu0_tdi;
-wire          cpu0_tdo;
-wire          cpu0_crc_en;
-wire          cpu0_shift_crc;
-`else
-wire          cpu0_crc_en = 1'b0;
-wire          cpu0_shift_crc = 1'b0;
+   // CPU signals
+   ,
+   cpu0_clk_i,
+   cpu0_addr_o,
+   cpu0_data_i,
+   cpu0_data_o,
+   cpu0_bp_i,
+   cpu0_stall_o,
+   cpu0_stb_o,
+   cpu0_we_o,
+   cpu0_ack_i,
+   cpu0_rst_o
 `endif
 
 `ifdef DBG_CPU1_SUPPORTED
-input         cpu1_clk_i; 
-output [31:0] cpu1_addr_o; 
-input  [31:0] cpu1_data_i; 
-output [31:0] cpu1_data_o;
-input         cpu1_bp_i;
-output        cpu1_stall_o;
-output        cpu1_stb_o;
-output        cpu1_we_o;
-input         cpu1_ack_i;
-output        cpu1_rst_o;
+   // CPU signals
+   ,
+   cpu1_clk_i,
+   cpu1_addr_o,
+   cpu1_data_i,
+   cpu1_data_o,
+   cpu1_bp_i,
+   cpu1_stall_o,
+   cpu1_stb_o,
+   cpu1_we_o,
+   cpu1_ack_i,
+   cpu1_rst_o
+`endif
+  );
 
-reg           cpu1_debug_module;
-reg           cpu1_ce;
-wire          cpu1_tdi;
-wire          cpu1_tdo;
-wire          cpu1_crc_en;
-wire          cpu1_shift_crc;
+  // JTAG signals
+  input   tck_i;
+  input   tdi_i;
+  output  tdo_o;
+  input   rst_i;
+
+  // TAP states
+  input   shift_dr_i;
+  input   pause_dr_i;
+  input   update_dr_i;
+
+  // Instructions
+  input   debug_select_i;
+
+`ifdef DBG_WISHBONE_SUPPORTED
+  input         wb_clk_i;
+  output [31:0] wb_adr_o;
+  output [31:0] wb_dat_o;
+  input  [31:0] wb_dat_i;
+  output        wb_cyc_o;
+  output        wb_stb_o;
+  output  [3:0] wb_sel_o;
+  output        wb_we_o;
+  input         wb_ack_i;
+  output        wb_cab_o;
+  input         wb_err_i;
+  output  [2:0] wb_cti_o;
+  output  [1:0] wb_bte_o;
+
+  reg           wishbone_module;
+  reg           wishbone_ce;
+  wire          tdi_wb;
+  wire          tdo_wb;
+  wire          crc_en_wb;
+  wire          shift_crc_wb;
 `else
-wire          cpu1_crc_en = 1'b0;
-wire          cpu1_shift_crc = 1'b0;
+  wire          crc_en_wb = 1'b0;
+  wire          shift_crc_wb = 1'b0;
 `endif
 
+`ifdef DBG_CPU0_SUPPORTED
+  // CPU signals
+  input         cpu0_clk_i;
+  output [31:0] cpu0_addr_o;
+  input  [31:0] cpu0_data_i;
+  output [31:0] cpu0_data_o;
+  input         cpu0_bp_i;
+  output        cpu0_stall_o;
+  output        cpu0_stb_o;
+  output        cpu0_we_o;
+  input         cpu0_ack_i;
+  output        cpu0_rst_o;
 
-reg [`DBG_TOP_DATA_CNT -1:0]        data_cnt;
-reg [`DBG_TOP_CRC_CNT -1:0]         crc_cnt;
-reg [`DBG_TOP_STATUS_CNT_WIDTH -1:0]      status_cnt;
-reg [`DBG_TOP_MODULE_DATA_LEN -1:0]  module_dr;
-reg [`DBG_TOP_MODULE_ID_LENGTH -1:0] module_id; 
+  reg           cpu0_debug_module;
+  reg           cpu0_ce;
+  wire          cpu0_tdi;
+  wire          cpu0_tdo;
+  wire          cpu0_crc_en;
+  wire          cpu0_shift_crc;
+`else
+  wire          cpu0_crc_en = 1'b0;
+  wire          cpu0_shift_crc = 1'b0;
+`endif
 
-wire module_latch_en;
-wire data_cnt_end;
-wire crc_cnt_end;
-wire status_cnt_end;
-reg  crc_cnt_end_q;
-reg  module_select;
-reg  module_select_error;
-wire crc_out;
-wire crc_match;
+`ifdef DBG_CPU1_SUPPORTED
+  input         cpu1_clk_i;
+  output [31:0] cpu1_addr_o;
+  input  [31:0] cpu1_data_i;
+  output [31:0] cpu1_data_o;
+  input         cpu1_bp_i;
+  output        cpu1_stall_o;
+  output        cpu1_stb_o;
+  output        cpu1_we_o;
+  input         cpu1_ack_i;
+  output        cpu1_rst_o;
 
-wire data_shift_en;
-wire selecting_command;
+  reg           cpu1_debug_module;
+  reg           cpu1_ce;
+  wire          cpu1_tdi;
+  wire          cpu1_tdo;
+  wire          cpu1_crc_en;
+  wire          cpu1_shift_crc;
+`else
+  wire          cpu1_crc_en = 1'b0;
+  wire          cpu1_shift_crc = 1'b0;
+`endif
 
-reg tdo_o;
+  reg [`DBG_TOP_DATA_CNT -1:0]          data_cnt;
+  reg [`DBG_TOP_CRC_CNT -1:0]           crc_cnt;
+  reg [`DBG_TOP_STATUS_CNT_WIDTH -1:0]  status_cnt;
+  reg [`DBG_TOP_MODULE_DATA_LEN -1:0]   module_dr;
+  reg [`DBG_TOP_MODULE_ID_LENGTH -1:0]  module_id;
 
+  wire    module_latch_en;
+  wire    data_cnt_end;
+  wire    crc_cnt_end;
+  wire    status_cnt_end;
+  reg     crc_cnt_end_q;
+  reg     module_select;
+  reg     module_select_error;
+  wire    crc_out;
+  wire    crc_match;
+  wire    data_shift_en;
+  wire    selecting_command;
+  reg     tdo_o;
+  wire    shift_crc;
 
+  // data counter
+  always @ (posedge tck_i or posedge rst_i) begin
 
+    if (rst_i)
+      data_cnt <=  {`DBG_TOP_DATA_CNT{1'b0}};
 
-wire shift_crc;
+    else if(shift_dr_i & (~data_cnt_end))
+      data_cnt <=  data_cnt + 1;
 
-// data counter
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    data_cnt <=  {`DBG_TOP_DATA_CNT{1'b0}};
-  else if(shift_dr_i & (~data_cnt_end))
-    data_cnt <=  data_cnt + 1;
-  else if (update_dr_i)
-    data_cnt <=  {`DBG_TOP_DATA_CNT{1'b0}};
-end
+    else if (update_dr_i)
+      data_cnt <=  {`DBG_TOP_DATA_CNT{1'b0}};
 
+  end
 
-assign data_cnt_end = data_cnt == `DBG_TOP_MODULE_DATA_LEN;
+  assign data_cnt_end = data_cnt == `DBG_TOP_MODULE_DATA_LEN;
 
+  // crc counter
+  always @ (posedge tck_i or posedge rst_i) begin
 
-// crc counter
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    crc_cnt <=  {`DBG_TOP_CRC_CNT{1'b0}};
-  else if(shift_dr_i & data_cnt_end & (~crc_cnt_end) & module_select)
-    crc_cnt <=  crc_cnt + 1;
-  else if (update_dr_i)
-    crc_cnt <=  {`DBG_TOP_CRC_CNT{1'b0}};
-end
+    if (rst_i)
+      crc_cnt <=  {`DBG_TOP_CRC_CNT{1'b0}};
 
-assign crc_cnt_end = crc_cnt == `DBG_TOP_CRC_LEN;
+    else if(shift_dr_i & data_cnt_end & (~crc_cnt_end) & module_select)
+      crc_cnt <=  crc_cnt + 1;
 
+    else if (update_dr_i)
+      crc_cnt <=  {`DBG_TOP_CRC_CNT{1'b0}};
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    crc_cnt_end_q  <=  1'b0;
-  else
-    crc_cnt_end_q  <=  crc_cnt_end;
-end
+  end
 
+  assign crc_cnt_end = crc_cnt == `DBG_TOP_CRC_LEN;
 
-// status counter
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    status_cnt <=  {`DBG_TOP_STATUS_CNT_WIDTH{1'b0}};
-  else if(shift_dr_i & crc_cnt_end & (~status_cnt_end))
-    status_cnt <=  status_cnt + 1;
-  else if (update_dr_i)
-    status_cnt <=  {`DBG_TOP_STATUS_CNT_WIDTH{1'b0}};
-end
+  always @ (posedge tck_i or posedge rst_i) begin
 
-assign status_cnt_end = status_cnt == `DBG_TOP_STATUS_LEN;
+    if (rst_i)
+      crc_cnt_end_q  <=  1'b0;
 
+    else
+      crc_cnt_end_q  <=  crc_cnt_end;
 
-assign selecting_command = shift_dr_i & (data_cnt == `DBG_TOP_DATA_CNT'h0) & debug_select_i;
+  end
 
+  // status counter
+  always @ (posedge tck_i or posedge rst_i) begin
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    module_select <=  1'b0;
-  else if(selecting_command & tdi_i)       // Chain select
-    module_select <=  1'b1;
-  else if (update_dr_i)
-    module_select <=  1'b0;
-end
+    if (rst_i)
+      status_cnt <=  {`DBG_TOP_STATUS_CNT_WIDTH{1'b0}};
 
-/* verilator lint_off COMBDLY */
-always @ (module_id)
-begin
-  `ifdef DBG_CPU0_SUPPORTED
-  cpu0_debug_module  <=  1'b0;
-  `endif
-  `ifdef DBG_CPU1_SUPPORTED
-  cpu1_debug_module  <=  1'b0;
-  `endif
-  `ifdef DBG_WISHBONE_SUPPORTED
-  wishbone_module   <=  1'b0;
-  `endif
-  module_select_error    <=  1'b0;
-  
-  case (module_id)                /* synthesis parallel_case */
-    `ifdef DBG_CPU0_SUPPORTED
-      `DBG_TOP_CPU0_DEBUG_MODULE     :   cpu0_debug_module   <=  1'b1;
-    `endif
-    `ifdef DBG_CPU1_SUPPORTED
-      `DBG_TOP_CPU1_DEBUG_MODULE     :   cpu1_debug_module   <=  1'b1;
-    `endif
-    `ifdef DBG_WISHBONE_SUPPORTED
-      `DBG_TOP_WISHBONE_DEBUG_MODULE :   wishbone_module     <=  1'b1;
-    `endif
-    default                          :   module_select_error <=  1'b1; 
-  endcase
-end
-/* verilator lint_on COMBDLY */
+    else if(shift_dr_i & crc_cnt_end & (~status_cnt_end))
+      status_cnt <=  status_cnt + 1;
 
-assign module_latch_en = module_select & crc_cnt_end & (~crc_cnt_end_q);
+    else if (update_dr_i)
+      status_cnt <=  {`DBG_TOP_STATUS_CNT_WIDTH{1'b0}};
 
+  end
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    module_id <= {`DBG_TOP_MODULE_ID_LENGTH{1'b1}};
-  else if(module_latch_en & crc_match)
-    module_id <=  module_dr[`DBG_TOP_MODULE_DATA_LEN -2:0];
-end
+  assign status_cnt_end = status_cnt == `DBG_TOP_STATUS_LEN;
 
+  assign selecting_command = shift_dr_i & (data_cnt == `DBG_TOP_DATA_CNT'h0) & debug_select_i;
 
-assign data_shift_en = shift_dr_i & (~data_cnt_end);
+  always @ (posedge tck_i or posedge rst_i) begin
 
+    if (rst_i)
+      module_select <=  1'b0;
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    module_dr <=  0;   
-  else if (data_shift_en)
-    module_dr[`DBG_TOP_MODULE_DATA_LEN -1:0] <=  {module_dr[`DBG_TOP_MODULE_DATA_LEN -2:0], tdi_i};
-end
+    else if(selecting_command & tdi_i)       // Chain select
+      module_select <=  1'b1;
 
+    else if (update_dr_i)
+      module_select <=  1'b0;
 
-// Calculating crc for input data
-dbg_crc32_d1 i_dbg_crc32_d1_in
-             ( 
-              .data       (tdi_i),
-              .enable     (shift_dr_i),
-              .shift      (1'b0),
-              .rst        (rst_i),
-              .sync_rst   (update_dr_i),
-              .crc_out    (),
-              .clk        (tck_i),
-              .crc_match  (crc_match)
-             );
+  end
 
+  /* verilator lint_off COMBDLY */
+  always @ (module_id) begin
 
-reg tdo_module_select;
-wire crc_en;
-wire crc_en_dbg;
-reg crc_started;
+`ifdef DBG_CPU0_SUPPORTED
+    cpu0_debug_module  <=  1'b0;
+`endif
 
-assign crc_en = crc_en_dbg | crc_en_wb | cpu1_crc_en | cpu0_crc_en;
+`ifdef DBG_CPU1_SUPPORTED
+    cpu1_debug_module  <=  1'b0;
+`endif
 
-assign crc_en_dbg = shift_dr_i & crc_cnt_end & (~status_cnt_end);
+`ifdef DBG_WISHBONE_SUPPORTED
+    wishbone_module   <=  1'b0;
+`endif
+    module_select_error    <=  1'b0;
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    crc_started <=  1'b0;
-  else if (crc_en)
-    crc_started <=  1'b1;
-  else if (update_dr_i)
-    crc_started <=  1'b0;
-end
+    case (module_id)                /* synthesis parallel_case */
+`ifdef DBG_CPU0_SUPPORTED
+    `DBG_TOP_CPU0_DEBUG_MODULE     :   cpu0_debug_module   <=  1'b1;
+`endif
+`ifdef DBG_CPU1_SUPPORTED
+    `DBG_TOP_CPU1_DEBUG_MODULE     :   cpu1_debug_module   <=  1'b1;
+`endif
+`ifdef DBG_WISHBONE_SUPPORTED
+    `DBG_TOP_WISHBONE_DEBUG_MODULE :   wishbone_module     <=  1'b1;
+`endif
+    default                        :   module_select_error <=  1'b1;
+    endcase
 
+  end
+  /* verilator lint_on COMBDLY */
 
-reg tdo_tmp;
+  assign module_latch_en = module_select & crc_cnt_end & (~crc_cnt_end_q);
 
+  always @ (posedge tck_i or posedge rst_i) begin
 
-// Calculating crc for input data
-dbg_crc32_d1 i_dbg_crc32_d1_out
-             ( 
-              .data       (tdo_tmp),
-              .enable     (crc_en), // enable has priority
-//              .shift      (1'b0),
-              .shift      (shift_dr_i & crc_started & (~crc_en)),
-              .rst        (rst_i),
-              .sync_rst   (update_dr_i),
-              .crc_out    (crc_out),
-              .clk        (tck_i),
-              .crc_match  ()
-             );
+    if (rst_i)
+      module_id <= {`DBG_TOP_MODULE_ID_LENGTH{1'b1}};
 
-// Following status is shifted out: 
-// 1. bit:          0 if crc is OK, else 1
-// 2. bit:          0 if existing module_id is selected, 1 if non-existing module_id is selected
-// 3. bit:          0 (always) 
-// 4. bit:          0 (always)
+    else if(module_latch_en & crc_match)
+      module_id <=  module_dr[`DBG_TOP_MODULE_DATA_LEN -2:0];
+
+  end
+
+  assign data_shift_en = shift_dr_i & (~data_cnt_end);
+
+  always @ (posedge tck_i or posedge rst_i) begin
+
+    if (rst_i)
+      module_dr <=  0;
+
+    else if (data_shift_en)
+      module_dr[`DBG_TOP_MODULE_DATA_LEN -1:0] <=  {module_dr[`DBG_TOP_MODULE_DATA_LEN -2:0], tdi_i};
+
+  end
+
+  // Calculating crc for input data
+  dbg_crc32_d1 i_dbg_crc32_d1_in
+    (
+     .data       (tdi_i),
+     .enable     (shift_dr_i),
+     .shift      (1'b0),
+     .rst        (rst_i),
+     .sync_rst   (update_dr_i),
+     .crc_out    (),
+     .clk        (tck_i),
+     .crc_match  (crc_match)
+    );
 
 
-always @ (status_cnt or crc_match or module_select_error or crc_out)
-begin
-  case (status_cnt)                   /* synthesis full_case parallel_case */ 
+  reg   tdo_module_select;
+  wire  crc_en;
+  wire  crc_en_dbg;
+  reg   crc_started;
+
+  assign crc_en = crc_en_dbg | crc_en_wb | cpu1_crc_en | cpu0_crc_en;
+
+  assign crc_en_dbg = shift_dr_i & crc_cnt_end & (~status_cnt_end);
+
+  always @ (posedge tck_i or posedge rst_i) begin
+
+    if (rst_i)
+      crc_started <=  1'b0;
+
+    else if (crc_en)
+      crc_started <=  1'b1;
+
+    else if (update_dr_i)
+      crc_started <=  1'b0;
+
+  end
+
+  reg   tdo_tmp;
+
+  // Calculating crc for input data
+  dbg_crc32_d1 i_dbg_crc32_d1_out
+    (
+     .data       (tdo_tmp),
+     .enable     (crc_en), // enable has priority
+     // .shift      (1'b0),
+     .shift      (shift_dr_i & crc_started & (~crc_en)),
+     .rst        (rst_i),
+     .sync_rst   (update_dr_i),
+     .crc_out    (crc_out),
+     .clk        (tck_i),
+     .crc_match  ()
+    );
+
+  // Following status is shifted out:
+  // 1. bit:          0 if crc is OK, else 1
+  // 2. bit:          0 if existing module_id is selected, 1 if non-existing module_id is selected
+  // 3. bit:          0 (always)
+  // 4. bit:          0 (always)
+
+  always @ (status_cnt or crc_match or module_select_error or crc_out) begin
+    case (status_cnt)                   /* synthesis full_case parallel_case */
+
     `DBG_TOP_STATUS_CNT_WIDTH'd0  : begin
-                        tdo_module_select = ~crc_match;
-                      end
+      tdo_module_select = ~crc_match;
+    end
+
     `DBG_TOP_STATUS_CNT_WIDTH'd1  : begin
-                        tdo_module_select = module_select_error;
-                      end
+      tdo_module_select = module_select_error;
+    end
+
     `DBG_TOP_STATUS_CNT_WIDTH'd2  : begin
-                        tdo_module_select = 1'b0;
-                      end
+      tdo_module_select = 1'b0;
+    end
+
     `DBG_TOP_STATUS_CNT_WIDTH'd3  : begin
-                        tdo_module_select = 1'b0;
-                      end
+      tdo_module_select = 1'b0;
+    end
+
     `DBG_TOP_STATUS_CNT_WIDTH'd4  : begin
-                        tdo_module_select = crc_out;
-                      end
-     default : begin    tdo_module_select = 1'b0; end			//me added
-  endcase
-end
+      tdo_module_select = crc_out;
+    end
 
+     default : begin
+      tdo_module_select = 1'b0;
+    end			//me added
 
+    endcase
+  end
 
+  assign shift_crc = shift_crc_wb | cpu1_shift_crc | cpu0_shift_crc;
 
-assign shift_crc = shift_crc_wb | cpu1_shift_crc | cpu0_shift_crc;
-
-always @ (shift_crc or crc_out or tdo_module_select
+  always @ (shift_crc or crc_out or tdo_module_select
 `ifdef DBG_WISHBONE_SUPPORTED
- or wishbone_ce or tdo_wb
+            or wishbone_ce or tdo_wb
 `endif
 `ifdef DBG_CPU0_SUPPORTED
- or cpu0_ce or cpu0_tdo
+            or cpu0_ce or cpu0_tdo
 `endif
 `ifdef DBG_CPU1_SUPPORTED
- or cpu1_ce or cpu1_tdo
+            or cpu1_ce or cpu1_tdo
 `endif
-         )
-begin
-  if (shift_crc)          // shifting crc
-    tdo_tmp = crc_out;
-  `ifdef DBG_WISHBONE_SUPPORTED
-  else if (wishbone_ce)   //  shifting data from wb
-    tdo_tmp = tdo_wb;
-  `endif
-  `ifdef DBG_CPU0_SUPPORTED
-  else if (cpu0_ce)        // shifting data from cpu
-    tdo_tmp = cpu0_tdo;
-  `endif
-  `ifdef DBG_CPU1_SUPPORTED
-  else if (cpu1_ce)        // shifting data from cpu
-    tdo_tmp = cpu1_tdo;
-  `endif
-  else
-    tdo_tmp = tdo_module_select;
-end
+           ) begin
 
+    if (shift_crc)          // shifting crc
+      tdo_tmp = crc_out;
 
-always @ (negedge tck_i)
-begin
-  tdo_o <=  tdo_tmp;
-end
+`ifdef DBG_WISHBONE_SUPPORTED
+    else if (wishbone_ce)   //  shifting data from wb
+      tdo_tmp = tdo_wb;
+`endif
 
+`ifdef DBG_CPU0_SUPPORTED
+    else if (cpu0_ce)        // shifting data from cpu
+      tdo_tmp = cpu0_tdo;
+`endif
 
+`ifdef DBG_CPU1_SUPPORTED
+    else if (cpu1_ce)        // shifting data from cpu
+      tdo_tmp = cpu1_tdo;
+`endif
 
+    else
+      tdo_tmp = tdo_module_select;
+  end
 
-// Signals for WISHBONE module
+  always @ (negedge tck_i) begin
+    tdo_o <=  tdo_tmp;
+  end
 
+  // Signals for WISHBONE module
+  always @ (posedge tck_i or posedge rst_i) begin
 
-always @ (posedge tck_i or posedge rst_i)
-begin
-  if (rst_i)
-    begin
-      `ifdef DBG_WISHBONE_SUPPORTED
-      wishbone_ce <=  1'b0;
-      `endif
-      `ifdef DBG_CPU0_SUPPORTED
-      cpu0_ce <=  1'b0;
-      `endif
-      `ifdef DBG_CPU1_SUPPORTED
-      cpu1_ce <=  1'b0;
-      `endif
+    if (rst_i) begin
+    `ifdef DBG_WISHBONE_SUPPORTED
+        wishbone_ce <=  1'b0;
+    `endif
+
+    `ifdef DBG_CPU0_SUPPORTED
+        cpu0_ce <=  1'b0;
+    `endif
+
+    `ifdef DBG_CPU1_SUPPORTED
+        cpu1_ce <=  1'b0;
+    `endif
+
     end
-  else if(selecting_command & (~tdi_i))
-    begin
-      `ifdef DBG_WISHBONE_SUPPORTED
+
+    else  if(selecting_command & (~tdi_i)) begin
+`ifdef DBG_WISHBONE_SUPPORTED
       if (wishbone_module)      // wishbone CE
-        wishbone_ce <=  1'b1;
-      `endif
-      `ifdef DBG_CPU0_SUPPORTED
+          wishbone_ce <=  1'b1;
+`endif
+
+`ifdef DBG_CPU0_SUPPORTED
       if (cpu0_debug_module)     // CPU CE
         cpu0_ce <=  1'b1;
-      `endif
-      `ifdef DBG_CPU1_SUPPORTED
+`endif
+
+`ifdef DBG_CPU1_SUPPORTED
       if (cpu1_debug_module)     // CPU CE
         cpu1_ce <=  1'b1;
-      `endif
+`endif
     end
-  else if (update_dr_i)
-    begin
-      `ifdef DBG_WISHBONE_SUPPORTED
+
+    else if (update_dr_i) begin
+`ifdef DBG_WISHBONE_SUPPORTED
       wishbone_ce <=  1'b0;
-      `endif
-      `ifdef DBG_CPU0_SUPPORTED
+`endif
+
+`ifdef DBG_CPU0_SUPPORTED
       cpu0_ce <=  1'b0;
-      `endif
-      `ifdef DBG_CPU1_SUPPORTED
-      cpu1_ce <=  1'b0;
-      `endif
-    end
-end
-
-
-`ifdef DBG_WISHBONE_SUPPORTED
-assign tdi_wb  = wishbone_ce & tdi_i;
 `endif
 
-`ifdef DBG_CPU0_SUPPORTED
-assign cpu0_tdi = cpu0_ce & tdi_i;
-`endif
 `ifdef DBG_CPU1_SUPPORTED
-assign cpu1_tdi = cpu1_ce & tdi_i;
+      cpu1_ce <=  1'b0;
 `endif
-
+    end
+  end
 
 `ifdef DBG_WISHBONE_SUPPORTED
-// Connecting wishbone module
-dbg_wb i_dbg_wb (
-                  // JTAG signals
-                  .tck_i            (tck_i),
-                  .tdi_i            (tdi_wb),
-                  .tdo_o            (tdo_wb),
-
-                  // TAP states
-                  .shift_dr_i       (shift_dr_i),
-                  .pause_dr_i       (pause_dr_i),
-                  .update_dr_i      (update_dr_i),
-
-                  .wishbone_ce_i    (wishbone_ce),
-                  .crc_match_i      (crc_match),
-                  .crc_en_o         (crc_en_wb),
-                  .shift_crc_o      (shift_crc_wb),
-                  .rst_i            (rst_i),
-
-                  // WISHBONE common signals
-                  .wb_clk_i         (wb_clk_i),
-
-                  // WISHBONE master interface
-                  .wb_adr_o         (wb_adr_o), 
-                  .wb_dat_o         (wb_dat_o),
-                  .wb_dat_i         (wb_dat_i),
-                  .wb_cyc_o         (wb_cyc_o),
-                  .wb_stb_o         (wb_stb_o),
-                  .wb_sel_o         (wb_sel_o),
-                  .wb_we_o          (wb_we_o),
-                  .wb_ack_i         (wb_ack_i),
-                  .wb_cab_o         (wb_cab_o),
-                  .wb_err_i         (wb_err_i),
-                  .wb_cti_o         (wb_cti_o),
-                  .wb_bte_o         (wb_bte_o)
-            );
+  assign tdi_wb  = wishbone_ce & tdi_i;
 `endif
 
+`ifdef DBG_CPU0_SUPPORTED
+  assign cpu0_tdi = cpu0_ce & tdi_i;
+`endif
 
+`ifdef DBG_CPU1_SUPPORTED
+  assign cpu1_tdi = cpu1_ce & tdi_i;
+`endif
+
+`ifdef DBG_WISHBONE_SUPPORTED
+  // Connecting wishbone module
+  dbg_wb i_dbg_wb (
+                    // JTAG signals
+                    .tck_i            (tck_i),
+                    .tdi_i            (tdi_wb),
+                    .tdo_o            (tdo_wb),
+
+                    // TAP states
+                    .shift_dr_i       (shift_dr_i),
+                    .pause_dr_i       (pause_dr_i),
+                    .update_dr_i      (update_dr_i),
+
+                    .wishbone_ce_i    (wishbone_ce),
+                    .crc_match_i      (crc_match),
+                    .crc_en_o         (crc_en_wb),
+                    .shift_crc_o      (shift_crc_wb),
+                    .rst_i            (rst_i),
+
+                    // WISHBONE common signals
+                    .wb_clk_i         (wb_clk_i),
+
+                    // WISHBONE master interface
+                    .wb_adr_o         (wb_adr_o),
+                    .wb_dat_o         (wb_dat_o),
+                    .wb_dat_i         (wb_dat_i),
+                    .wb_cyc_o         (wb_cyc_o),
+                    .wb_stb_o         (wb_stb_o),
+                    .wb_sel_o         (wb_sel_o),
+                    .wb_we_o          (wb_we_o),
+                    .wb_ack_i         (wb_ack_i),
+                    .wb_cab_o         (wb_cab_o),
+                    .wb_err_i         (wb_err_i),
+                    .wb_cti_o         (wb_cti_o),
+                    .wb_bte_o         (wb_bte_o)
+              );
+`endif // DBG_WISHBONE_SUPPORTED
 
 `ifdef DBG_CPU0_SUPPORTED
-dbg_cpu i_dbg_cpu_or1k (
-                  // JTAG signals
-                  .tck_i            (tck_i),
-                  .tdi_i            (cpu0_tdi),
-                  .tdo_o            (cpu0_tdo),
+  dbg_cpu i_dbg_cpu_or1k (
+                    // JTAG signals
+                    .tck_i            (tck_i),
+                    .tdi_i            (cpu0_tdi),
+                    .tdo_o            (cpu0_tdo),
 
-                  // TAP states
-                  .shift_dr_i       (shift_dr_i),
-                  .pause_dr_i       (pause_dr_i),
-                  .update_dr_i      (update_dr_i),
+                    // TAP states
+                    .shift_dr_i       (shift_dr_i),
+                    .pause_dr_i       (pause_dr_i),
+                    .update_dr_i      (update_dr_i),
 
-                  .cpu_ce_i         (cpu0_ce),
-                  .crc_match_i      (crc_match),
-                  .crc_en_o         (cpu0_crc_en),
-                  .shift_crc_o      (cpu0_shift_crc),
-                  .rst_i            (rst_i),
+                    .cpu_ce_i         (cpu0_ce),
+                    .crc_match_i      (crc_match),
+                    .crc_en_o         (cpu0_crc_en),
+                    .shift_crc_o      (cpu0_shift_crc),
+                    .rst_i            (rst_i),
 
-                  // CPU signals
-                  .cpu_clk_i        (cpu0_clk_i), 
-                  .cpu_addr_o       (cpu0_addr_o), 
-                  .cpu_data_i       (cpu0_data_i), 
-                  .cpu_data_o       (cpu0_data_o),
-                  .cpu_bp_i         (cpu0_bp_i),
-                  .cpu_stall_o      (cpu0_stall_o),
-                  .cpu_stb_o        (cpu0_stb_o),
-                  .cpu_we_o         (cpu0_we_o),
-                  .cpu_ack_i        (cpu0_ack_i),
-                  .cpu_rst_o        (cpu0_rst_o)
-              );
+                    // CPU signals
+                    .cpu_clk_i        (cpu0_clk_i),
+                    .cpu_addr_o       (cpu0_addr_o),
+                    .cpu_data_i       (cpu0_data_i),
+                    .cpu_data_o       (cpu0_data_o),
+                    .cpu_bp_i         (cpu0_bp_i),
+                    .cpu_stall_o      (cpu0_stall_o),
+                    .cpu_stb_o        (cpu0_stb_o),
+                    .cpu_we_o         (cpu0_we_o),
+                    .cpu_ack_i        (cpu0_ack_i),
+                    .cpu_rst_o        (cpu0_rst_o)
+                );
 
 `endif  //  DBG_CPU0_SUPPORTED
 
 
 
 `ifdef DBG_CPU1_SUPPORTED
-// Connecting cpu module
-dbg_cpu i_dbg_cpu_8051 (
-                  // JTAG signals
-                  .tck_i            (tck_i),
-                  .tdi_i            (cpu1_tdi),
-                  .tdo_o            (cpu1_tdo),
+  // Connecting cpu module
+  dbg_cpu i_dbg_cpu_8051 (
+                    // JTAG signals
+                    .tck_i            (tck_i),
+                    .tdi_i            (cpu1_tdi),
+                    .tdo_o            (cpu1_tdo),
 
-                  // TAP states
-                  .shift_dr_i       (shift_dr_i),
-                  .pause_dr_i       (pause_dr_i),
-                  .update_dr_i      (update_dr_i),
+                    // TAP states
+                    .shift_dr_i       (shift_dr_i),
+                    .pause_dr_i       (pause_dr_i),
+                    .update_dr_i      (update_dr_i),
 
-                  .cpu_ce_i         (cpu1_ce),
-                  .crc_match_i      (crc_match),
-                  .crc_en_o         (cpu1_crc_en),
-                  .shift_crc_o      (cpu1_shift_crc),
-                  .rst_i            (rst_i),
+                    .cpu_ce_i         (cpu1_ce),
+                    .crc_match_i      (crc_match),
+                    .crc_en_o         (cpu1_crc_en),
+                    .shift_crc_o      (cpu1_shift_crc),
+                    .rst_i            (rst_i),
 
-                  // CPU signals
-                  .cpu_clk_i        (cpu1_clk_i), 
-                  .cpu_addr_o       (cpu1_addr_o), 
-                  .cpu_data_i       (cpu1_data_i), 
-                  .cpu_data_o       (cpu1_data_o),
-                  .cpu_bp_i         (cpu1_bp_i),
-                  .cpu_stall_o      (cpu1_stall_o),
-                  .cpu_stb_o        (cpu1_stb_o),
-                  .cpu_we_o         (cpu1_we_o),
-                  .cpu_ack_i        (cpu1_ack_i),
-                  .cpu_rst_o        (cpu1_rst_o)
-              );
-`endif
-
+                    // CPU signals
+                    .cpu_clk_i        (cpu1_clk_i),
+                    .cpu_addr_o       (cpu1_addr_o),
+                    .cpu_data_i       (cpu1_data_i),
+                    .cpu_data_o       (cpu1_data_o),
+                    .cpu_bp_i         (cpu1_bp_i),
+                    .cpu_stall_o      (cpu1_stall_o),
+                    .cpu_stb_o        (cpu1_stb_o),
+                    .cpu_we_o         (cpu1_we_o),
+                    .cpu_ack_i        (cpu1_ack_i),
+                    .cpu_rst_o        (cpu1_rst_o)
+                );
+`endif // DBG_CPU1_SUPPORTED
 
 endmodule

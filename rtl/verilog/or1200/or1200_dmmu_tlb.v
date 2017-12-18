@@ -143,7 +143,7 @@ module or1200_dmmu_tlb
   wire				        mbist_tr_so;
   wire				        mbist_mr_si = mbist_si_i;
   wire				        mbist_tr_si = mbist_mr_so;
-  assign				      mbist_so_o = mbist_tr_so;
+  assign				      mbist_so_o  = mbist_tr_so;
 `endif
 
   //
@@ -277,9 +277,9 @@ module or1200_dmmu_tlb
     .clk(clk),
 `ifdef OR1200_BIST
     // RAM BIST
-    .mbist_si_i(mbist_tr_si),
-    .mbist_so_o(mbist_tr_so),
-    .mbist_ctrl_i(mbist_ctrl_i),
+    .mbist_si_i  ( mbist_tr_si  ),
+    .mbist_so_o  ( mbist_tr_so  ),
+    .mbist_ctrl_i( mbist_ctrl_i ),
 `endif
     .ce(tlb_tr_en),
     .we(tlb_tr_we),

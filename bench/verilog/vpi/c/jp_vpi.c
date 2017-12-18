@@ -143,11 +143,11 @@ of s_vpi_systf_data.
 /******************************************************************************/
 // Date		Version	Description
 //------------------------------------------------------------------------
-// 090501		Imported code from "jp" VPI project     	jb
-//                      Changed to use pipes instead of sockets         jb
+// 090501		Imported code from "jp" VPI project     	    jb
+//              Changed to use pipes instead of sockets         jb
 
 
-
+#define DBG_JP_VPI 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -182,6 +182,8 @@ of s_vpi_systf_data.
 // Define the port we open the RSP server on
 #define RSP_SERVER_PORT 50002
 
+#define VCS_VPI
+
 //Function to register the function which sets up the sockets interface
 void register_init_rsp_server_functions() ;
 // Function which sets up the socket interface
@@ -214,16 +216,21 @@ void return_command_data();
 void return_command_block_data();
 void return_response();
 
+void register_hello();
+void hello();
   
 #include <time.h>
 
-uint32_t vpi_to_rsp_pipe[2]; // [0] - read, [1] - write
-uint32_t rsp_to_vpi_pipe[2]; // [0] - read, [1] - write
-uint32_t command_pipe[2]; // RSP end writes, VPI end reads ONLY
+uint32_t vpi_to_rsp_pipe[2];    // [0] - read, [1] - write
+uint32_t rsp_to_vpi_pipe[2];    // [0] - read, [1] - write
+// RSP --> send data
+// VPI <-- read data
+uint32_t command_pipe[2];       // RSP end writes, VPI end reads ONLY
 
 /* Global static to store the child rsp server PID if we want to kill it */
 static pid_t rsp_server_child_pid = (pid_t) 0; // pid_t is just a signed int
 
+int connfd = 0;
 
 /********************************************************************/
 /* init_rsp_server
@@ -231,116 +238,106 @@ static pid_t rsp_server_child_pid = (pid_t) 0; // pid_t is just a signed int
  * Fork off the rsp server process
  *                                                                   /
 /********************************************************************/
-void init_rsp_server(){
+void init_rsp_server( )
+{
+    // First get the port number to start the RSP server on 
+    vpiHandle systfref, args_iter, argh;
+    struct t_vpi_value argval;
+    int value,i;
+    int n;
+    int portNum;
+    char* send_buf;
 
+/*
+    // Currently removed - ability to call $rsp_init_server() with a 
+    // port number as parameter. Hardcoded allows us to run this as
+    // a callback after compiile (cbEndOfCompile)
 
-  // First get the port number to start the RSP server on
-  
-  vpiHandle systfref, args_iter, argh;
-  
-  struct t_vpi_value argval;
+    // Obtain a handle to the argument list
+    systfref = vpi_handle(vpiSysTfCall, NULL);
 
-  int value,i;
+    // Now call iterate with the vpiArgument parameter
+    args_iter = vpi_iterate(vpiArgument, systfref); 
 
-  int n;
+    // get a handle on the object passed to the function
+    argh = vpi_scan(args_iter);
 
-  int portNum;
-  
-  char* send_buf;
+    // now store the command value back in the sim
+    argval.format = vpiIntVal;
 
-  /*
+    // Now set the data value
+    vpi_get_value(argh, &argval);
 
-  // Currently removed - ability to call $rsp_init_server() with a 
-  // port number as parameter. Hardcoded allows us to run this as
-  // a callback after compiile (cbEndOfCompile)
+    portNum = (int) argval.value.integer;
 
-  // Obtain a handle to the argument list
-  systfref = vpi_handle(vpiSysTfCall, NULL);
-  
-  // Now call iterate with the vpiArgument parameter
-  args_iter = vpi_iterate(vpiArgument, systfref); 
+    // Cleanup and return
+    vpi_free_object(args_iter);
 
-  // get a handle on the object passed to the function
-  argh = vpi_scan(args_iter);
+    // We should now have our port number.
 
-  // now store the command value back in the sim
-  argval.format = vpiIntVal;
-  
-  // Now set the data value
-  vpi_get_value(argh, &argval);
+*/
 
-  portNum = (int) argval.value.integer;
-  
-  // Cleanup and return
-  vpi_free_object(args_iter);
-  
-  // We should now have our port number.
+    // Fork. Let the child run the RSP server
+    pid_t pid;
+    int rv;
 
-  */
+    /*if(DBG_JP_VPI)*/ printf("jp_vpi: init_rsp_server\n");
 
-  // Fork. Let the child run the RSP server
-  pid_t pid;
-  int rv;
-
-  if(DBG_JP_VPI) printf("jp_vpi: init_rsp_server\n");
-
-  // Setup pipes
-  if(pipe(vpi_to_rsp_pipe) == -1)
+    // Setup pipes
+    if( pipe(vpi_to_rsp_pipe) == -1 )
     {
-      perror("jp_vpi: init_rsp_server pipes");
-      exit(1);
+        perror("jp_vpi: init_rsp_server pipes");
+        exit(1);
     }
-  if(pipe(rsp_to_vpi_pipe) == -1)
+    if(pipe(rsp_to_vpi_pipe) == -1)
     {
-      perror("jp_vpi: init_rsp_server pipes");
-      exit(1);
+        perror("jp_vpi: init_rsp_server pipes");
+        exit(1);
     }
-  if(pipe(command_pipe) == -1)
+    if(pipe(command_pipe) == -1)
     {
-      perror("jp_vpi: init_rsp_server pipes");
-      exit(1);
+        perror("jp_vpi: init_rsp_server pipes");
+        exit(1);
     }
 
-  // Set command pipe to be non-blocking
+    // Set command pipe to be non-blocking
 #if defined (STRIDE) || (defined (pfa) && defined (HAVE_PTYS)) || defined (AIX)
-  {
-    int one = 1;
-    ioctl (command_pipe[0], FIONBIO, &one);
-  }
+    {
+        int one = 1;
+        ioctl (command_pipe[0], FIONBIO, &one);
+    }
 #endif
-  
-#ifdef O_NONBLOCK /* The POSIX way */
-  fcntl (command_pipe[0], F_SETFL, O_NONBLOCK);
-#elif defined (O_NDELAY)
-  fcntl (command_pipe[0], F_SETFL, O_NDELAY);
-#endif /* O_NONBLOCK */
-  
-  // Check on the child process. If it has not been started it will
-  // be 0, else it will be something else and we'll just return
-  if ((int) rsp_server_child_pid > 0)
-    return;
 
-  switch(pid=fork())
+#ifdef O_NONBLOCK /* The POSIX way */
+    fcntl (command_pipe[0], F_SETFL, O_NONBLOCK);
+#elif defined (O_NDELAY)
+    fcntl (command_pipe[0], F_SETFL, O_NDELAY);
+#endif /* O_NONBLOCK */
+
+    // Check on the child process. If it has not been started it will
+    // be 0, else it will be something else and we'll just return
+    if ((int) rsp_server_child_pid > 0)
+        return;
+
+    switch(pid=fork())
     {
     case -1:
-      perror("fork");
-      exit(1);
-      break;
+        perror("fork");
+        exit(1);
+        break;
     case 0: // Child
-      run_rsp_server(RSP_SERVER_PORT);
-      // exit if it ever returns, which it shouldn't
-      exit(0);
-      break;
+        run_rsp_server(RSP_SERVER_PORT);
+        // exit if it ever returns, which it shouldn't
+        exit(0);
+        break;
     default:
-      //  We're the parent process, so continue on.
-      rsp_server_child_pid = pid;
-      break;
+        //  We're the parent process, so continue on.
+        rsp_server_child_pid = pid;
+        break;
     }
 
-  // Parent will only ever get this far...
-
-  return;
-  
+    // Parent will only ever get this far...
+    return;
 }
 
 void register_init_rsp_server_functions() {
@@ -359,7 +356,7 @@ void register_init_rsp_server_functions() {
 
 void print_command_string(unsigned char cmd)
 {
-  switch(cmd)
+    switch(cmd)
     {
     case 0x1 :
       printf("  TAP instruction register set\n");
@@ -408,91 +405,86 @@ void print_command_string(unsigned char cmd)
 
 // See if there's anything on the FIFO for us
 
-void check_for_command(char *userdata){
+void check_for_command(char *userdata)
+{
+    vpiHandle     systfref, args_iter, argh;
+    struct        t_vpi_value argval;
+    int           value,i;
+    int           n;
+    unsigned char data;
 
-  vpiHandle systfref, args_iter, argh;
-
-  struct t_vpi_value argval;
-
-  int value,i;
-
-  int n;
-
-  unsigned char data;
-
-  //if(DBG_JP_VPI) printf("check_for_command\n");
+    if(DBG_JP_VPI) printf("JF::DEBUG_C check_for_command\n");
+    
+  	// Get the command from TCP server
+	if(!connfd)
+	{
+	  // init_rsp_server( );
+	}
   
-  //n = read(rsp_to_vpi_pipe[0], &data, 1);
-  
-  n = read(command_pipe[0], &data, 1);
+    //n = read(rsp_to_vpi_pipe[0], &data, 1);
 
-  if ( ((n < 0) && (errno == EAGAIN)) || (n==0) )
+    n = read(command_pipe[0], &data, 1);
+    if ( ((n < 0) && (errno == EAGAIN)) || (n==0) )
     {
-      // Nothing in the fifo this time, let's return
-      return;
+        // Nothing in the fifo this time, let's return
+        if(DBG_JP_VPI) printf("Nothing in the fifo this time, let's return\n");
+        return;
     }
-  else if (n < 0)
+    else if (n < 0)
     {
-      // some sort of error
-      perror("check_for_command");
-
-      exit(1);
+        // some sort of error
+        perror("check_for_command");
+        exit(1);
     }
-  
-  if (DBG_JP_VPI)
-  {
-    printf("jp_vpi: c = %x:",data);
-    print_command_string(data);
-    fflush(stdout);
-  }
-  
-  // Return the command to the sim
-  
-  // Obtain a handle to the argument list
-  systfref = vpi_handle(vpiSysTfCall, NULL);
-  
-  // Now call iterate with the vpiArgument parameter
-  args_iter = vpi_iterate(vpiArgument, systfref); 
 
-  // get a handle on the variable passed to the function
-  argh = vpi_scan(args_iter);
+    if (DBG_JP_VPI)
+    {
+        printf("jp_vpi: c = %x:",data);
+        print_command_string(data);
+        fflush(stdout);
+    }
 
-  // now store the command value back in the sim
-  argval.format = vpiIntVal;
-  
-  // Now set the command value
-  vpi_get_value(argh, &argval);
+    // Return the command to the sim
+    // Obtain a handle to the argument list
+    systfref = vpi_handle(vpiSysTfCall, NULL);
 
-  argval.value.integer = (uint32_t) data;
+    // Now call iterate with the vpiArgument parameter
+    args_iter = vpi_iterate(vpiArgument, systfref); 
 
-  // And vpi_put_value() it back into the sim
-  vpi_put_value(argh, &argval, NULL, vpiNoDelay);
-  
-  // Cleanup and return
-  vpi_free_object(args_iter);
+    // get a handle on the variable passed to the function
+    argh = vpi_scan(args_iter);
 
-  n = write(vpi_to_rsp_pipe[1],&data,1);
-  if (DBG_JP_VPI) printf("jp_vpi: r");
+    // now store the command value back in the sim
+    argval.format = vpiIntVal;
 
-  if (DBG_JP_VPI) printf("\n");
-   
-  return;
+    // Now set the command value
+    vpi_get_value(argh, &argval);
+
+    argval.value.integer = (uint32_t) data;
+
+    // And vpi_put_value() it back into the sim
+    vpi_put_value(argh, &argval, NULL, vpiNoDelay);
+
+    // Cleanup and return
+    vpi_free_object(args_iter);
+
+    n = write(vpi_to_rsp_pipe[1],&data,1);
+    if (DBG_JP_VPI) printf("jp_vpi: r");
+
+    if (DBG_JP_VPI) printf("\n");
+
+    return;
 }
 
-void get_command_address(char *userdata){
-
+void get_command_address(char *userdata)
+{
   vpiHandle systfref, args_iter, argh;
-
   struct t_vpi_value argval;
-
   int value,i;
-
   int n;
-
   uint32_t data;
-  
   char* recv_buf;
-
+    
   recv_buf = (char *) &data; // cast data as our receive char buffer
 
   n = read(rsp_to_vpi_pipe[0],recv_buf,4);
@@ -526,15 +518,14 @@ void get_command_address(char *userdata){
   // And vpi_put_value() it back into the sim
   vpi_put_value(argh, &argval, NULL, vpiNoDelay);
   
-  // Cleanup and return
-  vpi_free_object(args_iter);
+    // Cleanup and return
+    vpi_free_object(args_iter);
    
-   return;
-
+    return;
 }
 
-void get_command_data(char *userdata){
-
+void get_command_data(char *userdata)
+{
   vpiHandle systfref, args_iter, argh;
 
   struct t_vpi_value argval;
@@ -847,21 +838,18 @@ void return_command_block_data(){
     sent_words++;
   }
   
-  if (!(length > 4))
+    if (!(length > 4))
     {
       block_data_buf = (char *) &data; 
     }
   
-  n = write(vpi_to_rsp_pipe[1],block_data_buf,length);
-
-  
-  if (length > 4)
+    n = write(vpi_to_rsp_pipe[1],block_data_buf,length);
+    if (length > 4)
     {
       // Free the array
       free(block_data_buf);
     }
     
-  
   // Cleanup and return
   vpi_free_object(args_iter);
 
@@ -869,10 +857,8 @@ void return_command_block_data(){
 
 }
 
-
-
-void return_response(char *userdata){
-
+void return_response(char *userdata)
+{
   int n;
   
   char resp = 0;
@@ -884,6 +870,27 @@ void return_response(char *userdata){
   
   return;
 
+}
+
+void hello()
+{
+  vpi_printf("\n\nHello VPI, jinf\n");
+  vpi_printf("\n\nHello Deepak\n\n");
+}
+
+void register_hello()
+{
+  s_vpi_systf_data data = {vpiSysTask, 
+			   0, 
+			   "$hello", 
+			   (void *)hello, 
+			   0, 
+			   0, 
+			   0};
+
+  vpi_register_systf(&data);
+
+  return;
 }
 
 void register_check_for_command() {
@@ -942,7 +949,6 @@ void register_get_command_block_data() {
   return;
 }
 
-
 void register_return_command_block_data() {
   s_vpi_systf_data data = {vpiSysTask, 
 			   0, 
@@ -985,7 +991,6 @@ void register_return_response() {
   return;
 }
 
-
 void setup_reset_callbacks()
 {
   
@@ -1016,56 +1021,46 @@ void setup_reset_callbacks()
 
 void sim_reset_callback()
 {
-
   // nothing to do!
-
   return;
-
 }
 
 void setup_endofcompile_callbacks()
 {
-  
-  // here we setup and install callbacks for 
-  // simulation finish
-
-  static s_vpi_time time_s = {vpiScaledRealTime}; 
-  static s_vpi_value value_s = {vpiBinStrVal}; 
-  static s_cb_data cb_data_s =  
+    // here we setup and install callbacks for 
+    // simulation finish
+    static s_vpi_time time_s = {vpiScaledRealTime}; 
+    static s_vpi_value value_s = {vpiBinStrVal}; 
+    static s_cb_data cb_data_s =  
     {
-      cbEndOfCompile, // end of compile
-      (void *)sim_endofcompile_callback,
-      NULL,
-      &time_s,
-      &value_s
+        cbEndOfCompile, // end of compile
+        (void *)sim_endofcompile_callback,
+        NULL,
+        &time_s,
+        &value_s
     }; 
   
-  cb_data_s.obj = NULL;  /* trigger object */ 
+    cb_data_s.obj = NULL;  /* trigger object */ 
+    cb_data_s.user_data = NULL;
 
-  cb_data_s.user_data = NULL;
-
-  // actual call to register the callback
-  vpi_register_cb(&cb_data_s);  
-
+    // actual call to register the callback
+    vpi_register_cb(&cb_data_s);  
 }
 
 void sim_endofcompile_callback()
 {
-  // Init the RSP server
-  init_rsp_server(); // Start the RSP server from here!
-
+    // Init the RSP server
+    init_rsp_server(); // Start the RSP server from here!
 }
-
 
 void setup_finish_callbacks()
 {
-  
-  // here we setup and install callbacks for 
-  // simulation finish
+    // here we setup and install callbacks for 
+    // simulation finish
 
-  static s_vpi_time time_s = {vpiScaledRealTime}; 
-  static s_vpi_value value_s = {vpiBinStrVal}; 
-  static s_cb_data cb_data_s =  
+    static s_vpi_time time_s = {vpiScaledRealTime}; 
+    static s_vpi_value value_s = {vpiBinStrVal}; 
+    static s_cb_data cb_data_s =  
     {
       cbEndOfSimulation, // end of simulation
       (void *)sim_finish_callback,
@@ -1090,8 +1085,7 @@ void sim_finish_callback()
   kill(rsp_server_child_pid,SIGTERM);
 }
 
-
-
+#ifndef VCS_VPI
 // Register the new system task here
 void (*vlog_startup_routines[ ] ) () = {
   register_init_rsp_server_functions,
@@ -1109,18 +1103,13 @@ void (*vlog_startup_routines[ ] ) () = {
   register_return_command_data,
   register_return_command_block_data,
   register_return_response,
+  register_hello,
   0  // last entry must be 0 
 }; 
-
-
 
 // Entry point for testing development of the vpi functions
 int main(int argc, char *argv[])
 {
-
-  return 0;
-  
+  return 0; 
 }
-
-
-
+#endif // VCS_VPI

@@ -113,8 +113,8 @@ module or1200_immu_top
   //
   input                   spr_cs;
   input                   spr_write;
-  input  [aw-1:0]         spr_addr;
-  input  [31:0]           spr_dat_i;
+  input   [aw-1:0]        spr_addr;
+  input   [31:0]          spr_dat_i;
   output  [31:0]          spr_dat_o;
 
 `ifdef OR1200_BIST
@@ -190,20 +190,23 @@ module or1200_immu_top
       // select async. value due to reset state
       icpu_adr_default <=  `OR1200_BOOT_ADR;
       icpu_adr_select  <=  1'b1;
+    
     end
     
     // selected value (different from default) is written
     // into FF after reset state
-    else if (icpu_adr_select) begin
+    else if ( icpu_adr_select ) begin
       
       // dynamic value can only be assigned to FF out of reset!
       icpu_adr_default <=  icpu_adr_boot;
       // select FF value
       icpu_adr_select  <=  1'b0;
+    
     end
     
     else begin
       icpu_adr_default <=  icpu_adr_i;
+    
     end
 
   // select async. value for boot address after reset - PC jumps to the address
@@ -213,17 +216,20 @@ module or1200_immu_top
   assign icpu_adr_boot = `OR1200_BOOT_ADR; // jb
 
   always @(icpu_adr_boot or icpu_adr_default or icpu_adr_select)
+
     if (icpu_adr_select)
       // async. value is selected due to reset state
       icpu_adr_o = icpu_adr_boot;
+    
     else
       // FF value is selected 2nd clock after reset state
       //此时icpu_adr_default中存放的是  
       //if_insn下一条指令的地址 
-      icpu_adr_o = icpu_adr_default ;
+      icpu_adr_o = icpu_adr_default;
 
 `else // ! OR1200_REGISTERED_OUTPUTS: must be defined/enabled
   Unsupported !!!
+
 `endif
 
   //
@@ -239,6 +245,7 @@ module or1200_immu_top
   // one clock cycle after offset part.
   //
   always @(posedge clk or `OR1200_RST_EVENT rst)
+
     if (rst == `OR1200_RST_VALUE)
       icpu_vpn_r <=  {32-`OR1200_IMMU_PS{1'b0}};
 
@@ -289,16 +296,20 @@ module or1200_immu_top
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       dis_spr_access_frst_clk  <=  1'b0;
+    
     else if (!icpu_rty_o)
       dis_spr_access_frst_clk  <=  1'b0;
+    
     else if (spr_cs)
       dis_spr_access_frst_clk  <=  1'b1;
 
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       dis_spr_access_scnd_clk  <=  1'b0;
+    
     else if (!icpu_rty_o)
       dis_spr_access_scnd_clk  <=  1'b0;
+    
     else if (dis_spr_access_frst_clk)
       dis_spr_access_scnd_clk  <=  1'b1;
 
@@ -329,6 +340,7 @@ module or1200_immu_top
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       itlb_en_r <=  1'b0;
+    
     else
       itlb_en_r <=  itlb_en & ~itlb_spr_access;
 
@@ -343,7 +355,8 @@ module or1200_immu_top
   //
   // assign qmemimmu_cycstb_o = (!ic_en & immu_en) ? ~(miss | fault) & icpu_cycstb_i & ~page_cross : (miss | fault) ? 1'b0 : icpu_cycstb_i & ~page_cross; // DL
   //assign qmemimmu_cycstb_o = immu_en ? ~(miss | fault) & icpu_cycstb_i & ~page_cross & itlb_done : icpu_cycstb_i & ~page_cross;
-  assign qmemimmu_cycstb_o = immu_en ? ~(miss | fault) & icpu_cycstb_i & ~page_cross & itlb_done & ~itlb_spr_access : icpu_cycstb_i & ~page_cross;
+  assign qmemimmu_cycstb_o = immu_en ? ~(miss | fault) & icpu_cycstb_i & ~page_cross & itlb_done & ~itlb_spr_access :
+                                         icpu_cycstb_i & ~page_cross;
 
   //
   // Cache Inhibit
@@ -362,7 +375,8 @@ module or1200_immu_top
   // simply equal when IMMU is disabled
   //
   //assign qmemimmu_adr_o = itlb_done ? {itlb_ppn, icpu_adr_i[`OR1200_IMMU_PS-1:0]} : {icpu_vpn_r, icpu_adr_i[`OR1200_IMMU_PS-1:0]}; // DL: immu_en
-  assign qmemimmu_adr_o = immu_en & itlb_done ? {itlb_ppn, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0} : {icpu_vpn_r, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0};
+  assign qmemimmu_adr_o = immu_en & itlb_done ? {itlb_ppn, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0} : 
+                                                {icpu_vpn_r, icpu_adr_i[`OR1200_IMMU_PS-1:2], 2'h0};
 
   reg [31:0] spr_dat_reg;
   //
@@ -373,6 +387,7 @@ module or1200_immu_top
   always @(posedge clk or `OR1200_RST_EVENT rst)
     if (rst == `OR1200_RST_VALUE)
       spr_dat_reg <=  32'h0000_0000;
+    
     else if (spr_cs & !dis_spr_access_scnd_clk)
       spr_dat_reg <=  itlb_dat_o;
 
@@ -420,9 +435,9 @@ module or1200_immu_top
 `endif
 
     // SPR access
-    .spr_cs(itlb_spr_access),
+    .spr_cs   (itlb_spr_access),
     .spr_write(spr_write),
-    .spr_addr(spr_addr),
+    .spr_addr (spr_addr),
     .spr_dat_i(spr_dat_i),
     .spr_dat_o(itlb_dat_o)
   );

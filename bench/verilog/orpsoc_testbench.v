@@ -81,12 +81,14 @@ module orpsoc_testbench;
       .tdi_pad_i		(tdi_pad_i),
       .tdo_pad_o		(tdo_pad_o),
 `endif // JTAG_DEBUG
+
 `ifdef UART0
       .uart0_stx_pad_o		(uart0_stx_pad_o),
       .uart0_srx_pad_i		(uart0_srx_pad_i),
 `endif // UART0
+
       .rst_n_pad_i		(rst_n)
-      );
+     );
 
 `ifdef OR1200
   //
@@ -127,16 +129,16 @@ module orpsoc_testbench;
       .tdo(tdo_pad_o)
       );
  `else
-   // If no VPI debugging, tie off JTAG inputs
-   assign tdi_pad_i = 1;
-   assign tck_pad_i = 0;
-   assign tms_pad_i = 1;
+    // If no VPI debugging, tie off JTAG inputs
+    assign tdi_pad_i = 1;
+    assign tck_pad_i = 0;
+    assign tms_pad_i = 1;
  `endif // !`ifdef VPI_DEBUG_ENABLE
 `endif //  `ifdef JTAG_DEBUG
 
   initial begin
 `ifndef SIM_QUIET
-	$display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n", `TEST_NAME_STRING );
+  $display("\n* Starting simulation of ORPSoC RTL.\n* Test: %s\n", `TEST_NAME_STRING );
 `endif
 
 `ifdef VCD
@@ -240,6 +242,17 @@ module orpsoc_testbench;
    assign uart0_srx_pad_i = uart0_stx_pad_o;
 
 `endif //  `ifdef UART0
+
+//  initial begin
+//    $display("==================================================");
+//    $display("TEST VPI");
+//    $display("==================================================");
+//    $hello;
+//    $display("==================================================");
+//    $display("FINISH TEST VPI");
+//    $display("==================================================");
+//    #10 $finish;  
+//  end
 
 endmodule // orpsoc_testbench
 

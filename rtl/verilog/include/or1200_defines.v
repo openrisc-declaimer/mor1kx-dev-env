@@ -91,12 +91,12 @@
 //
 // Do not implement Data MMU
 //
-`define OR1200_NO_DMMU
+// `define OR1200_NO_DMMU
 
 //
 // Do not implement Insn MMU
 //
-`define OR1200_NO_IMMU
+// `define OR1200_NO_IMMU
 
 //
 // Select between ASIC optimized and generic multiplier
@@ -109,7 +109,7 @@
 //
 // `define OR1200_IC_1W_512B
 // `define OR1200_IC_1W_4KB
-`define OR1200_IC_1W_8KB
+`define OR1200_IC_1W_8KB        // 配置ICACHE的大小，默认是8KB
 // `define OR1200_DC_1W_4KB
 `define OR1200_DC_1W_8KB
 
@@ -924,7 +924,7 @@
 //
 
 // Define it if you want DU implemented
-// `define OR1200_DU_IMPLEMENTED
+`define OR1200_DU_IMPLEMENTED
 
 //
 // Define if you want HW Breakpoints
@@ -934,16 +934,20 @@
 // however already enough for use
 // with or32 gdb)
 //
-//`define OR1200_DU_HWBKPTS
+`define OR1200_DU_HWBKPTS
 
 // Number of DVR/DCR pairs if HW breakpoints enabled
 //  Comment / uncomment DU_DVRn / DU_DCRn pairs bellow according to this number !
 //  DU_DVR0..DU_DVR7 should be uncommented for 8 DU_DVRDCR_PAIRS
+//
+// 调试值寄存器(DVR)   : Debug Value Register
+// 调试控制寄存器(DCR) : Debug Control Register
+//
 `define OR1200_DU_DVRDCR_PAIRS 8
 
 // Define if you want trace buffer
 //  (for now only available for Xilinx Virtex FPGAs)
-//`define OR1200_DU_TB_IMPLEMENTED
+// `define OR1200_DU_TB_IMPLEMENTED
 
 
 //
@@ -969,16 +973,20 @@
 `define OR1200_DU_DCR6      11'd14
 `define OR1200_DU_DCR7      11'd15
 `endif
+
 `define OR1200_DU_DMR1      11'd16
+
 `ifdef OR1200_DU_HWBKPTS
 `define OR1200_DU_DMR2      11'd17
-`define OR1200_DU_DWCR0      11'd18
-`define OR1200_DU_DWCR1      11'd19
+`define OR1200_DU_DWCR0     11'd18
+`define OR1200_DU_DWCR1     11'd19
 `endif
-`define OR1200_DU_DSR        11'd20
-`define OR1200_DU_DRR        11'd21
+
+`define OR1200_DU_DSR       11'd20
+`define OR1200_DU_DRR       11'd21
+
 `ifdef OR1200_DU_TB_IMPLEMENTED
-`define OR1200_DU_TBADR      11'h0ff
+`define OR1200_DU_TBADR     11'h0ff
 `define OR1200_DU_TBIA      11'h1??
 `define OR1200_DU_TBIM      11'h2??
 `define OR1200_DU_TBAR      11'h3??
@@ -995,6 +1003,7 @@
 `define OR1200_DU_DCR_CT    7:5
 
 // DMR1 bits
+// 调试模式寄存器(DMR1)
 `define OR1200_DU_DMR1_CW0  1:0
 `define OR1200_DU_DMR1_CW1  3:2
 `define OR1200_DU_DMR1_CW2  5:4
@@ -1161,30 +1170,30 @@
 //
 `define  OR1200_DTLBTR_CC_BITS    0
 `define  OR1200_DTLBTR_CI_BITS    1
-`define  OR1200_DTLBTR_WBC_BITS  2
-`define  OR1200_DTLBTR_WOM_BITS  3
-`define  OR1200_DTLBTR_A_BITS    4
-`define  OR1200_DTLBTR_D_BITS    5
-`define  OR1200_DTLBTR_URE_BITS  6
-`define  OR1200_DTLBTR_UWE_BITS  7
-`define  OR1200_DTLBTR_SRE_BITS  8
-`define  OR1200_DTLBTR_SWE_BITS  9
-`define  OR1200_DTLBTR_RES_BITS  11:10
-`define  OR1200_DTLBTR_PPN_BITS  31:13
+`define  OR1200_DTLBTR_WBC_BITS   2
+`define  OR1200_DTLBTR_WOM_BITS   3
+`define  OR1200_DTLBTR_A_BITS     4
+`define  OR1200_DTLBTR_D_BITS     5
+`define  OR1200_DTLBTR_URE_BITS   6
+`define  OR1200_DTLBTR_UWE_BITS   7
+`define  OR1200_DTLBTR_SRE_BITS   8
+`define  OR1200_DTLBTR_SWE_BITS   9
+`define  OR1200_DTLBTR_RES_BITS   11:10
+`define  OR1200_DTLBTR_PPN_BITS   31:13
 
 //
 // DTLB configuration
 //
-`define  OR1200_DMMU_PS          13          // 13 for 8KB page size
-`define  OR1200_DTLB_INDXW        6          // 6 for 64 entry DTLB  7 for 128 entries
-`define   OR1200_DTLB_INDXL      `OR1200_DMMU_PS        // 13      13
-`define   OR1200_DTLB_INDXH      `OR1200_DMMU_PS+`OR1200_DTLB_INDXW-1  // 18      19
-`define  OR1200_DTLB_INDX        `OR1200_DTLB_INDXH:`OR1200_DTLB_INDXL  // 18:13    19:13
-`define   OR1200_DTLB_TAGW      32-`OR1200_DTLB_INDXW-`OR1200_DMMU_PS  // 13      12
-`define   OR1200_DTLB_TAGL      `OR1200_DTLB_INDXH+1      // 19      20
-`define  OR1200_DTLB_TAG        31:`OR1200_DTLB_TAGL      // 31:19    31:20
-`define  OR1200_DTLBMRW         `OR1200_DTLB_TAGW+1      // +1 because of V bit
-`define  OR1200_DTLBTRW         32-`OR1200_DMMU_PS+5      // +5 because of protection bits and CI
+`define  OR1200_DMMU_PS           13                                      // 13 for 8KB page size
+`define  OR1200_DTLB_INDXW        6                                       // 6 for 64 entry DTLB | 7 for 128 entries
+`define  OR1200_DTLB_INDXL        `OR1200_DMMU_PS                         // 13                  | 13
+`define  OR1200_DTLB_INDXH        `OR1200_DMMU_PS+`OR1200_DTLB_INDXW-1    // 18                  | 19
+`define  OR1200_DTLB_INDX         `OR1200_DTLB_INDXH:`OR1200_DTLB_INDXL   // 18:13               | 19:13
+`define  OR1200_DTLB_TAGW         32-`OR1200_DTLB_INDXW-`OR1200_DMMU_PS   // 13                  | 12
+`define  OR1200_DTLB_TAGL         `OR1200_DTLB_INDXH+1                    // 19                  | 20
+`define  OR1200_DTLB_TAG          31:`OR1200_DTLB_TAGL                    // 31:19               | 31:20
+`define  OR1200_DTLBMRW           `OR1200_DTLB_TAGW+1                     // +1 because of V bit
+`define  OR1200_DTLBTRW           32-`OR1200_DMMU_PS+5                    // +5 because of protection bits and CI
 
 //
 // Cache inhibit while DMMU is not enabled/implemented
@@ -1280,6 +1289,7 @@
 `define OR1200_ICTAG          `OR1200_ICSIZE-`OR1200_ICLS // 5
 `define OR1200_ICTAG_W        24
 `endif
+
 `ifdef OR1200_IC_1W_4KB
 `define  OR1200_ICSIZE        12      // 4096
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 10
@@ -1288,6 +1298,7 @@
 `define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 8
 `define  OR1200_ICTAG_W       21
 `endif
+
 `ifdef OR1200_IC_1W_8KB
 `define  OR1200_ICSIZE        13      // 8192
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 11
@@ -1296,6 +1307,7 @@
 `define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 9
 `define  OR1200_ICTAG_W       20
 `endif
+
 `ifdef OR1200_IC_1W_16KB
 `define  OR1200_ICSIZE        14      // 16384
 `define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 12
@@ -1304,11 +1316,12 @@
 `define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 10
 `define  OR1200_ICTAG_W       19
 `endif
+
 `ifdef OR1200_IC_1W_32KB
-`define OR1200_ICSIZE         15      // 32768
-`define OR1200_ICINDX         `OR1200_ICSIZE-2  // 13
-`define OR1200_ICINDXH        `OR1200_ICSIZE-1  // 14
-`define OR1200_ICTAGL         `OR1200_ICINDXH+1  // 14
+`define  OR1200_ICSIZE        15      // 32768
+`define  OR1200_ICINDX        `OR1200_ICSIZE-2  // 13
+`define  OR1200_ICINDXH       `OR1200_ICSIZE-1  // 14
+`define  OR1200_ICTAGL        `OR1200_ICINDXH+1  // 14
 `define  OR1200_ICTAG         `OR1200_ICSIZE-`OR1200_ICLS  // 10
 `define  OR1200_ICTAG_W       18
 `endif
@@ -1337,7 +1350,7 @@
 // Data cache SPR definitions
 `define OR1200_SPRGRP_DC_ADR_WIDTH  3
 // Data cache group SPR addresses
-`define OR1200_SPRGRP_DC_DCCR        3'd0 // Not implemented
+`define OR1200_SPRGRP_DC_DCCR       3'd0 // Not implemented
 `define OR1200_SPRGRP_DC_DCBPR      3'd1 // Not implemented
 `define OR1200_SPRGRP_DC_DCBFR      3'd2
 `define OR1200_SPRGRP_DC_DCBIR      3'd3
@@ -1348,28 +1361,28 @@
 // DC configurations
 //
 `ifdef OR1200_DC_1W_4KB
-`define OR1200_DCSIZE                12      // 4096
-`define OR1200_DCINDX                `OR1200_DCSIZE-2  // 10
+`define OR1200_DCSIZE               12      // 4096
+`define OR1200_DCINDX               `OR1200_DCSIZE-2  // 10
 `define OR1200_DCINDXH              `OR1200_DCSIZE-1  // 11
-`define OR1200_DCTAGL                `OR1200_DCINDXH+1  // 12
-`define  OR1200_DCTAG                `OR1200_DCSIZE-`OR1200_DCLS  // 8
-`define  OR1200_DCTAG_W              21
+`define OR1200_DCTAGL               `OR1200_DCINDXH+1  // 12
+`define  OR1200_DCTAG               `OR1200_DCSIZE-`OR1200_DCLS  // 8
+`define  OR1200_DCTAG_W             21
 `endif
 `ifdef OR1200_DC_1W_8KB
-`define OR1200_DCSIZE                13      // 8192
-`define OR1200_DCINDX                `OR1200_DCSIZE-2  // 11
+`define OR1200_DCSIZE               13      // 8192
+`define OR1200_DCINDX               `OR1200_DCSIZE-2  // 11
 `define OR1200_DCINDXH              `OR1200_DCSIZE-1  // 12
-`define OR1200_DCTAGL                `OR1200_DCINDXH+1  // 13
-`define  OR1200_DCTAG                `OR1200_DCSIZE-`OR1200_DCLS  // 9
-`define  OR1200_DCTAG_W              20
+`define OR1200_DCTAGL               `OR1200_DCINDXH+1  // 13
+`define OR1200_DCTAG               `OR1200_DCSIZE-`OR1200_DCLS  // 9
+`define OR1200_DCTAG_W             20
 `endif
 `ifdef OR1200_DC_1W_16KB
-`define OR1200_DCSIZE                14      // 16384
-`define OR1200_DCINDX                `OR1200_DCSIZE-2  // 12
+`define OR1200_DCSIZE               14      // 16384
+`define OR1200_DCINDX               `OR1200_DCSIZE-2  // 12
 `define OR1200_DCINDXH              `OR1200_DCSIZE-1  // 13
 `define OR1200_DCTAGL                `OR1200_DCINDXH+1  // 14
-`define  OR1200_DCTAG                `OR1200_DCSIZE-`OR1200_DCLS  // 10
-`define  OR1200_DCTAG_W              19
+`define OR1200_DCTAG                `OR1200_DCSIZE-`OR1200_DCLS  // 10
+`define OR1200_DCTAG_W              19
 `endif
 `ifdef OR1200_DC_1W_32KB
 `define OR1200_DCSIZE                15      // 32768
@@ -1409,7 +1422,7 @@
 // entries in SB FIFO. Number of entries can be changed further
 // down.
 //
-//`define OR1200_SB_IMPLEMENTED
+`define OR1200_SB_IMPLEMENTED
 
 //
 // Number of store buffer entries
@@ -1451,7 +1464,7 @@
 // memory in the system). IC/DC are sitting behind QMEM so the
 // whole design timing might be worse with QMEM implemented.
 //
-// `define OR1200_QMEM_IMPLEMENTED
+`define OR1200_QMEM_IMPLEMENTED
 
 //
 // Base address and mask of QMEM

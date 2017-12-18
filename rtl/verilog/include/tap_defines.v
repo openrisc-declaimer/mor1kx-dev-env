@@ -54,10 +54,10 @@
 
 
 // Define IDCODE Value
-`define IDCODE_VALUE  32'h14951185
+`define IDCODE_VALUE    32'h14951185
 
 // Length of the Instruction register
-`define	IR_LENGTH	4
+`define	IR_LENGTH	      4
 
 // Supported Instructions
 `define EXTEST          4'b0000

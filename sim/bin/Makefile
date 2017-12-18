@@ -179,6 +179,8 @@ VPI_SRCS=$(shell ls $(VPI_SRC_C_DIR)/*.[ch])
 MODELTECH_VPILIB=msim_jp_vpi.sl
 # Icarus VPI compile target
 ICARUS_VPILIB=jp_vpi
+# VCS VPI compile target
+VCS_VPILIB=vcs_jp_vpi
 
 #
 # Modelsim-specific settings
@@ -229,6 +231,9 @@ MGC_VSIM_ARGS += -pli $(VPI_SRC_C_DIR)/$(MODELTECH_VPILIB)
 
 ICARUS_VPI_LIB=$(VPI_SRC_C_DIR)/$(ICARUS_VPILIB)
 ICARUS_VPI_ARGS=-M$(VPI_SRC_C_DIR) -m$(ICARUS_VPILIB)
+
+VCS_VPI_LIB=$(VPI_SRC_C_DIR)/$(VCS_VPILIB)
+VCS_VPI_ARGS=-P $(VCS_VPI_LIB).tab $(VCS_VPI_LIB).a
 endif
 
 # Rule to make the VPI library for Modelsim
@@ -239,8 +244,18 @@ $(MGC_VPI_LIB): $(VPI_SRCS)
 $(ICARUS_VPI_LIB): $(VPI_SRCS)
 	$(MAKE) -C $(VPI_SRC_C_DIR) $(ICARUS_VPILIB)
 
+# Rule to make VPI library for VCS Verilog
+$(VCS_VPI_LIB).a: $(VPI_SRCS)
+	@echo
+	@echo "$(VPI_SRC_C_DIR)"
+	@echo "$(VCS_VPILIB).a"
+	@echo
+	$(MAKE) -C $(VPI_SRC_C_DIR) $(VCS_VPILIB).a
+
 # Manually add the VPI bench verilog path
 BENCH_VERILOG_SRC_SUBDIRS += $(VPI_SRC_VERILOG_DIR)
+VPI_SRC = $(shell ls $(VPI_SRC_VERILOG_DIR)/vpi_debug_module.v)
+VPI_SRC_INCLUDES = $(VPI_SRC_VERILOG_DIR)
 
 #
 # Verilog DUT source variables
@@ -563,7 +578,7 @@ clean-rtl:
 	done
 
 # Removes any checked out RTL
-distclean: clean
+distclean: clean clean-sim
 	$(Q) echo; echo "\t### Cleaning generated verilog RTL ###"; echo;
 	$(Q)for module in $(RTL_TO_CHECK); do \
 		$(MAKE) -C $(RTL_VERILOG_DIR)/$$module distclean; \

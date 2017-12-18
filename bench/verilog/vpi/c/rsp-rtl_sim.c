@@ -129,10 +129,9 @@ void send_data_to_vpi(uint32_t data)
 {
   // Now send data
   int n;
-
   char* send_buf;
 
-  if (DBG_CALLS)printf("send_data_to_vpi: data 0x%.8x\n",data);
+  if (DBG_CALLS) printf("send_data_to_vpi: data 0x%.8x\n",data);
 
   send_buf = (char *) &data;
   

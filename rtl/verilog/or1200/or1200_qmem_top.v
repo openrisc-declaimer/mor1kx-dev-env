@@ -316,12 +316,16 @@ module or1200_qmem_top
   // 地址在QMEM的范围内，同时对QMEM有总线操作信号
   assign qmem_en = iaddr_qmem_hit & qmemimmu_cycstb_i |
                    daddr_qmem_hit & qmemdmmu_cycstb_i;
+
   // 注意写操作只能在数据总线上出现
   assign qmem_we   = qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i;
+
 `ifdef OR1200_QMEM_BSEL
   assign qmem_sel  = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdcpu_sel_i : qmemicpu_sel_i;
 `endif
+
   assign qmem_di   = qmemdcpu_dat_i;
+
   // 实际上是优先级的判断，如果有数据总线和指令总线同时的请求，数据总线优先操作
   assign qmem_addr = (qmemdmmu_cycstb_i & daddr_qmem_hit) ? qmemdmmu_adr_i : qmemimmu_adr_i;
 
@@ -337,89 +341,106 @@ module or1200_qmem_top
     end
     else
       case (state)  // synopsys parallel_case
+      
       `OR1200_QMEMFSM_IDLE: begin
         if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i & qmem_ack) begin
           state     <=  `OR1200_QMEMFSM_STORE;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_LOAD;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemimmu_cycstb_i & iaddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_FETCH;
           qmem_iack <=  1'b1;
           qmem_dack <=  1'b0;
         end
       end
+      
       `OR1200_QMEMFSM_STORE: begin
+        
         if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_STORE;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_LOAD;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemimmu_cycstb_i & iaddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_FETCH;
           qmem_iack <=  1'b1;
           qmem_dack <=  1'b0;
         end
+        
         else begin
           state <=  `OR1200_QMEMFSM_IDLE;
           qmem_dack <=  1'b0;
           qmem_iack <=  1'b0;
         end
       end
+      
       `OR1200_QMEMFSM_LOAD: begin
         if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_STORE;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_LOAD;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemimmu_cycstb_i & iaddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_FETCH;
           qmem_iack <=  1'b1;
           qmem_dack <=  1'b0;
         end
+        
         else begin
           state <=  `OR1200_QMEMFSM_IDLE;
           qmem_dack <=  1'b0;
           qmem_iack <=  1'b0;
         end
       end
+      
       `OR1200_QMEMFSM_FETCH: begin
         if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmemdcpu_we_i & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_STORE;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemdmmu_cycstb_i & daddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_LOAD;
           qmem_dack <=  1'b1;
           qmem_iack <=  1'b0;
         end
+        
         else if (qmemimmu_cycstb_i & iaddr_qmem_hit & qmem_ack) begin
           state <=  `OR1200_QMEMFSM_FETCH;
           qmem_iack <=  1'b1;
           qmem_dack <=  1'b0;
         end
+        
         else begin
           state <=  `OR1200_QMEMFSM_IDLE;
           qmem_dack <=  1'b0;
           qmem_iack <=  1'b0;
         end
       end
+      
       default: begin
         state <=  `OR1200_QMEMFSM_IDLE;
         qmem_dack <=  1'b0;

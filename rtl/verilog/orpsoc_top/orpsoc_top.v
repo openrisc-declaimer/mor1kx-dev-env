@@ -40,6 +40,7 @@ module orpsoc_top
 `ifdef JTAG_DEBUG
    tdo_pad_o, tms_pad_i, tck_pad_i, tdi_pad_i,
 `endif
+
 `ifdef UART0
    uart0_srx_pad_i, uart0_stx_pad_o,
 `endif
@@ -435,7 +436,7 @@ module orpsoc_top
 
 `ifdef JTAG_DEBUG
   // ---------------------------------------------------------------------------
-  // JTAG TAP
+  // JTAG TAP (Test Access Porting)
   // ---------------------------------------------------------------------------
 
   //
@@ -644,20 +645,20 @@ module orpsoc_top
   //  --========================================================================--
 `else // !`ifdef JTAG_DEBUG
 
-   assign wbm_d_dbg_adr_o = 0;
-   assign wbm_d_dbg_dat_o = 0;
-   assign wbm_d_dbg_cyc_o = 0;
-   assign wbm_d_dbg_stb_o = 0;
-   assign wbm_d_dbg_sel_o = 0;
-   assign wbm_d_dbg_we_o  = 0;
-   assign wbm_d_dbg_cti_o = 0;
-   assign wbm_d_dbg_bte_o = 0;
+  assign wbm_d_dbg_adr_o = 0;
+  assign wbm_d_dbg_dat_o = 0;
+  assign wbm_d_dbg_cyc_o = 0;
+  assign wbm_d_dbg_stb_o = 0;
+  assign wbm_d_dbg_sel_o = 0;
+  assign wbm_d_dbg_we_o  = 0;
+  assign wbm_d_dbg_cti_o = 0;
+  assign wbm_d_dbg_bte_o = 0;
 
-   assign or1200_dbg_adr_i = 0;
-   assign or1200_dbg_dat_i = 0;
-   assign or1200_dbg_stb_i = 0;
-   assign or1200_dbg_we_i  = 0;
-   assign or1200_dbg_stall_i = 0;
+  assign or1200_dbg_adr_i = 0;
+  assign or1200_dbg_dat_i = 0;
+  assign or1200_dbg_stb_i = 0;
+  assign or1200_dbg_we_i  = 0;
+  assign or1200_dbg_stall_i = 0;
 
   //  --========================================================================--
 `endif // !`ifdef JTAG_DEBUG

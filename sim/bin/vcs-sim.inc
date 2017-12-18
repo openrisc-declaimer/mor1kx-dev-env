@@ -62,14 +62,18 @@ VCS_DEFINE  = +define+FSDB -line -debug_access+all
 TB_INC  = +incdir+$(RTL_VERILOG_INCLUDE_DIR)
 TB_INC += +incdir+$(BOOTROM_SW_DIR)
 TB_INC += +incdir+$(BENCH_VERILOG_INCLUDE_DIR)
+TB_INC += +incdir+$(VPI_SRC_INCLUDES)
 
 ######################################################################
 # all source files 
 ######################################################################
 ALL_SRC  = $(RTL_VERILOG_SRC) 
-ALL_SRC += $(BENCH_VERILOG_SRC) 
+ALL_SRC += $(BENCH_VERILOG_SRC)
 ALL_SRC += $(BENCH_TOP)
+ifeq ($(VPI), 1)
+ALL_SRC += $(VPI_SRC)
 # ALL_SRC += $(VPI_SRCS)
+endif
 
 # Code coverage command 
 # 代码覆盖率相关
@@ -113,7 +117,7 @@ VPD_NAME = +vpdfile+$(VCS_SIM).vpd
 #
 #########################################################################################
 LIB_EXT = +libext+.v
-LIB_FILE = -v /home/klin/digital_lib/charter/fb_csm18ic_sc-x_2007q2v1/aci/sc-x/verilog/csm18ic.v
+# LIB_FILE = -v /home/klin/digital_lib/charter/fb_csm18ic_sc-x_2007q2v1/aci/sc-x/verilog/csm18ic.v
 
 DUT_CMP_OPTIONS   += -timescale=1ns/1ns
 DUT_CMP_OPTIONS   += -override_timescale=1ns/1ns
@@ -137,6 +141,7 @@ VCS_VSIM_ARGS = +v2k             		   \
 				+notimingcheck             \
 				+nospecify                 \
 				+vcs+flush+all             \
+				+vpi                       \
 				$(CM)                      \
 				$(CM_NAME)                 \
 				$(CM_DIR)                  \
@@ -160,8 +165,8 @@ SIM = ./$(VCS_SIM).elf           \
 DEBUG_RUN = -full64
 
 # start compile
-vcs-com: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VPI_SRCS)
-	$(Q)$(VCS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
+vcs-com: restore-profileoutput $(TEST_DEFINES_VLG) $(RTL_VERILOG_SRC) $(RTL_VERILOG_INCLUDES) $(BOOTROM_VERILOG) $(BENCH_VERILOG_SRC) $(BENCH_TOP) $(VCS_VPI_LIB).a
+	$(Q)$(VCS) $(VCS_VPI_ARGS) $(VCS_VSIM_ARGS) -top $(RTL_TESTBENCH_TOP) $(TB_INC) $(ALL_SRC)
 
 # Start simulation
 # 
